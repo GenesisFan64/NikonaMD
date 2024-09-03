@@ -1,0 +1,10 @@
+		dc.l Obj_TestEnemy
+		dc.w 311,316
+		dc.w 0,0
+		dc.l Obj_TestEnemy
+		dc.w 972,415
+		dc.w 0,0
+		dc.l Obj_TestEnemy
+		dc.w 510,284
+		dc.w 0,0
+		dc.l -1
