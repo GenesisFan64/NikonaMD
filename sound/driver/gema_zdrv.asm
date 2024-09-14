@@ -1,7 +1,6 @@
 ; ===========================================================================
 ; -------------------------------------------------------------------
 ; GEMA/Nikona Z80 code v1.0
-; _gf64 2023-2024
 ; -------------------------------------------------------------------
 
 		phase 0
@@ -19,9 +18,7 @@ MAX_BUFFNTRY	equ 4*2		; !! nikona_BuffList buffer entry size
 MAX_TBLSIZE	equ 18h		; Maximum size for chip tables (MINIMUM: 10h)
 MAX_TRKINDX	equ 26		; Max channel indexes per buffer: 4PSG+6FM+8PCM+8PWM
 MAX_ZCMND	equ 10h		; Size of command array ** 1-bit SIZES ONLY ** (68k uses this label too)
-
-; Debug:
-ZSET_TESTME	equ 0		; Set to 1 to check the DAC playback quality
+DBUG_DAC	equ 0		; *DEBUG* Set to 1 to check the DAC playback quality
 
 ; --------------------------------------------------------
 ; Structs
@@ -60,23 +57,41 @@ trk_RomInst	equ 1Fh ; [3b] ROM instrument data
 trk_RomBlks	equ 22h ; [3b] ROM blocks data
 trk_ChnIndx	equ 25h	; CHANNEL INDEXES START HERE
 
-; chnBuff struct: 8 bytes ONLY
+; chnBuff struct, 8 BYTES ONLY.
 ;
 ; chnl_Flags: E0LRevin
-; E  - Channel is active
-; LR - Global left/Right panning bits (reverse bits: 0-ON 1-OFF)
-; e  - Effect*
-; v  - Volume*
-; i  - Intrument*
-; n  - Note*
-chnl_Flags	equ 0	; Playback flags ** DON'T MOVE THIS **
+; 	 E - Channel is active
+; 	LR - 1-bit Left/Right panning bits: 0-ON 1-OFF
+; 	 e - Effect*
+; 	 v - Volume*
+; 	 i - Intrument*
+; 	 n - Note*
+chnl_Flags	equ 0	; Playback flags: %E0LRevin ** MUST STAY AT 0
 chnl_Chip	equ 1	; %ccccpppp c - Current Chip ID / p - Priority level
-chnl_Note	equ 2
-chnl_Ins	equ 3	; Starting from 1, 0 is invalid
-chnl_Vol	equ 4	; MAX to MIN: 40h-00h
-chnl_EffId	equ 5
-chnl_EffArg	equ 6
-chnl_Type	equ 7	; Impulse-note update bits
+chnl_Note	equ 2	; IT Musical note or command
+chnl_Ins	equ 3	; IT Instrument starting from 1 (0 is invalid)
+chnl_Vol	equ 4	; IT Volume: MAX(64) to MIN(0)
+chnl_EffId	equ 5	; IT Effect number
+chnl_EffArg	equ 6	; IT Effect argument
+chnl_Type	equ 7	; Impulse update bits
+
+
+; Table struct
+
+ztbl_Link	equ 00h		; !! current linked channel in trkChnls
+ztbl_Priority	equ 02h		; !! 00h-7Fh: Priority level or 80h+chipID Silence request
+ztbl_Chip	equ 03h		; Chip index (YM2612: direct KEY index) *MUST BE ON THE LIST*
+ztbl_MasterVol	equ 04h		; MASTER volume for this channel
+ztbl_FreqIndx	equ 05h		; Frequency list index (YM2612: %oooiiiii oct|index)
+ztbl_PitchBend	equ 06h		; Pitchbend add/sub
+ztbl_Volume	equ 07h		; Current Volume: 00-max
+ztbl_EffBuff	equ 09h		; Effect buffer
+ztbl_VarT0	equ 0Ah		; !! FM ins LSB or SCD PCM panning
+ztbl_VarT1	equ 0Bh		; !! FM ins MSB
+ztbl_FM_alfd	equ 0Ch		; !! copy of algorithm and feedback
+ztbl_FM_pmam	equ 0Dh		; !! copy of PMS, AMS (panning ignored)
+ztbl_FM_lfo	equ 0Eh		; !! copy of LFO
+ztbl_FM_keys	equ 0Fh		; !! Current keys
 
 ; --------------------------------------------------------
 ; Variables
@@ -120,9 +135,9 @@ PTMR		equ 56
 ; Code starts here
 ; --------------------------------------------------------
 
-		di			; Disable interrputs first
-		im	1		; Set Interrupt mode 1
-		ld	sp,2000h	; Set stack at the end of Z80
+		di			; Disable interrupts
+		im	1		; Interrupt mode 1
+		ld	sp,2000h	; Set STACK at the end of Z80
 		jr	z80_init	; Jump to z80_init
 
 ; --------------------------------------------------------
@@ -152,27 +167,32 @@ PTMR		equ 56
 ; Samplerate is at 16000hz with minimal quality loss.
 ; --------------------------------------------------------
 
+; EXX set:
+; af - temporal
+; bc - l temporal | dWaveBuff MSB
+; de - pitch increment
+; hl - wave buffer position 00.00h
 ; 		org 8
-dac_me:		exx			; * swap regs <-- Changes between EXX(play) and RET(stop)
+dac_me:		exx			; * flip registers <-- Changes between EXX(play) and RET(stop)
 		ex	af,af'		; Swap af
-		ld	b,l		; Save pitch .00 to b
-		ld	l,h		; l - xx.00 to 00xx
-		ld	h,c		; h - Wave buffer MSB + 00xx
-		ld	a,2Ah		; YM register 2Ah
-		ld	(Zym_ctrl_1),a	; Set DAC write
-		ld	a,(hl)		; Read wave byte
-		ld	(Zym_data_1),a	; Write it to DAC
-		ld	h,l		; get hl back
-		ld	l,b		; Get .00 back from b to l
+		ld	b,l		; Save old hl buff
+		ld	l,h		;
+		ld	h,c		; h - Set buffer MSB
+		ld	a,2Ah		;
+		ld	(Zym_ctrl_1),a	; Set YM Register 2Ah
+		ld	a,(hl)		; Read wave byte and
+		ld	(Zym_data_1),a	; write it to DAC
+		ld	h,l		; Get hl buff back
+		ld	l,b		;
 		add	hl,de		; Pitch increment hl
 		ex	af,af'		; Return af
-		exx			; * swap regs
+		exx			; * return registers
 		ret
 
 ; --------------------------------------------------------
 ; 1Ch - Master tracklist pointer
 gemaMstrListPos:
-		db 0				; ** 32-bit 68k address **
+		db 0			; ** 32-bit 68k address **
 		db 0
 		db 0
 		db 0
@@ -192,7 +212,7 @@ dac_fill:	push	af		; <-- Changes between PUSH AF(play) and RET(stop)
 		xor	h		; Grab LSB.00
 		exx			; * swap regs
 		and	80h		; Check if bit changed
-		call	nz,dac_refill	; If yes, Refill and update LSB to check
+		call	nz,dac_refill	; If yes, Call refill and update LSB block
 		pop	af
 		ret
 
@@ -212,14 +232,14 @@ marsBlock	db 0			; 37h: Flag to BLOCK PWM transfers.
 ; --------------------------------------------------------
 
 ; 		org 38h			; Align 38h
-		ld	(tickSpSet),sp	; Write TICK flag using sp (xx1F, read as tickFlag+1)
+		ld	(tickSpSet),sp	; Write TICK flag using current sp (xx1F, read as tickFlag+1)
 		di			; Disable interrupt
 		ret
 
 ; --------------------------------------------------------
 ; 03Eh - More user settings
-palMode		db 0		; 3Eh: PAL mode flag
-commZRead	db 0		; cmd fifo READ pointer (here)
+palMode		db 0			; 3Eh: PAL mode flag
+commZRead	db 0			; cmd fifo READ pointer (here)
 
 ; --------------------------------------------------------
 ; 68K Read/Write area at 40h
@@ -276,7 +296,7 @@ drv_loop:
 .neither:
 		rst	8
 	if MCD|MARS|MARSCD
-		call	zmars_send		; External communication
+		call	zmars_send		; External communication with CD and 32X
 	endif
 		call	get_tick
 .next_cmd:
@@ -348,26 +368,6 @@ drv_loop:
 ; --------------------------------------------------------
 
 .cmnd_0:
-; 		ld	a,DacIns_TEST>>16
-; 		ld	hl,(DacIns_TEST+6)&0FFFFh
-; 		ld	(wave_Start),hl
-; 		ld	(wave_Start+2),a
-; 		ld	a,02h
-; 		ld	hl,04000h
-; 		ld	(wave_Len),hl
-; 		ld	(wave_Len+2),a
-; 		ld	bc,0
-; 		ld	(wave_Loop),bc
-; 		ld	hl,100h
-; 		ld	(wave_Pitch),hl
-; 		ld	a,1
-; 		ld	(wave_Flags),a
-; 		call	dac_play
-
-; 		ld	iy,trkBuff_0
-; 		ld	(iy+trk_VolMaster),64-16
-; 		ld	(iy+trk_VolFdTarget),64
-
 		jp	.next_cmd
 
 ; --------------------------------------------------------
@@ -1436,14 +1436,13 @@ tblbuff_read:
 	; de - instrument data
 		cp	-1			; Found any link?
 		ret	z
-		inc	hl			; Skip link
+		inc	hl			; MANUAL SETTING ztbl_MasterVol
 		inc	hl
-		ld	a,(iy+trk_Priority)
-		ld	(hl),a			; Write priority level
+		inc	hl
 		inc	hl
 		ld	a,(iy+trk_VolMaster)
-		ld	(hl),a			; Write current MASTER volume
-		ld	bc,10h-3		; Move to instr data
+		ld	(hl),a
+		ld	bc,10h-4		; Move to instr data
 		add	hl,bc
 		ex	hl,de			; <-- swap for ldir
 		ld	bc,8
@@ -1482,7 +1481,7 @@ tblbuff_read:
 		pop	de
 		cp	-1
 		jr	z,.dont_res
-		call	.reset_link
+		call	tblz_clear
 .dont_res:
 		rst	8
 		jr	.new_chip
@@ -1543,7 +1542,7 @@ tblbuff_read:
 
 .reroll:
 		push	hl
-		ld	bc,4		; <-- fake iy+04h
+		ld	bc,ztbl_Chip	; <-- fake iy+ztbl_Chip
 		add	hl,bc
 		rst	8
 		ld	c,(hl)		; c - ID
@@ -1562,7 +1561,7 @@ tblbuff_read:
 		rst	8
 		push	de
 		ld	d,80h		; Force silence
-		call	.reset_link
+		call	tblz_clear
 		pop	de
 .refill:
 		jr	.set_asfull
@@ -1643,7 +1642,7 @@ tblbuff_read:
 .new_link_o:
 		push	hl
 		ld	d,(ix+chnl_Chip)
-		call	.reset_link
+		call	tblz_clear
 		pop	hl
 ; NEW link
 .new_link:
@@ -1655,13 +1654,13 @@ tblbuff_read:
 		ld	(ix+chnl_Chip),e
 		push	ix
 		pop	de
-		ld	(hl),c		; write priority
+		ld	(hl),c		; Write priority
 		dec	hl
 		rst	8
 		ld 	(hl),d		; MSB
 		dec	hl
 		ld	(hl),e		; LSB
-		xor	a
+		xor	a		; Return OK
 		ret
 
 ; Single slot
@@ -1683,7 +1682,7 @@ tblbuff_read:
 		jr	c,.l_hiprio		; PRIORITY
 		rst	8
 .set_asfull:
-		ld	a,-1			; Return -1, can't use instrument.
+		ld	a,-1			; Return -1
 		ret
 
 ; Pick chip table
@@ -1716,31 +1715,6 @@ tblbuff_read:
 		pop	hl
 		add	hl,de
 		pop	de
-		ret
-
-; d - Silence chip
-;
-; Uses:
-; bc
-.reset_link:
-		rst	8
-		ld	(hl),0			; Delete link
-		inc	hl
-		ld	(hl),0
-		inc	hl
-		ld	(hl),d			; Set "silence" chip ID.
-		inc	hl
-		ld	(hl),0			; Clear master volume
-		ld	bc,8-3			; Go to 08h
-		add	hl,bc
-		ld	b,8/2
-.clrfull:
-		ld	(hl),0			; Reset settings 08-0Bh
-		inc	hl
-		ld	(hl),0
-		inc	hl
-		rst	8
-		djnz	.clrfull
 		ret
 
 ; ============================================
@@ -1821,7 +1795,7 @@ dtbl_singl:
 
 .rcyl_com:
 		ld	b,0
-		ld	c,(iy+04h)
+		ld	c,(iy+ztbl_Chip)
 		add	ix,bc
 		ld	(ix),100b	; key-cut
 		ret
@@ -1946,7 +1920,7 @@ dtbl_singl:
 		push	ix
 		rst	8
 		ld	ix,psgcom	; ix - psgcom
-		ld	e,(iy+04h)
+		ld	e,(iy+ztbl_Chip)
 		ld	d,0
 		add	ix,de
 		bit	0,b
@@ -1958,8 +1932,8 @@ dtbl_singl:
 		ld	(ix+COM),001b	; Key ON
 .from_psgn:
 		rst	8
-		ld	d,0		; de - note*2
-		ld	e,(iy+06h)	; Freq index
+		ld	d,0			; de - note*2
+		ld	e,(iy+ztbl_FreqIndx)	; Freq index
 		ld	hl,psgFreq_List-(36*2)	; <-- 48
 		add	hl,de
 		ld	a,(hl)
@@ -1971,7 +1945,7 @@ dtbl_singl:
 		jr	z,.not_palp
 		dec	hl
 .not_palp:
-		ld	a,(iy+07h)	; pitchbend
+		ld	a,(iy+ztbl_PitchBend)	; pitchbend
 		rlca			; << 3
 		rlca
 		rst	8
@@ -1988,8 +1962,8 @@ dtbl_singl:
 		ld	(ix+DTL),l
 		ld	(ix+DTH),h
 .psg_keyon:
-		ld	a,(iy+08h)	; Set current Volume
-		sub	a,(iy+03h)	; + MASTER vol
+		ld	a,(iy+ztbl_Volume)	; Set current Volume
+		sub	a,(iy+ztbl_MasterVol)	; + MASTER vol
 		neg	a
 		rst	8
 		add	a,a
@@ -2006,7 +1980,7 @@ dtbl_singl:
 ; --------------------------------
 
 .mk_fm:
-		ld	c,(iy+04h)	; c - KeyID (011b always)
+		ld	c,(iy+ztbl_Chip)	; c - KeyID (011b always)
 		bit	0,b		; NEW note?
 		jr	z,.mkfm_set
 		ld	a,(ix+chnl_Note)
@@ -2035,7 +2009,7 @@ dtbl_singl:
 .not_dspc:
 		call	.fm_keyoff
 		push	bc
-		ld	a,(iy+06h)
+		ld	a,(iy+ztbl_FreqIndx)
 		ld	b,a
 		and	00011111b
 		ld	e,a
@@ -2059,7 +2033,7 @@ dtbl_singl:
 		rrca
 		or	h
 		ld	h,a
-		ld	e,(iy+07h)	; pitchbend
+		ld	e,(iy+ztbl_PitchBend)	; pitchbend
 		rst	8
 		xor	a		; Clear high
 		ccf			; Clear carry
@@ -2074,17 +2048,17 @@ dtbl_singl:
 ; --------------------------------
 
 .mkfm_set:
-	if ZSET_TESTME
+	if DBUG_DAC
 		ret
 	else
-		call	.fm_wrtalpan	; Panning and effects
-		call	.fm_wrtlvol	; FM volume control
-		ld	a,(iy+0Fh)	; 0Fh - keys ***
+		call	.fm_wrtalpan		; Panning and effects
+		call	.fm_wrtlvol		; FM volume control
+		ld	a,(iy+ztbl_FM_keys)	; 0Fh - keys ***
 		and	11110000b
-		or	c		; Merge FM channel
+		or	c			; Merge FM channel
 		ld	e,a
 		ld	d,28h
-		call	fm_send_1	; Set keys
+		call	fm_send_1		; Set keys
 		rst	8
 .nofm_note:
 		ret
@@ -2095,7 +2069,7 @@ dtbl_singl:
 ; --------------------------------
 
 .mk_fmspc:
-		ld	c,(iy+04h)	; c - KeyID (011b always)
+		ld	c,(iy+ztbl_Chip)	; c - KeyID (011b always)
 		bit	0,b		; NEW Note?
 		jr	z,.mkfm_set
 		ld	a,(ix+chnl_Note)
@@ -2105,7 +2079,7 @@ dtbl_singl:
 		jp	z,.fm_off
 		call	.fm_keyoff
 		ld	hl,fmcach_list	; Read external freqs
-		ld	a,(iy+04h)
+		ld	a,(iy+ztbl_Chip)
 		and	0111b
 		ld	d,0
 		add	a,a
@@ -2156,11 +2130,11 @@ dtbl_singl:
 
 .fm_keyoff:
 		ld	d,28h
-		ld	e,(iy+04h)
+		ld	e,(iy+ztbl_Chip)
 		jp	fm_send_1
 .fm_tloff:
 		ld	b,4
-		ld	c,(iy+04h)
+		ld	c,(iy+ztbl_Chip)
 		ld	a,c
 		and	011b
 		or	40h	; TL regs
@@ -2197,7 +2171,7 @@ dtbl_singl:
 
 .fm_wrtlvol:
 		ld	hl,fmcach_list
-		ld	a,(iy+04h)
+		ld	a,(iy+ztbl_Chip)
 		and	0111b
 		ld	d,0
 		rst	8
@@ -2213,7 +2187,7 @@ dtbl_singl:
 		inc	hl
 		rst	8
 		inc	hl		; Point to TL's
-		ld	a,(iy+04h)
+		ld	a,(iy+ztbl_Chip)
 		and	011b
 		or	40h		; TL registers
 		ld	d,a
@@ -2222,19 +2196,19 @@ dtbl_singl:
 ; .fm_wrtlvol:
 		push	bc
 		push	hl
-		ld	hl,.fm_cindx	; hl - jump carry list
-		ld	a,(iy+0Ch)	; Read 0B0h copy
+		ld	hl,.fm_cindx		; hl - jump carry list
+		ld	a,(iy+ztbl_FM_alfd)	; Read 0B0h copy
 		and	0111b
 		ld	b,0
 		ld	c,a
 		add	hl,bc
-		ld	a,(iy+08h)	; Read current Volume
+		ld	a,(iy+ztbl_Volume)		; Read current Volume
 		rst	8
-		sub	a,(iy+03h)	; + MASTER vol
-		ld	c,a		; c - Current Volume
-		ld	b,(hl)		; b - Current jump-carry byte
+		sub	a,(iy+ztbl_MasterVol)		; + MASTER vol
+		ld	c,a			; c - Current Volume
+		ld	b,(hl)			; b - Current jump-carry byte
 		pop	hl
-		rrc	b		; OP1
+		rrc	b			; OP1
 		call	c,.write_tl
 		inc	hl
 		inc	d
@@ -2242,14 +2216,14 @@ dtbl_singl:
 		rst	8
 		inc	d
 		inc	d
-		rrc	b		; OP2
+		rrc	b			; OP2
 		call	c,.write_tl
 		inc	hl
 		inc	d
 		inc	d
 		inc	d
 		inc	d
-		rrc	b		; OP3
+		rrc	b			; OP3
 		call	c,.write_tl
 		inc	hl
 		rst	8
@@ -2257,7 +2231,7 @@ dtbl_singl:
 		inc	d
 		inc	d
 		inc	d
-		rrc	b		; OP4
+		rrc	b			; OP4
 		call	c,.write_tl
 		inc	hl
 		inc	d
@@ -2269,13 +2243,13 @@ dtbl_singl:
 		ret
 .write_tl:
 		ld	a,(hl)
-		sub	a,c		; reg - volume
+		sub	a,c			; reg - volume
 		jp	p,.keep_tlmx
-		ld	a,7Fh		; <-- maximum TL
+		ld	a,7Fh			; <-- maximum TL
 .keep_tlmx:
 		push	bc
 		ld	e,a
-		ld	c,(iy+04h)
+		ld	c,(iy+ztbl_Chip)
 		call	fm_autoreg
 		rst	8
 		pop	bc
@@ -2292,7 +2266,7 @@ dtbl_singl:
 		db 1111b
 ; c - KeyId
 .fm_wrtalpan:
-		ld	a,(iy+0Ch)		; 0B0h algorithm
+		ld	a,(iy+ztbl_FM_alfd)	; 0B0h algorithm
 		ld	e,a
 		ld	a,c
 		and	011b
@@ -2306,7 +2280,7 @@ dtbl_singl:
 		rlca				; << 2
 		rlca
 		ld	e,a			; save as e
-		ld	a,(iy+0Dh)		; 0B4h %00aa0ppp
+		ld	a,(iy+ztbl_FM_pmam)	; 0B4h %00aa0ppp
 		and	00111111b
 		or	e			; Merge panning
 		ld	e,a
@@ -2316,7 +2290,7 @@ dtbl_singl:
 		or	0B4h
 		ld	d,a
 		call	fm_autoreg
-		ld	a,(iy+0Eh)		; Read LFO
+		ld	a,(iy+ztbl_FM_lfo)	; Read LFO
 		bit	3,a			; Intrument wants LFO?
 		jr	z,.no_lfo
 		ld	e,a
@@ -2358,14 +2332,14 @@ dtbl_singl:
 		jp	.chnl_ulnkcut
 .dac_pitch:
 		ld	d,0		; Freq index
-		ld	e,(iy+06h)
+		ld	e,(iy+ztbl_FreqIndx)
 		ld	hl,wavFreq_List-(2*36)
 		add	hl,de
 		ld	a,(hl)
 		inc	hl
 		ld	h,(hl)
 		ld	l,a
-		ld	e,(iy+07h)	; pitchbend
+		ld	e,(iy+ztbl_PitchBend)	; pitchbend
 		rst	8
 		xor	a		; Clear high
 		ccf			; Clear carry
@@ -2389,7 +2363,7 @@ dtbl_singl:
 	if MCD|MARSCD
 		ld	a,(ix+chnl_Note)
 		ld	d,0
-		ld	e,(iy+04h)		; e - Channel ID
+		ld	e,(iy+ztbl_Chip)		; e - Channel ID
 		ld	c,(ix+chnl_Flags)	; c - Panning bits
 		push	ix
 		ld	ix,pcmcom
@@ -2413,25 +2387,25 @@ dtbl_singl:
 		ld	e,00001001b
 		jr	.mkpcm_wrton
 .pcm_note:
-		ld	a,c		; <-- Lazy panning reset
-		and	00110000b	; Read LR bits
+		ld	a,c			; <-- Lazy panning reset
+		and	00110000b		; Read LR bits
 		or	a
 		jr	nz,.mp_reset
-		ld	(iy+0Ah),0	; If 0, reset panning on table
+		ld	(iy+ztbl_VarT0),0	; If 0, reset panning on table
 .mp_reset:
-		ld	e,00000001b	; KeyON request
+		ld	e,00000001b		; KeyON request
 .mkpcm_wrton:
-		ld	(ix),e		; Write key-on bit
+		ld	(ix),e			; Write key-on bit
 .mkpcm_proc:
 		call	.readfreq_pcm
-		ld	de,8		; Go to Pitch
+		ld	de,8			; Go to Pitch
 		add	ix,de
-		ld	(ix),h		; Set pitch
+		ld	(ix),h			; Set pitch
 		add	ix,de
 		ld	(ix),l
 		add	ix,de
 		ld	c,-1
-		ld	a,(iy+03h)
+		ld	a,(iy+ztbl_MasterVol)
 		cp	40h
 		jr	z,.vpcm_siln
 		jr	nc,.vpcm_siln
@@ -2439,7 +2413,7 @@ dtbl_singl:
 		jp	m,.vpcm_siln
 		add	a,a
 		ld	b,a
-		ld	a,(iy+08h)	; Read current Volume
+		ld	a,(iy+ztbl_Volume)	; Read current Volume
 		add	a,a		; * 2
 		ccf
 		sbc	a,b		; + MASTER vol
@@ -2453,10 +2427,10 @@ dtbl_singl:
 .vpcm_zero:
 		ld	(ix),a
 		add	ix,de
-		ld	a,(iy+0Ah)
+		ld	a,(iy+ztbl_VarT0)	; MCD panning
 		cpl
 		ld	(ix),a
-	if ZSET_TESTME=0
+	if DBUG_DAC=0
 		ld	a,1
 		ld	(mcdUpd),a
 	endif
@@ -2490,7 +2464,7 @@ dtbl_singl:
 	if MARS|MARSCD
 		ld	a,(ix+chnl_Note)
 		ld	d,0
-		ld	e,(iy+04h)		; e - Channel ID
+		ld	e,(iy+ztbl_Chip)		; e - Channel ID
 		ld	c,(ix+chnl_Flags)	; c - Panning bits
 		push	ix
 		ld	ix,pwmcom
@@ -2522,12 +2496,12 @@ dtbl_singl:
 		and	00110000b
 		rst	8
 		ld	e,a		; Save panning to e
-		ld	a,(iy+03h)
+		ld	a,(iy+ztbl_MasterVol)
 		cp	40h
 		jr	z,.vpwm_siln
 		jr	nc,.vpwm_siln
 		ld	c,a
-		ld	a,(iy+08h)	; Read current volume
+		ld	a,(iy+ztbl_Volume)	; Read current volume
 		sub	a,c		; + MASTER vol
 		jr	.vpwm_much
 .vpwm_siln:
@@ -2547,7 +2521,7 @@ dtbl_singl:
 		and	11001111b
 		or	e		; Set panning bits
 		ld	(ix),a
-	if ZSET_TESTME=0
+	if DBUG_DAC=0
 		ld	a,1
 		ld	(marsUpd),a
 	endif
@@ -2583,13 +2557,13 @@ dtbl_singl:
 		ld	hl,wavFreq_List-(2*36)
 .set_wavfreq:
 		ld	d,0		; Freq index
-		ld	e,(iy+06h)
+		ld	e,(iy+ztbl_FreqIndx)
 		add	hl,de
 		ld	a,(hl)
 		inc	hl
 		ld	h,(hl)
 		ld	l,a
-		ld	e,(iy+07h)	; pitchbend
+		ld	e,(iy+ztbl_PitchBend)	; pitchbend
 		rst	8
 		xor	a		; Clear high
 		ccf			; Clear carry
@@ -2653,7 +2627,7 @@ dtbl_singl:
 		ld	a,c
 		and	00111100b
 		ld	c,a
-		ld	a,(iy+08h)	; Current volume
+		ld	a,(iy+ztbl_Volume)	; Current volume
 		rst	8
 		sub	a,c
 		ld	e,0C0h
@@ -2669,13 +2643,13 @@ dtbl_singl:
 		ld	a,c
 		and	00111100b
 		ld	c,a
-		ld	a,(iy+08h)	; Current volume
+		ld	a,(iy+ztbl_Volume)	; Current volume
 		rst	8
 		add	a,c
 		jr	c,.vol_dvld
 		xor	a
 .vol_dvld:
-		ld	(iy+08h),a
+		ld	(iy+ztbl_Volume),a
 		ret
 
 ; ----------------------------------------
@@ -2691,9 +2665,9 @@ dtbl_singl:
 		cp	0E0h
 		ret	z
 		rst	8
-		ld	a,(iy+07h)
+		ld	a,(iy+ztbl_PitchBend)
 		sub	a,c
-		ld	(iy+07h),a
+		ld	(iy+ztbl_PitchBend),a
 		ret
 
 ; ----------------------------------------
@@ -2709,21 +2683,21 @@ dtbl_singl:
 		cp	0E0h
 		ret	z
 		rst	8
-		ld	a,(iy+07h)
+		ld	a,(iy+ztbl_PitchBend)
 		add	a,c
-		ld	(iy+07h),a
+		ld	(iy+ztbl_PitchBend),a
 		ret
 
 ; --------------------------------
 ; e - got arg
 ; c - new arg
 .save_arg:
-		ld	c,(iy+09h)	; Current slide setting
-		ld	a,e		; EffArg is non-zero?
+		ld	c,(iy+ztbl_EffBuff)	; Current slide setting
+		ld	a,e			; EffArg is non-zero?
 		or	a
-		jr	z,.D_cont	; 00h = slide continue
+		jr	z,.D_cont		; 00h = slide continue
 		ld	c,a
-		ld	(iy+09h),c	; Store NEW slide setting
+		ld	(iy+ztbl_EffBuff),c	; Store NEW slide setting
 .D_cont:
 		ret
 
@@ -2750,7 +2724,7 @@ dtbl_singl:
 	; ----------------------------------------
 	; Common panning bits: %00LR0000
 	; (REVERSE: 0-on 1-off)
-		ld	(iy+09h),0
+		ld	(iy+ztbl_EffBuff),0
 		rst	8
 		push	hl
 		ld	hl,.comn_panlist
@@ -2787,7 +2761,7 @@ dtbl_singl:
 		ld	e,a
 		add	hl,de
 		ld	a,(hl)
-		ld	(iy+0Ah),a
+		ld	(iy+ztbl_VarT0),a
 		pop	de
 		pop	hl
 		ret
@@ -2847,7 +2821,7 @@ dtbl_singl:
 .volu:
 		ld	a,(ix+chnl_Vol)
 		sub	a,64
-		ld	(iy+08h),a	; BASE volume
+		ld	(iy+ztbl_Volume),a	; BASE volume
 		ret
 
 ; ----------------------------------------
@@ -2882,14 +2856,14 @@ dtbl_singl:
 .ins_psgn:
 		ld	a,(hl)		; Grab noise setting
 		and	0111b
-		ld	(psgHatMode),a	; ** SET GLOBAL SETTING
+		ld	(psgHatMode),a	; ** GLOBAL SETTING
 .ins_psg:
 		rst	8
 		push	ix
 		push	hl
 		inc	hl		; Skip ID
 		ld	ix,psgcom	; Read psg control
-		ld	e,(iy+04h)
+		ld	e,(iy+ztbl_Chip)
 		ld	d,0
 		add	ix,de
 		ld	a,(hl)
@@ -2925,9 +2899,7 @@ dtbl_singl:
 		push	ix
 		push	hl
 		push	bc
-; 		ld	b,(ix+chnl_Ins)	; b - current Ins
-		ld	b,(iy+02h)
-		ld	a,(iy+04h)
+		ld	a,(iy+ztbl_Chip)
 		and	0111b
 		ld	d,0
 		add	a,a
@@ -2939,13 +2911,12 @@ dtbl_singl:
 		inc	ix
 		ld	d,(ix)
 
-; 		ld	a,(iy+0Bh)	; 0Bh: DON'T reload flag
+; 		ld	a,(iy+ztbl_VarT1)	; 0Bh: DON'T reload flag
 ; 		cp	b
 ; 		jr	z,.same_patch
-; 		ld	(iy+0Bh),b
+; 		ld	(iy+ztbl_VarT1),b
 		inc	hl		; Skip id and pitch
 		inc	hl
-
 		ld	b,(hl)
 		inc	hl
 		ld	c,(hl)
@@ -2953,23 +2924,23 @@ dtbl_singl:
 		ld	l,(hl)
 		ld	h,c
 
-		ld	a,(iy+0Ah)
+		ld	a,(iy+ztbl_VarT0)
 		cp	h
 		jr	nz,.new_romdat
 		rst	8
-		ld	a,(iy+0Bh)
+		ld	a,(iy+ztbl_VarT1)
 		cp	l
 		jr	z,.same_patch
 .new_romdat:
-		ld	(iy+0Ah),h
-		ld	(iy+0Bh),l
+		ld	(iy+ztbl_VarT0),h
+		ld	(iy+ztbl_VarT1),l
 		ld	a,b
 		ld	bc,28h		; <- size
 		push	de
 		call	transferRom	; *** ROM ACCESS ***
 
 		pop	hl
-		ld	a,(iy+04h)
+		ld	a,(iy+ztbl_Chip)
 		ld	c,a		; c - FM Key ID
 
 	; hl - fmcach intrument
@@ -2987,20 +2958,20 @@ dtbl_singl:
 ; 		call	.fm_setrlist
 ; 		ld	b,5*4
 ; 		call	.fm_setrlist
-		ld	a,(hl)		; 0B0h
-		ld	(iy+0Ch),a	; ** Save 0B0h to 0Ch
+		ld	a,(hl)			; 0B0h
+		ld	(iy+ztbl_FM_alfd),a	; ** Save 0B0h
 		inc	hl
-		ld	a,(hl)		; 0B4h
-		ld	(iy+0Dh),a	; ** Save 0B4h to 0Dh
+		ld	a,(hl)			; 0B4h
+		ld	(iy+ztbl_FM_pmam),a	; ** Save 0B4h
 		inc	hl
 		rst	8
 		ld	a,(hl)
-		ld	(iy+0Eh),a	; LFO
+		ld	(iy+ztbl_FM_lfo),a	; LFO
 		inc	hl
-		ld	a,(hl)		; 028h keys
+		ld	a,(hl)			; 028h keys
 		and	11110000b
 		rst	8
-		ld	(iy+0Fh),a	; ** Save keys to 0Eh
+		ld	(iy+ztbl_FM_keys),a	; ** Save keys
 .same_patch:
 		pop	bc
 		pop	hl
@@ -3104,7 +3075,7 @@ dtbl_singl:
 	; e,hl - 24-bit pointer + loop bit
 		ld	ix,pcmcom
 		ld	b,0
-		ld	c,(iy+04h)
+		ld	c,(iy+ztbl_Chip)
 		add	ix,bc
 		ld	bc,40		; Go to 40
 		add	ix,bc
@@ -3148,7 +3119,7 @@ dtbl_singl:
 	; de,hl - 32-bit PWM pointer
 		ld	ix,pwmcom
 		ld	b,0
-		ld	c,(iy+04h)
+		ld	c,(iy+ztbl_Chip)
 		add	ix,bc
 		ld	bc,24
 		add	ix,bc	; Move to PWOUTF
@@ -3173,7 +3144,7 @@ dtbl_singl:
 		ld	a,b		; Volume bit?
 		and	0100b
 		jr	nz,.fm_hasvol
-		ld	(iy+08h),0	; Reset to default volume
+		ld	(iy+ztbl_Volume),0	; Reset to default volume
 		rst	8
 .fm_hasvol:
 		ld	a,(ix+chnl_Note)
@@ -3213,8 +3184,8 @@ dtbl_singl:
 		add	a,e		; Note + pitch
 		rst	8
 		add	a,a		; * 2
-		ld	(iy+06h),a
-		ld	(iy+07h),0	; reset pitchbend
+		ld	(iy+ztbl_FreqIndx),a
+		ld	(iy+ztbl_PitchBend),0	; reset pitchbend
 		ret
 .n_psgn:
 		ld	a,c
@@ -3255,8 +3226,8 @@ dtbl_singl:
 		rrc	c
 		rst	8
 		or	c
-		ld	(iy+06h),a	; Save octave + index: OOOiiiiib
-		ld	(iy+07h),0
+		ld	(iy+ztbl_FreqIndx),a	; Save octave + index: OOOiiiiib
+		ld	(iy+ztbl_PitchBend),0
 		ret
 
 ; ----------------------------------------
@@ -3266,32 +3237,50 @@ dtbl_singl:
 		jp	.chnl_ulnk
 .chnl_ulnkoff:
 ; 		ld	c,0
+
 .chnl_ulnk:
 		xor	a
 		rst	8
-		ld	(iy),a			; Delete link, chip and prio
+		ld	(iy),a				; Delete link, chip and prio
 		ld	(iy+1),a
 		ld	(iy+2),a
-		ld	(iy+3),a
-		ld	(iy+08h),a
-		ld	(iy+09h),a
-		ld	(iy+0Ah),a
-		ld	(iy+0Bh),a
+
+		ld	(iy+ztbl_Volume),a		; <--
+		ld	(iy+ztbl_EffBuff),a
+		ld	(iy+ztbl_VarT0),a
+		ld	(iy+ztbl_VarT1),a
 		ret
-; 		push	iy
-; 		pop	hl
-; 		ld	bc,8-2		; Go to 08h
-; 		add	hl,bc
-; 		rst	8
-; 		ld	b,8/2
-; .clrfull:
-; 		ld	(hl),0		; Reset settings 08-0Bh
+
+; ----------------------------------------
+; Reset all table
+;
+; hl - Current channel table
+; d - Silence chip
+;
+; Uses:
+; b
+; ----------------------------------------
+
+tblz_clear:
+		rst	8
+		ld	(hl),0			; Delete link
+		inc	hl
+		ld	(hl),0
+		inc	hl
+		ld	(hl),d			; Set "silence" chip ID.
 ; 		inc	hl
-; 		ld	(hl),0
-; 		inc	hl
-; 		rst	8
-; 		djnz	.clrfull
-; 		ret
+; 		ld	(hl),0			; Clear master volume
+		ld	bc,8-3			; Go to 08h
+		add	hl,bc
+		ld	b,8/2
+.clrfull:
+		ld	(hl),0			; Reset settings 08-0Bh
+		inc	hl
+		ld	(hl),0
+		inc	hl
+		rst	8
+		djnz	.clrfull
+		ret
 
 ; ============================================================
 ; --------------------------------------------------------
@@ -3338,7 +3327,7 @@ zmars_send:
 		cp	c
 		jr	nz,.wait_in
 		djnz	.make_sure
-		ld	(hl),01h	; Request IRQ
+		ld	(hl),81h	; Request IRQ
 		rst	8
 .test_sub:
 		ld	a,(iy+1)	; Sub response?
@@ -4006,7 +3995,7 @@ chip_env:
 		and	00001111b		; Filter volume value
 		or	c			; and OR with current channel
 		or	90h			; Set volume-set mode
-	if ZSET_TESTME=0
+	if DBUG_DAC=0
 		ld	(ix),a			; *** WRITE volume
 	endif
 		inc	(iy+PTMR)		; Update general timer
@@ -4372,20 +4361,7 @@ trkBuff_3	ds trk_ChnIndx+MAX_TRKINDX
 
 ; ====================================================================
 ; --------------------------------------------------------
-; Channel table struct:
-; 00  - DIRECT Linked channel from trkChnls
-; 02  - 00h-7Fh: Priority level or 80h+ Silence request (chip ID)
-; 03  - MASTER Volume for this channel
-; 04  - Chip index (YM2612: KEY index)
-; 05  - FREE
-; 06  - Frequency list index (YM2612: %oooiiiii oct|index)
-; 07  - Pitchbend add/sub
-; 08  - Current volume: 00-max
-; 09  - Stored effect setting
-; 0A  - FREE
-; 0B  - FREE
-; 0C+ - Misc. settings for the current chip
-; 10+ - Intrument data
+; Channel tables
 ;
 ; PSG   80h
 ; PSGN  90h
@@ -4408,48 +4384,48 @@ tblList:	dw tblPSG-tblList		;  80h
 tblFM:		db 00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,01h,00h,00h,00h	; Channel 2
+		db 00h,00h,00h,01h,01h,00h,00h,00h	; Channel 2
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,04h,00h,00h,00h	; Channel 4 <--
+		db 00h,00h,00h,04h,04h,00h,00h,00h	; Channel 4 <--
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,05h,00h,00h,00h	; Channel 5
+		db 00h,00h,00h,05h,05h,00h,00h,00h	; Channel 5
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-tblFM3:		db 00h,00h,00h,00h,02h,00h,00h,00h	; Channel 3 <--
+tblFM3:		db 00h,00h,00h,02h,02h,00h,00h,00h	; Channel 3 <--
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-tblFM6:		db 00h,00h,00h,00h,06h,00h,00h,00h	; Channel 6 <--
+tblFM6:		db 00h,00h,00h,06h,06h,00h,00h,00h	; Channel 6 <--
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		dw -1	; end-of-list
 tblPCM:		db 00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,01h,00h,00h,00h	; Channel 2
+		db 00h,00h,00h,01h,01h,00h,00h,00h	; Channel 2
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,02h,00h,00h,00h	; Channel 3
+		db 00h,00h,00h,02h,02h,00h,00h,00h	; Channel 3
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,03h,00h,00h,00h	; Channel 4
+		db 00h,00h,00h,03h,03h,00h,00h,00h	; Channel 4
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,04h,00h,00h,00h	; Channel 5
+		db 00h,00h,00h,04h,04h,00h,00h,00h	; Channel 5
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,05h,00h,00h,00h	; Channel 6
+		db 00h,00h,00h,05h,05h,00h,00h,00h	; Channel 6
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,06h,00h,00h,00h	; Channel 7
+		db 00h,00h,00h,06h,06h,00h,00h,00h	; Channel 7
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,07h,00h,00h,00h	; Channel 7
+		db 00h,00h,00h,07h,07h,00h,00h,00h	; Channel 7
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		dw -1	; end-of-list
-tblPSGN:	db 00h,00h,00h,00h,03h,00h,00h,03h	; Noise
+tblPSGN:	db 00h,00h,00h,03h,03h,00h,00h,00h	; Noise
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 ; --------------------------------------------------------
@@ -4480,35 +4456,35 @@ tickCnt		db 0		; ** Tick counter (PUT THIS AFTER tickFlag)
 tblPSG:		db 00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,01h,00h,00h,00h	; Channel 2
+		db 00h,00h,00h,01h,01h,00h,00h,00h	; Channel 2
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,02h,00h,00h,00h	; Channel 3
+		db 00h,00h,00h,02h,02h,00h,00h,00h	; Channel 3
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		dw -1	; end-of-list
 tblPWM:		db 00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,01h,00h,00h,00h	; Channel 2
+		db 00h,00h,00h,01h,01h,00h,00h,00h	; Channel 2
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,02h,00h,00h,00h	; Channel 3
+		db 00h,00h,00h,02h,02h,00h,00h,00h	; Channel 3
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,03h,00h,00h,00h	; Channel 4
+		db 00h,00h,00h,03h,03h,00h,00h,00h	; Channel 4
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,04h,00h,00h,00h	; Channel 5
+		db 00h,00h,00h,04h,04h,00h,00h,00h	; Channel 5
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,05h,00h,00h,00h	; Channel 6
+		db 00h,00h,00h,05h,05h,00h,00h,00h	; Channel 6
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,00h,06h,00h,00h,00h	; Channel 7
+		db 00h,00h,00h,06h,06h,00h,00h,00h	; Channel 7
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-; 		db 00h,00h,00h,00h,06h,00h,00h,00h	; Channel 8
+; 		db 00h,00h,00h,07h,00h,00h,00h,00h	; Channel 8
 ; 		db 00h,00h,00h,00h,00h,00h,00h,00h
 ; 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		dw -1	; end-of-list

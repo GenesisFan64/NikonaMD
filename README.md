@@ -47,7 +47,7 @@ A codebase in pure assembly for developing on these SEGA systems: Genesis, Sega 
 * CDDA Playback: Play, Stop, Volume fading
 * BRAM Saving/Loading
 * PCM playback: All 8 channels with internal-streaming for larger samples *see GEMA Sound Driver
-* ASIC Stamps --UNSTABLE--
+* Scaling and Rotation "Stamps" --UNFINISHED--
 
 ### with Sega 32X
 

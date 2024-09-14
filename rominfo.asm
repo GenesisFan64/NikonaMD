@@ -31,7 +31,7 @@ HTAG_SYS_PICO	equ "SEGA PICO       "
 HTAG_DISCID	equ "NIKONACD   "	; SCD Disc Volume name
 HTAG_DISCID_M	equ "NIKONACD32X"	; CD32X Disc Volume name
 HTAG_SYSNAME	equ "NIKONA-SDK "
-HTAG_CDVER	equ $0100|$02		; $0100|version: $00-$FF
+HTAG_CDVER	equ $0100|$02		; $0100|Version: $00-$FF
 
 ; --------------------------------------------------------
 ; Release date

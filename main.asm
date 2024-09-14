@@ -11,7 +11,7 @@
 ; NIKONA SETTINGS
 ; ----------------------------------------------------------------
 
-SET_INITMODE	equ 0		; Starting screen mode number on boot, for debugging.
+SET_INITMODE	equ 7		; Starting screen mode number on boot, for debugging.
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -279,8 +279,8 @@ Md_SysCode_e:
 
 	if MCD|MARSCD
 		align $8000
-		binclude "system/mcd/fshead.bin"	; Pre-generated ISO header
-		fs_mkList 0,IsoFileList,IsoFileList_e	; TWO pointers to the filelist
+		binclude "system/mcd/fshead.bin"		; Pre-generated ISO header
+		fs_mkList 0,IsoFileList,IsoFileList_e		; TWO pointers to the filelist
 		fs_mkList 1,IsoFileList,IsoFileList_e
 IsoFileList:
 		fs_file "NKNA_SUB.BIN",MCD_SMPDATA,MCD_SMPDATA_e

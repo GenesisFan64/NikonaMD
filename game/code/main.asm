@@ -210,21 +210,21 @@ str_MenuText:
 		dc.b "    Sega CD stamps",$0A
 		dc.b "    32X 2D mode",$0A
 		dc.b "    32X 3D mode",$0A
-		dc.b "    Nikona/GEMA sound test"
+		dc.b "    GEMA sound test"
 		dc.b 0
 		align 2
 
-str_InputMe:
-	if MARS|MARSCD
-		dc.l pstr_mem(0,sysmars_reg+comm0)
-		dc.b " "
-		dc.l pstr_mem(0,sysmars_reg+comm1)
-		dc.b " "
-		dc.l pstr_mem(3,RAM_Framecount)
-	else
-		dc.b " "
-	endif
-		dc.b 0
-		align 2
+; str_InputMe:
+; 	if MARS|MARSCD
+; 		dc.l pstr_mem(0,sysmars_reg+comm0)
+; 		dc.b " "
+; 		dc.l pstr_mem(0,sysmars_reg+comm1)
+; 		dc.b " "
+; 		dc.l pstr_mem(3,RAM_Framecount)
+; 	else
+; 		dc.b " "
+; 	endif
+; 		dc.b 0
+; 		align 2
 
 ; ====================================================================

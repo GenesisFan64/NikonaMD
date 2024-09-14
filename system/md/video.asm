@@ -142,7 +142,7 @@ RAM_VerScroll		ds.l 320/16			; DMA Vertical scroll data
 RAM_Sprites		ds.w 8*80			; DMA Sprites
 RAM_Palette		ds.w 64				; DMA Palette
 RAM_PaletteFade		ds.w 64				; Target MD palette for FadeIn/Out
-RAM_VidPrntList		ds.w 3*24			; Video_Print list: Address, Type
+; RAM_VidPrntList		ds.w 3*24			; Video_Print list: Address, Type
 RAM_VdpDmaIndx		ds.w 1				; Current index in DMA BLAST list
 RAM_VdpDmaMod		ds.w 1				; Mid-write flag
 RAM_MdVidClr_e		ds.l 0				; <-- END POINT for Video_Clear

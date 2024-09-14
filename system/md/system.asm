@@ -1241,7 +1241,8 @@ System_MdMcd_Interrupt:
 ; 		andi.w	#$C0,d7
 ; 		cmpi.w	#$C0,d7
 ; 		beq.s	.wait_first
-		bset	#0,(sysmcd_reg).l		; Request Level 1
+; 		bset	#0,(sysmcd_reg).l		; Request Level 1
+		move.b	#$81,(sysmcd_reg).l
 		move.l	(sp)+,d7
 		rts
 
