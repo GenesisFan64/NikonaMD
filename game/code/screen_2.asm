@@ -640,11 +640,11 @@ gtrk_NadieCd_2:
 ; ----------------------------------------------------
 
 FmIns_Piano_Aqua:
-		binclude "sound/instr/fm/piano_aqua.gsx",$2478,$20
+		binclude "sound/instr/fm/gsx/piano_aqua.gsx",$2478,$20
 FmIns_HBeat_tom:
-		binclude "sound/instr/fm/nadia_tom.gsx",$2478,$20
+		binclude "sound/instr/fm/gsx/nadia_tom.gsx",$2478,$20
 FmIns_Trumpet_1:
-		binclude "sound/instr/fm/trumpet_1.gsx",$2478,$20
+		binclude "sound/instr/fm/gsx/trumpet_1.gsx",$2478,$20
 	endif
 
 ; ====================================================================

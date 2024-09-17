@@ -1946,7 +1946,7 @@ dtbl_singl:
 		dec	hl
 .not_palp:
 		ld	a,(iy+ztbl_PitchBend)	; pitchbend
-		rlca			; << 3
+		rlca				; << 3
 		rlca
 		rst	8
 		rlca
@@ -1981,7 +1981,7 @@ dtbl_singl:
 
 .mk_fm:
 		ld	c,(iy+ztbl_Chip)	; c - KeyID (011b always)
-		bit	0,b		; NEW note?
+		bit	0,b			; NEW note?
 		jr	z,.mkfm_set
 		ld	a,(ix+chnl_Note)
 		cp	-2
@@ -2002,7 +2002,7 @@ dtbl_singl:
 		ld	a,(fmSpecial)
 		or	a
 		jr	z,.not_dspc
-		ld	de,2700h	; CH3 off
+		ld	de,2700h		; CH3 off
 		call	fm_send_1
 		ld	a,0
 		ld	(fmSpecial),a
@@ -2035,11 +2035,11 @@ dtbl_singl:
 		ld	h,a
 		ld	e,(iy+ztbl_PitchBend)	; pitchbend
 		rst	8
-		xor	a		; Clear high
-		ccf			; Clear carry
-		sla	e		; << 2
+		xor	a			; Clear high
+		ccf				; Clear carry
+		sla	e			; << 2
 		sla	e
-		sbc	a,a		; -1 if carry is set
+		sbc	a,a			; -1 if carry is set
 		ld	d,a
 		add	hl,de
 		call	.fm_setfreq
@@ -3178,12 +3178,12 @@ dtbl_singl:
 .n_indx:
 		ld	a,c
 .n_stfreq:
-		inc	hl		; Skip ID
-		ld	e,(hl)		; Read pitch
+		inc	hl			; Skip ID
+		ld	e,(hl)			; Read pitch
 		dec	hl
-		add	a,e		; Note + pitch
+		add	a,e			; Note + pitch
 		rst	8
-		add	a,a		; * 2
+		add	a,a			; * 2
 		ld	(iy+ztbl_FreqIndx),a
 		ld	(iy+ztbl_PitchBend),0	; reset pitchbend
 		ret
@@ -3244,12 +3244,12 @@ dtbl_singl:
 		ld	(iy),a				; Delete link, chip and prio
 		ld	(iy+1),a
 		ld	(iy+2),a
-
-		ld	(iy+ztbl_Volume),a		; <--
-		ld	(iy+ztbl_EffBuff),a
-		ld	(iy+ztbl_VarT0),a
-		ld	(iy+ztbl_VarT1),a
-		ret
+		push	iy
+		pop	hl
+		inc	hl
+		inc	hl
+		inc	hl
+		jr	tblz_clear_e
 
 ; ----------------------------------------
 ; Reset all table
@@ -3268,9 +3268,9 @@ tblz_clear:
 		ld	(hl),0
 		inc	hl
 		ld	(hl),d			; Set "silence" chip ID.
-; 		inc	hl
-; 		ld	(hl),0			; Clear master volume
+tblz_clear_e:
 		ld	bc,8-3			; Go to 08h
+		rst	8
 		add	hl,bc
 		ld	b,8/2
 .clrfull:

@@ -18,13 +18,13 @@ MAX_CHAN	= 32
 # Init
 # -------------------------------------------------
 
-if len(sys.argv) == 1:
-	print("ARGS: inputfile [pattnumloop]")
+if len(sys.argv) != 1+1:
+	print("Usage: itextrct.py inputfile")
 	exit()
 	
-#if os.path.exists(sys.argv[1]) == False:
-	#print("File not found")
-	#exit()
+# if os.path.exists(sys.argv[1]) == False:
+# 	print("File not found")
+# 	exit()
 	
 MASTERNAME = sys.argv[1]
 input_file = open("./trkr/"+MASTERNAME+".it","rb")

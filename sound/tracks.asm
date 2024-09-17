@@ -46,7 +46,8 @@
 ; ------------------------------------------------------------
 
 		gemaList MainGemaSeqList
-		gemaTrk 0,5,gtrk_Test
+		gemaTrk 0,3,gtrk_Test
+		gemaTrk 0,2,gtrk_Test2
 		gemaTrk 0,3,gtrk_Gigalo
 		gemaTrk 0,3,gtrk_Temple
 		gemaTrk 0,3,gtrk_Brinstr
@@ -64,17 +65,81 @@
 ; ----------------------------------------------------
 
 gtrk_Test:
-		gemaHead .blk,.pat,.ins,4
-.blk:		binclude "sound/tracks/test_blk.bin"
-.pat:		binclude "sound/tracks/test_patt.bin"
+		gemaHead .blk,.pat,.ins,10
+.blk:		binclude "sound/tracks/chill_blk.bin"
+.pat:		binclude "sound/tracks/chill_patt.bin"
 .ins:
-		gInsPsg 0,$00,$00,$00,$00,$04,0
-		gInsPsgN 0,$00,$00,$00,$00,$04,0,%111
-		gInsFm 0,FmIns_Trumpet_1
-		gInsFm3 0,FmIns_Sp_OpenHat
-		gInsDac 0,DacIns_TEST,0
-		gInsPcm 0,PcmIns_TEST,0
-		gInsPwm 0,PwmIns_TEST,%10
+		gInsFm -12,FmIns_Vibraphone_1
+		gInsDac -36,DacIns_Kick,0
+		gInsDac +22,DacIns_Snare,0
+		gInsFm -12,FmIns_Trumpet_1
+		gInsFm -12,FmIns_Bass_Groove_1
+		gInsPsgN 0,$00,$00,$00,$00,$40,0,%101
+		gInsPsgN 0,$00,$00,$00,$00,$40,0,%100
+		gInsNull
+		gInsNull
+		gInsPsgN 0,$10,$20,$00,$00,$40,0,%100
+		gInsFm 0,FmIns_Trumpet_15
+		gInsPsg 0,$20,$20,$00,$00,$01,0
+		gInsNull
+
+; ----------------------------------------------------
+
+gtrk_Test2:
+		gemaHead .blk,.pat,.ins,10
+.blk:		binclude "sound/tracks/mirror_blk.bin"
+.pat:		binclude "sound/tracks/mirror_patt.bin"
+.ins:
+		gInsDac +11,DacIns_Timpani,0
+		gInsNull
+		gInsNull
+		gInsDac +22,DacIns_Snare,0
+		gInsDac 0,DacIns_Kick,0
+		gInsFm +12,FmIns_Hats_1;PsgN 0,$10,$20,$00,$00,$18,0,%100
+		gInsFm +12,FmIns_Hats_1;gInsPsgN 0,$10,$20,$00,$00,$18,0,%100
+		gInsDac +11,DacIns_Kick,0
+		gInsFm -24,FmIns_Bass_Groove_1
+
+		gInsFm -12,FmIns_Trumpet_1
+		gInsNull
+		gInsPsg 0,$20,$20,$00,$00,$01,0
+		gInsFm -12,FmIns_Vibraphone_1
+		gInsFm -12,FmIns_Flaute_1
+		gInsNull
+		gInsFm -24,FmIns_Trumpet_15
+		gInsNull
+		gInsNull
+		gInsNull
+
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+
+; 		gInsFm -24,FmIns_Test_00
+; 		gInsFm -24,FmIns_Test_01
+; 		gInsFm -24,FmIns_Test_02
+; 		gInsFm -24,FmIns_Test_03
+; 		gInsFm -24,FmIns_Test_04
+; 		gInsFm -24,FmIns_Test_05
+; 		gInsFm -24,FmIns_Test_06
+
+; 		gInsPsg 0,$00,$00,$00,$00,$04,0
+; 		gInsPsgN 0,$00,$00,$00,$00,$04,0,%111
+; 		gInsFm 0,FmIns_Trumpet_1
+; 		gInsFm3 0,FmIns_Sp_OpenHat
+; 		gInsDac 0,DacIns_TEST,0
+; 		gInsPcm 0,PcmIns_TEST,0
+; 		gInsPwm 0,PwmIns_TEST,%10
 
 ; ----------------------------------------------------
 

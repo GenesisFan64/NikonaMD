@@ -28,7 +28,9 @@ MAX_SNDPICK		equ 7
 			memory RAM_ScrnBuff
 RAM_GemaCache_PSG	ds.l 3
 RAM_GemaCache_PSGN	ds.l 1
-RAM_GemaCache_FM	ds.l 6
+RAM_GemaCache_FM	ds.l 4
+RAM_GemaCache_FM3	ds.l 1
+RAM_GemaCache_FM6	ds.l 1
 RAM_GemaCache_PCM	ds.l 8
 RAM_GemaCache_PWM	ds.l 8
 
@@ -438,7 +440,6 @@ sizeof_thisbuff		ds.l 0
 
 		move.w	#DEF_VRAM_FG,d2
 		move.w	#DEF_HSIZE_64,d3
-
 		lea	(RAM_GemaCache_PSG),a3
 		moveq	#10,d0
 		moveq	#13,d1
@@ -460,11 +461,13 @@ sizeof_thisbuff		ds.l 0
 		moveq	#7-1,d7
 		bsr	.show_table
 
-		lea	(RAM_GemaCache_FM+(4*4)),a3
+		lea	(RAM_GemaCache_FM3),a3
 		moveq	#26,d0
 		moveq	#13+4,d1
 		moveq	#2-1,d7
 		bsr	.show_table_fm
+		adda	#4,a3
+
 		lea	(RAM_GemaCache_PSGN),a3
 		moveq	#10,d0
 		moveq	#13+3,d1
@@ -636,14 +639,14 @@ str_TesterTitle:
 		dc.b "GEMA Sound driver",0
 		align 2
 str_TesterInfo:
-		dc.b "    gemaTest          Slot Seq  Blk",$0A
+		dc.b "    gemaTest          Indx Seq. Blk.",$0A
 		dc.b "    gemaPlaySeq",$0A
 		dc.b "    gemaStopSeq",$0A
 		dc.b "    gemaFadeSeq",$0A
 		dc.b "    gemaSetSeqVol",$0A
 		dc.b "    gemaStopAll       Beat",$0A
 		dc.b "    gemaSetBeats",$0A
-		dc.b "    EXIT to Screen 00",$0A
+		dc.b "    EXIT to Screen 0",$0A
 		dc.b 0
 		align 2
 str_VmInfo:

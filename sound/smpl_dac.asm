@@ -28,8 +28,10 @@
 ; 	align $100
 	;gSmplData Label,"file_path",loop_start
 ; -----------------------------------------------------------
-	gSmplData DacIns_TEST,"sound/instr/smpl/test.wav",0
 	gSmplData DacIns_Nadie,"sound/instr/smpl/nadie.wav",0
 
+	gSmplData DacIns_Kick,"sound/instr/smpl/kick.wav",0
+	gSmplData DacIns_Snare,"sound/instr/smpl/snare.wav",0
+	gSmplData DacIns_Timpani,"sound/instr/smpl/timpani.wav",0
 	gSmplData DacIns_wegot_kick,"sound/instr/smpl/wegot_kick.wav",0
 	gSmplData DacIns_wegot_crash,"sound/instr/smpl/wegot_crash.wav",0
