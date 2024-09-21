@@ -132,15 +132,15 @@ RAM_TempStampVars	ds.l 2
 	; ----------------------------------------------
 	if MCD|MARSCD
 		bsr	.make_stamp
-		lea	(GemaTracks_Scr2),a0
-		bsr	gemaSetMasterList
-		bsr	System_Render
-		move.w	#192,d0
-		bsr	gemaSetBeats
-		moveq	#-1,d0
-		moveq	#0,d1
-		moveq	#0,d2
-		bsr	gemaPlaySeq
+; 		lea	(GemaTracks_Scr2),a0
+; 		bsr	gemaSetMasterList
+; 		bsr	System_Render
+; 		move.w	#192,d0
+; 		bsr	gemaSetBeats
+; 		moveq	#-1,d0
+; 		moveq	#0,d1
+; 		moveq	#0,d2
+; 		bsr	gemaPlaySeq
 ; 		moveq	#2,d0
 ; 		bsr	System_MdMcd_CddaPlayL
 		bsr	Video_MdMcd_StampInit
@@ -613,39 +613,39 @@ MapStamp_Test:
 ; Sound bank
 ; ------------------------------------------------------
 
-	if MCD|MARSCD
-		gemaList GemaTracks_Scr2
-		gemaTrk 1,5,gtrk_NadieCd_2
-
-; ----------------------------------------------------
-
-gtrk_NadieCd_2:
-		gemaHead .blk,.pat,.ins,11
-.blk:
-		binclude "sound/tracks/nadie_cd_blk.bin"
-.pat:
-		binclude "sound/tracks/nadie_cd_patt.bin"
-.ins:
-		gInsPcm 0,PcmIns_Nadie_L,0
-		gInsFm -36,FmIns_Piano_Aqua
-		gInsFm -12,FmIns_HBeat_tom
-		gInsPcm -5,PcmIns_PKick,%00
-		gInsPsg 0,$30,$20,$00,$02,$04,0
-		gInsFm 0,FmIns_Trumpet_1
-		gInsPcm 0,PcmIns_Piano,%00
-		gInsPcm -12,PcmIns_PTom,%00
-		gInsNull
-		gInsPcm 0,PcmIns_Nadie_R,0
-
-; ----------------------------------------------------
-
-FmIns_Piano_Aqua:
-		binclude "sound/instr/fm/gsx/piano_aqua.gsx",$2478,$20
-FmIns_HBeat_tom:
-		binclude "sound/instr/fm/gsx/nadia_tom.gsx",$2478,$20
-FmIns_Trumpet_1:
-		binclude "sound/instr/fm/gsx/trumpet_1.gsx",$2478,$20
-	endif
+; 	if MCD|MARSCD
+; GemaTracks_Scr2:
+; 		gemaTrk 1,5,gtrk_NadieCd_2
+;
+; ; ----------------------------------------------------
+;
+; gtrk_NadieCd_2:
+; 		gemaHead .blk,.pat,.ins,11
+; .blk:
+; 		binclude "sound/tracks/nadie_cd_blk.bin"
+; .pat:
+; 		binclude "sound/tracks/nadie_cd_patt.bin"
+; .ins:
+; 		gInsPcm 0,PcmIns_Nadie_L,0
+; 		gInsFm -36,FmIns_Piano_Aqua
+; 		gInsFm -12,FmIns_HBeat_tom
+; 		gInsPcm -5,PcmIns_PKick,%00
+; 		gInsPsg 0,$30,$20,$00,$02,$04,0
+; 		gInsFm 0,FmIns_Trumpet_1
+; 		gInsPcm 0,PcmIns_Piano,%00
+; 		gInsPcm -12,PcmIns_PTom,%00
+; 		gInsNull
+; 		gInsPcm 0,PcmIns_Nadie_R,0
+;
+; ; ----------------------------------------------------
+;
+; FmIns_Piano_Aqua:
+; 		binclude "sound/instr/fm/gsx/piano_aqua.gsx",$2478,$20
+; FmIns_HBeat_tom:
+; 		binclude "sound/instr/fm/gsx/nadia_tom.gsx",$2478,$20
+; FmIns_Trumpet_1:
+; 		binclude "sound/instr/fm/gsx/trumpet_1.gsx",$2478,$20
+; 	endif
 
 ; ====================================================================
 ; ------------------------------------------------------

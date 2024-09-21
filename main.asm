@@ -190,6 +190,7 @@ Md_SysCode:
 	endif
 ; ---------------------------------------------
 
+		include	"sound/driver/gema_macros.asm"
 		include	"sound/driver/gema.asm"
 		include	"system/md/video.asm"
 		include	"system/md/system.asm"

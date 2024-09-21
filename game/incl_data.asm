@@ -49,9 +49,7 @@
 
 	data_dset DATA_BANK0
 	; ------------------------------------------------
-		include "sound/tracks.asm"		; GEMA: Track data
-		include "sound/instr.asm"		; GEMA: FM instruments
-		include "sound/smpl_dac.asm"		; GEMA: DAC samples
+		include "sound/tracks.asm"		; GEMA user sound data
 		include "game/data/bank_main.asm"
 	; ------------------------------------------------
 	data_dend DATA_BANK0_e
