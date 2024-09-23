@@ -488,7 +488,7 @@ sizeof_thisbuff		ds.l 0
 		moveq	#-1,d1
 .link_ok:
 		move.w	d1,(a1)
-		adda	#$18,a0
+		adda	#$11,a0
 		adda	#4,a1
 		dbf	d7,.copy_me
 		rts

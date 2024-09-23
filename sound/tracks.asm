@@ -22,7 +22,7 @@ gtrk_Test:
 		gInsFm -24,FmIns_Bass_Groove_1
 		gInsFm -12,FmIns_Trumpet_1
 		gInsDac +11,DacIns_Kick,0
-		gInsPsg 0,$20,$20,$00,$00,$04,0
+		gInsPsg 0,$20,$20,$00,$00,$08,0
 		gInsFm -12,FmIns_Vibraphone_1
 		gInsFm -12,FmIns_Flaute_1
 		gInsFm +12,FmIns_Hats_1
@@ -184,6 +184,7 @@ FmIns_Brass_7:
 ; 16000hz base
 ; -------------------------------------------------------------------
 
+		align $800
 		gSmplData DacIns_Arena_01,"sound/instr/smpl/arena_01.wav",0
 		gSmplData DacIns_Arena_02,"sound/instr/smpl/arena_02.wav",0
 		gSmplData DacIns_Arena_03,"sound/instr/smpl/arena_03.wav",0
