@@ -74,7 +74,7 @@ sizeof_thisbuff		ds.l 0
 		move.w	#$0888,(a0)+			; gray
 
 		lea	str_TesterTitle(pc),a0
-		moveq	#1,d0
+		moveq	#6,d0
 		moveq	#1,d1
 		move.w	#DEF_VRAM_FG,d2
 		move.w	#DEF_HSIZE_64,d3
@@ -86,10 +86,10 @@ sizeof_thisbuff		ds.l 0
 		move.w	#DEF_HSIZE_64,d3
 		bsr	Video_Print
 		lea	str_VmInfo(pc),a0
-		moveq	#5,d0
-		moveq	#13,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		moveq	#2,d0
+		moveq	#22,d1
+; 		move.w	#DEF_VRAM_FG,d2
+; 		move.w	#DEF_HSIZE_64,d3
 		bsr	Video_Print
 		bsr	.show_cursor
 
@@ -441,37 +441,62 @@ sizeof_thisbuff		ds.l 0
 		move.w	#DEF_VRAM_FG,d2
 		move.w	#DEF_HSIZE_64,d3
 		lea	(RAM_GemaCache_PSG),a3
-		moveq	#10,d0
-		moveq	#13,d1
+		moveq	#7,d0
+		moveq	#22,d1
 		moveq	#3-1,d7
 		bsr	.show_table
+		lea	(RAM_GemaCache_PSGN),a3
+		moveq	#7+12,d0
+		moveq	#22,d1
+		moveq	#1-1,d7
+		bsr	.show_table
+
 		lea	(RAM_GemaCache_FM),a3
-		moveq	#26,d0
-		moveq	#13,d1
-		moveq	#4-1,d7
+		moveq	#7,d0
+		moveq	#22+1,d1
+		moveq	#5-1,d7
 		bsr	.show_table_fm
+		moveq	#7+16,d0
+		moveq	#22+1,d1
+		bsr	sndLockZ80
+		move.b	(z80_cpu+fmSpecial),d7
+		bsr	sndUnlockZ80
+		tst.b	d7
+		beq.s	.no_spec
+		lea	(str_Speci),a0
+		bsr	Video_Print
+		bra.s	.b_sampl
+.no_spec:
+		lea	(RAM_GemaCache_FM3),a3
+		moveq	#1-1,d7
+		bsr	.show_table_fm
+.b_sampl:
+
+		moveq	#7+20,d0
+		moveq	#22+1,d1
+		bsr	sndLockZ80
+		move.b	(z80_cpu+8),d7
+		bsr	sndUnlockZ80
+		cmp.b	#$D9,d7
+		bne.s	.no_sampl
+		lea	(str_Sampl),a0
+		bsr	Video_Print
+		bra.s	.c_sampl
+.no_sampl:
+		lea	(RAM_GemaCache_FM6),a3
+		moveq	#1-1,d7
+		bsr	.show_table_fm
+.c_sampl:
+
 		lea	(RAM_GemaCache_PCM),a3
-		moveq	#10,d0
-		moveq	#13+7,d1
+		moveq	#7,d0
+		moveq	#22+2,d1
 		moveq	#8-1,d7
 		bsr	.show_table
 		lea	(RAM_GemaCache_PWM),a3
-		moveq	#26,d0
-		moveq	#13+7,d1
-		moveq	#7-1,d7
-		bsr	.show_table
-
-		lea	(RAM_GemaCache_FM3),a3
-		moveq	#26,d0
-		moveq	#13+4,d1
-		moveq	#2-1,d7
-		bsr	.show_table_fm
-		adda	#4,a3
-
-		lea	(RAM_GemaCache_PSGN),a3
-		moveq	#10,d0
-		moveq	#13+3,d1
-		moveq	#1-1,d7
+		moveq	#7,d0
+		moveq	#22+3,d1
+		moveq	#8-1,d7
 		bra	.show_table
 
 ; ----------------------------------------------
@@ -519,7 +544,8 @@ sizeof_thisbuff		ds.l 0
 		bsr	Video_Print
 		move.w	d4,d0
 .from_fmbad:
-		addq.w	#1,d1
+; 		addq.w	#1,d1
+		addq.w	#4,d0
 		adda	#4,a3
 		dbf	d7,.show_table_fm
 		rts
@@ -534,7 +560,8 @@ sizeof_thisbuff		ds.l 0
 		adda	d6,a0
 .val_bad:
 		bsr	Video_Print
-		addq.w	#1,d1
+; 		addq.w	#1,d1
+		addq.w	#4,d0
 		adda	#4,a3
 		dbf	d7,.show_table
 		rts
@@ -636,7 +663,7 @@ str_CursorDel:	dc.b "   ",0
 		align 2
 
 str_TesterTitle:
-		dc.b "GEMA Sound driver",0
+		dc.b "GEMA Sound driver  V1.x(dev)",0
 		align 2
 str_TesterInfo:
 		dc.b "    gemaTest          Indx Seq. Blk.",$0A
@@ -646,25 +673,14 @@ str_TesterInfo:
 		dc.b "    gemaSetSeqVol",$0A
 		dc.b "    gemaStopAll       Beat",$0A
 		dc.b "    gemaSetBeats",$0A
-		dc.b "    EXIT to Screen 0",$0A
+		dc.b "    EXIT",$0A
 		dc.b 0
 		align 2
 str_VmInfo:
-		dc.b "PSG1 000         FM1 000",$0A
-		dc.b "PSG2 000         FM2 000",$0A
-		dc.b "PSG3 000         FM4 000",$0A
-		dc.b "PSGN 000         FM5 000",$0A
-		dc.b "                 FM3 000",$0A
-		dc.b "                 FM6 000",$0A
-		dc.b $0A
-		dc.b "PCM1 000        PWM1 000",$0A
-		dc.b "PCM2 000        PWM2 000",$0A
-		dc.b "PCM3 000        PWM3 000",$0A
-		dc.b "PCM4 000        PWM4 000",$0A
-		dc.b "PCM5 000        PWM5 000",$0A
-		dc.b "PCM6 000        PWM6 000",$0A
-		dc.b "PCM7 000        PWM7 000",$0A
-		dc.b "PCM8 000";PWM8 000 00 00",$0A
+		dc.b "PSG",$0A
+		dc.b "FM",$0A
+		dc.b "PCM",$0A
+		dc.b "PWM"
 		dc.b 0
 		align 2
 
@@ -682,6 +698,9 @@ strL_NoteList:	dc.b "---",0
 strL_FmOnly:	dc.b "---",0
 		dc.b "C- ",0,"C# ",0,"D- ",0,"D# ",0,"E- ",0,"F- ",0,"F# ",0,"G- ",0,"G# ",0,"A- ",0,"A# ",0,"B- ",0
 strL_LazyVal:	dc.b "0",0,"1",0,"2",0,"3",0,"4",0,"5",0,"6",0,"7",0,"8",0,"9",0
+
+str_Speci:	dc.b "spc",0
+str_Sampl:	dc.b "wav",0
 
 str_ShowVars:
 		dc.l pstr_mem(1,RAM_GemaArg0)

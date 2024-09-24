@@ -4318,13 +4318,12 @@ trkBlks_2	ds 8
 trkBuff_0	ds trk_ChnIndx+MAX_TRKINDX
 trkBuff_1	ds trk_ChnIndx+MAX_TRKINDX
 trkBuff_2	ds trk_ChnIndx+MAX_TRKINDX
-
 fmcach_list:	dw fmcach_1
 		dw fmcach_2
 		dw fmcach_3
-marsUpd		db 0		; Flag to request a PWM transfer
-mcdUpd		db 0		; Flag to request a PCM transfer
-		dw fmcach_4	; Followup
+marsUpd		db 0			; Flag to request a PWM transfer
+mcdUpd		db 0			; Flag to request a PCM transfer
+		dw fmcach_4		; Followup
 		dw fmcach_5
 		dw fmcach_6
 
@@ -4434,13 +4433,11 @@ tickSpSet	db 0		; **
 tickFlag	db 0		; Tick flag from VBlank
 tickCnt		db 0		; ** Tick counter (PUT THIS AFTER tickFlag)
 currTickBits	db 0		; Current Tick/Subbeat flags (000000BTb B-beat, T-tick)
-
 sbeatAcc	dw 0		; Accumulates on each tick to trigger the sub beats
 sbeatPtck	dw 214		; Default global subbeats (this-32 for PAL) 214=125
 dDacFifoMid	db 0		; WAVE play halfway refill flag (00h/80h)
 dDacPntr	db 0,0,0	; WAVE play current ROM position
 dDacCntr	db 0,0,0	; WAVE play length counter
-
 wave_Start	dw 0		; START: 68k 24-bit pointer
 		db 0
 wave_Len	dw 0		; LENGTH 24-bit

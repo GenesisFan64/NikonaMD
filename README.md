@@ -46,7 +46,7 @@ A codebase in pure assembly for developing on these SEGA systems: Genesis, Sega 
 * Basic ISO file loading to Word-RAM or Genesis RAM.
 * CDDA Playback: Play, Stop, Volume fading
 * BRAM Saving/Loading
-* PCM playback: All 8 channels with internal-streaming for larger samples *see GEMA Sound Driver
+* PCM playback: All 8 channels with data-streaming for larger samples *see GEMA Sound Driver
 * Scaling and Rotation "Stamps" --UNFINISHED--
 
 ### with Sega 32X
@@ -72,8 +72,8 @@ This is a custom sound driver, tracker-based that supports all the sound channel
 
 ## CURRENT ISSUES/NOTES
 
-* This is NOT finished at all and NOT TESTED ON REAL HARDWARE as of this current code.
+* This is NOT finished at all.
 * No documentation as I keep changing things until I get everything organized.
-* (SCD) Stamps support is unstable/unfinished, it will also slowdown if using too many stamps.
+* (SCD) Stamps support is unstable/unfinished
 * (32X) 2D-mode gets slow if showing more than 3 o 4 "Super" Spritesm because a single SH2 is not powerfull enough to draw everyhing, the other SH2 is required but there's not enough RAM for sharing tasks.
-* (32X) 3D-mode might randomly freeze on hardware.
+* (32X) 3D-mode might fail drawing a frame, happens very rarely

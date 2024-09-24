@@ -12,20 +12,19 @@ gtrk_Test:
 .pat:		binclude "sound/tracks/mirror_patt.bin"
 .ins:
 		gInsDac +11,DacIns_Timpani,0
-		gInsNull
-		gInsNull
+		gInsNull;gInsPsgN 0,$20,$20,$00,$00,$04,0,%110
+		gInsNull;gInsPsgN 0,$20,$20,$00,$00,$04,0,%110
 		gInsDac +22,DacIns_Snare,0
 		gInsDac 0,DacIns_Kick,0
-		gInsFm +12,FmIns_Hats_1
+		gInsNull
 		gInsFm +12,FmIns_Hats_1
 		gInsDac +11,DacIns_Kick,0
 		gInsFm -24,FmIns_Bass_Groove_1
 		gInsFm -12,FmIns_Trumpet_1
 		gInsDac +11,DacIns_Kick,0
-		gInsPsg 0,$20,$20,$00,$00,$08,0
+		gInsPsg 0,$20,$20,$00,$00,$04,0
 		gInsFm -12,FmIns_Vibraphone_1
-		gInsFm -12,FmIns_Flaute_1
-		gInsFm +12,FmIns_Hats_1
+		gInsFm3 +12,FmIns_Sp_OpenHat
 		gInsFm -36,FmIns_Brass_7
 		gInsFm -12,FmIns_Bell_mid36
 
