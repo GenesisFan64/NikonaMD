@@ -76,20 +76,20 @@ sizeof_thisbuff		ds.l 0
 		lea	str_TesterTitle(pc),a0
 		moveq	#6,d0
 		moveq	#1,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bsr	Video_PrintW
 		lea	str_TesterInfo(pc),a0
 		moveq	#1,d0
 		moveq	#4,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bsr	Video_Print
 		lea	str_VmInfo(pc),a0
 		moveq	#2,d0
 		moveq	#22,d1
-; 		move.w	#DEF_VRAM_FG,d2
-; 		move.w	#DEF_HSIZE_64,d3
+; 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bsr	Video_Print
 		bsr	.show_cursor
 
@@ -124,8 +124,8 @@ sizeof_thisbuff		ds.l 0
 ; 		lea	str_Info(pc),a0
 ; 		moveq	#31,d0
 ; 		moveq	#2,d1
-; 		move.w	#DEF_VRAM_FG,d2
-; 		move.w	#DEF_HSIZE_64,d3
+; 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 ; 		bsr	Video_Print
 
 ; 	; Controls
@@ -177,8 +177,8 @@ sizeof_thisbuff		ds.l 0
 		moveq	#1,d0
 		moveq	#4,d1
 		add.w	(RAM_LastPick).w,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bsr	Video_Print
 		move.w	(RAM_CurrPick).w,(RAM_LastPick).w
 .last_pick:
@@ -186,8 +186,8 @@ sizeof_thisbuff		ds.l 0
 		moveq	#1,d0
 		moveq	#4,d1
 		add.w	(RAM_CurrPick).w,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bra	Video_Print
 
 ; ------------------------------------------------------
@@ -196,8 +196,8 @@ sizeof_thisbuff		ds.l 0
 		lea	str_ShowVars(pc),a0
 		moveq	#23,d0
 		moveq	#5,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bra	Video_Print
 
 ; ------------------------------------------------------
@@ -390,7 +390,7 @@ sizeof_thisbuff		ds.l 0
 ; ------------------------------------------------------
 
 .extnal_beats:
-	dc.w 192
+	dc.w 200
 	dc.w 192
 	dc.w 192
 	dc.w 192
@@ -438,8 +438,8 @@ sizeof_thisbuff		ds.l 0
 		moveq	#8-1,d7
 		bsr	.copy_me
 
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		lea	(RAM_GemaCache_PSG),a3
 		moveq	#7,d0
 		moveq	#22,d1

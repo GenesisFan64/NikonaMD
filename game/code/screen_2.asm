@@ -78,8 +78,8 @@ RAM_TempStampVars	ds.l 2
 		lea	str_MidemeEsta(pc),a0
 		moveq	#0,d0
 		moveq	#26,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bsr	Video_Print
 
 	; ----------------------------------------------
@@ -238,15 +238,15 @@ RAM_TempStampVars	ds.l 2
 		lea	str_NikonaTest(pc),a0
 		moveq	#1,d0
 		moveq	#1,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bsr	Video_Print
 	endif
 		lea	str_NewCountr0(pc),a0
 		moveq	#23,d0
 		moveq	#1,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bra	Video_Print
 
 .make_stamp:

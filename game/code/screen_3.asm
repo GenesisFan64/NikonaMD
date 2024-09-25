@@ -100,8 +100,8 @@ RAM_ThisSpeed		ds.w 1
 ; 		lea	str_NikonaTest(pc),a0			; Print the title string
 ; 		moveq	#1,d0					; X/Y positions 1,1
 ; 		moveq	#1,d1
-; 		move.w	#DEF_VRAM_FG,d2				; FG VRAM location
-; 		move.w	#DEF_HSIZE_64,d3			; FG width
+; 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 ; 		bsr	Video_PrintW				; <-- Print BIG text
 		lea	(Pal_Sisi+color_indx(1)),a0
 		moveq	#1,d0
@@ -175,8 +175,8 @@ RAM_ThisSpeed		ds.w 1
 		lea	str_NewCountr0(pc),a0
 		moveq	#1,d0
 		moveq	#24,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bra	Video_Print
 
 ; ====================================================================

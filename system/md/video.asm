@@ -25,6 +25,12 @@ DEF_MaxStampCOut	equ $60		; Maximum backup cells for the SCD Stamps
 ; Variables
 ; --------------------------------------------------------
 
+; VDPATT_PL0		equ $0000
+VDPATTR_PL1		equ $2000
+VDPATTR_PL2		equ $4000
+VDPATTR_PL3		equ $6000
+VDPATTR_HI		equ $8000
+
 ; ------------------------------------------------
 ; Use these if you are not planning changing
 ; the VRAM locations of the scrolling area(s)
@@ -152,8 +158,6 @@ RAM_VdpDmaList		ds.b $10*MAX_MDDMATSK		; DMA BLAST list for VBlank
 RAM_FrameCount		ds.l 1				; Frame-counter
 RAM_IndxPalFade		ds.w 1				; Current index in the pal-fade request list
 RAM_SprLinkNum		ds.w 1				; Current link number for the sprite-building routines
-RAM_SetPrntVram		ds.w 1				; Default VRAM location for ASCII text used by Video_Print
-RAM_SetPrntVramW	ds.w 1				; '' but for wider text
 RAM_VdpVramFG		ds.w 1				; Full VRAM location for FG
 RAM_VdpVramBG		ds.w 1				; '' BG
 RAM_VdpVramWD		ds.w 1				; '' Window
@@ -1864,15 +1868,9 @@ Video_FadePal_List:
 
 Video_PrintInitW:
 		move.w	#($60*$20)*2,d2			; Graphics data from " " to "[DEL]"
-		move.w	d1,d3
-		subi.w	#$20*2,d3
-		move.w	d3,(RAM_SetPrntVramW).w
 		bra.s	vidPrint_Init
 Video_PrintInit:
 		move.w	#($60*$20),d2			; Graphics data from " " to "[DEL]"
-		move.w	d1,d3
-		subi.w	#$20,d3
-		move.w	d3,(RAM_SetPrntVram).w
 vidPrint_Init:
 		lsl.w	#5,d1				; VRAM location to real position
 		bra	Video_LoadArt
@@ -1906,15 +1904,23 @@ vid_FontDefPal:
 ; a0   | String data
 ; d0.w | X position
 ; d1.w | Y position
-; d2.w | Screen VRAM location
-;        Foreground: DEF_VRAM_FG
-;        Background: DEF_VRAM_BG
-;        Window:     DEF_VRAM_WD
+; d2.w | Font VRAM location
+; d3.l | Screen width / Screen VRAM location:
+;        splitw(width,vram_out)
 ;
-; d3.w | Screen width
-;        - $040 (DEF_HSIZE_32)
-;        - $080 (DEF_HSIZE_64)
-;        - $100 (DEF_HSIZE_128)
+; * Font VRAM location
+; Default 8x8:  DEF_PrintVram
+; Default 8x16: DEF_PrintVramW
+;
+; * Screen VRAM
+; Foreground: DEF_VRAM_FG
+; Background: DEF_VRAM_BG
+; Window:     DEF_VRAM_WD
+;
+; * Screen Width
+; $040 (DEF_HSIZE_32)
+; $080 (DEF_HSIZE_64)
+; $100 (DEF_HSIZE_128)
 ;
 ; Notes:
 ; - Initialize your graphics and VRAM location
@@ -1934,15 +1940,16 @@ vid_FontDefPal:
 Video_Print:
 		movem.l	d4-d7/a4-a6,-(sp)
 		lea	(vdp_data).l,a6
-		move.w	d2,d7
+		move.w	d3,d7
 		move.w	d0,d5
 		add.w	d5,d5
 		move.w	d1,d4
+		swap	d3
 		mulu.w	d3,d4
 		add.w	d4,d5
 		add.w	d5,d7
 		move.w	d3,d6
-
+		swap	d3
 		moveq	#0,d5
 		move.w	d7,d5
 		andi.w	#$3FFF,d7
@@ -1971,7 +1978,9 @@ Video_Print:
 ; ------------------------------------------------
 ; Normal text
 		andi.w	#$FF,d4
-		add.w	(RAM_SetPrntVram).w,d4
+; 		add.w	(RAM_SetPrntVram).w,d4
+		add.w	d2,d4
+		subi.w	#$20,d4
 		move.w	d4,(a6)
 		addq.w	#2,d5
 		bra.s	.q_loop
@@ -2039,7 +2048,9 @@ Video_Print:
 		bcs.s	.hex_incr
 		addq.w	#7,d6
 .hex_incr:	add.w	#"0",d6
-		add.w	(RAM_SetPrntVram).w,d6
+; 		add.w	(RAM_SetPrntVram).w,d6
+		add.w	d2,d6
+		subi.w	#$20,d6
 		move.w	d6,(a6)
 		addq.w	#2,d5
 		move.l	a4,d6
@@ -2052,8 +2063,9 @@ Video_Print:
 Video_PrintW:
 		movem.l	d4-d7/a3-a6,-(sp)
 		lea	(vdp_data).l,a6
-
-		move.w	(RAM_SetPrntVramW).w,d6
+; 		move.w	(RAM_SetPrntVramW).w,d6
+		move.w	d2,d6
+		subi.w	#$20*2,d6
 		move.w	(RAM_VdpRegSetC).w,d5
 		btst	#2,d5
 		beq.s	.no_dble_y
@@ -2064,14 +2076,16 @@ Video_PrintW:
 		or.w	d7,d6
 .no_dble_y:
 		swap	d6
-		move.w	d2,d7
+		move.w	d3,d7
 		move.w	d0,d5
 		add.w	d5,d5
 		move.w	d1,d4
+		swap	d3
 		mulu.w	d3,d4
 		add.w	d4,d5
 		add.w	d5,d7
 		move.w	d3,d6
+		swap	d3
 
 		moveq	#0,d5
 		move.w	d7,d5
@@ -2215,11 +2229,15 @@ Video_PrintW:
 
 		bsr.s	.get_preval
 		swap	d7
-		move.w	(RAM_SetPrntVramW).w,d4
+; 		move.w	(RAM_SetPrntVramW).w,d4
+		move.w	d2,d4
+		subi.w	#$20*2,d4
 		andi.w	#$7FF,d4
 		lsr.w	#1,d4
 		add.w	d4,d6
-		move.w	(RAM_SetPrntVramW).w,d4
+; 		move.w	(RAM_SetPrntVramW).w,d4
+		move.w	d2,d4
+		subi.w	#$20*2,d4
 		andi.w	#$F800,d4
 		or.w	d4,d6
 		move.w	d7,d4
@@ -2235,7 +2253,9 @@ Video_PrintW:
 .nibbl_norm:
 		bsr.s	.get_preval
 		add.w	d6,d6
-		add.w	(RAM_SetPrntVramW).w,d6
+; 		add.w	(RAM_SetPrntVramW).w,d6
+		move.w	d2,d6
+		subi.w	#$20*2,d6
 		swap	d7
 		move.w	d7,d4
 		swap	d7

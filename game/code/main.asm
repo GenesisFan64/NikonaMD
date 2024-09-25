@@ -51,18 +51,18 @@ RAM_SC0_OldOption	ds.w 1
 	; ----------------------------------------------
 	; Load PRINT
 		move.l	#ASCII_FONT,d0				; d0 - Font data
-		move.w	#DEF_PrintVram|DEF_PrintPal,d1
+		move.w	#DEF_PrintVram,d1
 		bsr	Video_PrintInit
 		move.l	#ASCII_FONT_W,d0
-		move.w	#DEF_PrintVramW|DEF_PrintPal,d1
+		move.w	#DEF_PrintVramW,d1
 		bsr	Video_PrintInitW
 		bsr	Video_PrintDefPal_Fade
 	; ----------------------------------------------
 		lea	str_MenuText(pc),a0			; Print the title string
 		moveq	#1,d0					; X/Y positions 1,1
 		moveq	#1,d1
-		move.w	#DEF_VRAM_FG,d2				; FG VRAM location
-		move.w	#DEF_HSIZE_64,d3			; FG width
+		move.w	#DEF_PrintVramW|DEF_PrintPal,d2		; FG VRAM location
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width
 		bsr	Video_PrintW
 		bsr	.print_cursor				; Draw counter
 		bsr	Video_DisplayOn
@@ -143,8 +143,8 @@ RAM_SC0_OldOption	ds.w 1
 		move.w	(RAM_SC0_OldOption).w,d2
 		add.w	d2,d2
 		add.w	d2,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width
 		bsr	Video_PrintW
 
 .print_cursor:
@@ -154,8 +154,8 @@ RAM_SC0_OldOption	ds.w 1
 		move.w	(RAM_SC0_CurrOption).w,d2
 		add.w	d2,d2
 		add.w	d2,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width
 		bra	Video_PrintW
 
 ; ====================================================================

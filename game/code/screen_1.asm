@@ -129,12 +129,6 @@ RAM_SC1_PickDispl	ds.w 1
 
 .show_counter:
 		rts
-		lea	str_NewCountr0(pc),a0
-		moveq	#1,d0
-		moveq	#3,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
-		bra	Video_PrintW
 
 ; ====================================================================
 ; ------------------------------------------------------
@@ -420,14 +414,14 @@ Screen0_PickBackgrnd:
 		lea	str_NikonaTest(pc),a0			; Print the title string
 		moveq	#16,d0					; X/Y positions 1,1
 		moveq	#1,d1
-		move.w	#DEF_VRAM_FG,d2				; FG VRAM location
-		move.w	#DEF_HSIZE_64,d3			; FG width
+		move.w	#DEF_PrintVramW|DEF_PrintPal,d2		; Font VRAM location
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width and location
 		bsr	Video_PrintW				; <-- Print BIG text
 		lea	str_NikonaTest2(pc),a0			; Print the title string
 		moveq	#15,d0					; X/Y positions 1,1
 		moveq	#25,d1
-		move.w	#DEF_VRAM_FG,d2				; FG VRAM location
-		move.w	#DEF_HSIZE_64,d3			; FG width
+		move.w	#DEF_PrintVramW|DEF_PrintPal,d2		; Font VRAM location
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width and location
 		bsr	Video_PrintW
 
 		lea	(Pal_TESTBG+color_indx(1)),a0		; a0 - Load palette (+2 skips first color)
@@ -456,14 +450,14 @@ Screen0_PickBackgrnd:
 		lea	str_NikonaTest(pc),a0			; Print the title string
 		moveq	#16,d0					; X/Y positions 1,1
 		moveq	#1,d1
-		move.w	#DEF_VRAM_FG,d2				; FG VRAM location
-		move.w	#DEF_HSIZE_64,d3			; FG width
+		move.w	#DEF_PrintVramW|DEF_PrintPal,d2		; Font VRAM location
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width and location
 		bsr	Video_PrintW
 		lea	str_NikonaTest2(pc),a0			; Print the title string
 		moveq	#15,d0					; X/Y positions 1,1
 		moveq	#26,d1
-		move.w	#DEF_VRAM_FG,d2				; FG VRAM location
-		move.w	#DEF_HSIZE_64,d3			; FG width
+		move.w	#DEF_PrintVramW|DEF_PrintPal,d2		; Font VRAM location
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width and location
 		bsr	Video_PrintW
 
 		lea	(Pal_TESTBG2),a0			; a0 - Load palette (+2 skips first color)

@@ -153,18 +153,11 @@ RAM_ModelPick		ds.w 1
 ; ------------------------------------------------------
 
 .show_counter:
-; 		lea	str_InputMe(pc),a0
-; 		moveq	#1,d0
-; 		moveq	#4,d1
-; 		move.w	#DEF_VRAM_FG,d2
-; 		move.w	#DEF_HSIZE_64,d3
-; 		bsr	Video_Print
-
 		lea	str_NewCountr0(pc),a0
 		moveq	#1,d0
 		moveq	#1,d1
-		move.w	#DEF_VRAM_FG,d2
-		move.w	#DEF_HSIZE_64,d3
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bra	Video_Print
 
 ; ------------------------------------------------------
