@@ -17,7 +17,7 @@ MAX_RCACH	equ 20h		; !! Max storage for ROM pattern data *** 1-BIT SIZES ONLY, M
 MAX_BUFFNTRY	equ 4*2		; !! nikona_BuffList buffer entry size
 MAX_SLOTS	equ 3		; !! Number of buffers
 
-MAX_TBLSIZE	equ 11h		; Maximum size for chip tables
+MAX_TBLSIZE	equ 12h		; Maximum size for chip tables
 MAX_TRKINDX	equ 26		; Max channel indexes per buffer: 4PSG+6FM+8PCM+8PWM
 MAX_ZCMND	equ 10h		; Size of command array ** 1-bit SIZES ONLY ** (68k uses this label too)
 
@@ -88,7 +88,7 @@ ztbl_FreqIndx	equ 05h			; Frequency list index (YM2612: %oooiiiii oct|index)
 ztbl_PitchBend	equ 06h			; Pitchbend incr/decr
 ztbl_Volume	equ 07h			; Current Volume: 00-max
 ztbl_EffBuff	equ 08h			; Effect setting
-ztbl_InstCach	equ 09h			; <-- 8 bytes
+ztbl_InstCach	equ 0Ah			; <-- 8 bytes
 
 ; --------------------------------------------------------
 ; Variables
@@ -1955,34 +1955,38 @@ dtbl_singl:
 ; --------------------------------
 
 .mk_fm:
-		ld	c,(iy+ztbl_Chip)	; c - KeyID (011b always)
-		bit	0,b			; NEW note?
-		jp	z,.mkfm_set
-		ld	a,(ix+chnl_Note)
-		cp	-2
+		ld	c,(iy+ztbl_Chip)	; c - YM key
+		bit	0,b			; NEW note (---n)?
+		jr	nz,.mkfm_new
+		jr	.mkfm_upd		; Else: Update FM
+.mkfm_new:
+		ld	a,(ix+chnl_Note)	; Get IT note
+		cp	-2			; Key-cut?
 		jp	z,.fm_cut
-		cp	-1
+		cp	-1			; Key-off?
 		jp	z,.fm_off
-; 		call	.fm_tloff
 		rst	8
 		ld	a,c
-		cp	6
+		cp	6			; Check FM6
 		jr	nz,.not_dac
-		call	dac_off
+		call	dac_off			; Turn DAC off
 		jr	.not_dspc
 .not_dac:
-; 		ld	a,c
-		cp	2
+		cp	2			; Check FM3
 		jr	nz,.not_dspc
-		ld	a,(fmSpecial)
+		ld	a,(fmSpecial)		; FM3 Special active?
 		or	a
 		jr	z,.not_dspc
-		ld	de,2700h		; CH3 off
-		call	fm_send_1
 		ld	a,0
 		ld	(fmSpecial),a
+		ld	de,2700h		; Turn FM3 Special OFF
+		call	fm_send_1
 .not_dspc:
-		call	.fm_keyoff
+		call	.fm_keyoff		; Turn FM keys off
+
+; --------------------------------
+
+.mkfm_upd:
 		push	bc
 		ld	a,(iy+ztbl_FreqIndx)
 		ld	b,a
@@ -1995,11 +1999,11 @@ dtbl_singl:
 		rst	8
 		inc	hl
 		ld	h,(hl)
-		ld	l,a
-		ld	a,(palMode)
+		ld	l,a			; hl - Current FM freq
+		ld	a,(palMode)		; PAL speed check
 		or	a
 		jr	z,.not_pal
-		ld	de,4
+		ld	de,4			; freq + 4
 		add	hl,de
 .not_pal:
 		ld	a,b
@@ -2008,15 +2012,16 @@ dtbl_singl:
 		rrca
 		or	h
 		ld	h,a
-		ld	e,(iy+ztbl_PitchBend)	; pitchbend
+		ld	e,(iy+ztbl_PitchBend)	; Get pitchbend effect
 		rst	8
-		xor	a			; Clear high
-		ccf				; Clear carry
-		sla	e			; << 2
+		xor	a			; clear high
+		ccf				; clear carry
+		sla	e			; pitchbend << 3
 		sla	e
-		sbc	a,a			; -1 if carry is set
+		sla	e
+		sbc	a,a			; a - 0 or -1 if carry is set
 		ld	d,a
-		add	hl,de
+		add	hl,de			; Pitchbend the freq
 		call	.fm_setfreq
 		pop	bc
 		jp	.mkfm_set		; Volume
@@ -2028,8 +2033,9 @@ dtbl_singl:
 ; --------------------------------
 
 .mk_fmspc:
-		ld	c,(iy+ztbl_Chip)	; c - KeyID (011b always)
-		bit	0,b		; NEW Note?
+; 		ld	c,(iy+ztbl_Chip)	; c - KeyID (011b always)
+		ld	c,011b			; <-- FM3 special ID
+		bit	0,b			; NEW Note?
 		jp	z,.mkfm_set
 		ld	a,(ix+chnl_Note)
 		cp	-2
@@ -2037,26 +2043,15 @@ dtbl_singl:
 		cp	-1
 		jp	z,.fm_off
 		call	.fm_keyoff
-		ld	hl,fmcach_list	; Read external freqs
-		ld	a,(iy+ztbl_Chip)
-		and	0111b
-		ld	d,0
-		add	a,a
-		ld	e,a
 		rst	8
-		add	hl,de
-		ld	a,(hl)
-		inc	hl
-		ld	h,(hl)
-		ld	l,a
-		rst	8
-		ld	de,20h		; point to regs
+		ld	hl,fmcach_3		; DIRECT point to FM3 data
+		ld	de,20h			; point to regs
 		add	hl,de
 		push	ix
-		ld	ix,.spcreglist
+		ld	ix,.this_regs
 		ld	b,8
 .wr_spc:
-		ld	d,(ix)
+		ld	d,(ix)			; Manually write the FM3 freqs
 		ld	e,(hl)
 		call	fm_send_1
 		rst	8
@@ -2064,12 +2059,12 @@ dtbl_singl:
 		inc	ix
 		djnz	.wr_spc
 		pop	ix
-		ld	de,2740h	; CH3 on
+		ld	de,2740h		; Turn FM3 Special mode
 		call	fm_send_1
 		ld	a,1
 		ld	(fmSpecial),a
 		jp	.mkfm_set
-.spcreglist:
+.this_regs:
 		db 0ADh,0A9h
 		db 0ACh,0A8h
 		db 0AEh,0AAh
@@ -2320,18 +2315,18 @@ dtbl_singl:
 		ld	l,a
 		ld	e,(iy+ztbl_PitchBend)	; pitchbend
 		rst	8
-		xor	a		; Clear high
-		ccf			; Clear carry
-		sla	e		; << 3
+		xor	a			; Clear high
+		ccf				; Clear carry
+		sla	e			; << 3
 		sla	e
 		sla	e
-		sbc	a,a		; -1 if carry is set
+		sbc	a,a			; -1 if carry is set
 		ld	d,a
 		add	hl,de
 		ld	(wave_Pitch),hl
-		exx			; *
-		ld	de,(wave_Pitch)	; *
-		exx			; *
+		exx				; *
+		ld	de,(wave_Pitch)		; *
+		exx				; *
 		ret
 
 ; --------------------------------
@@ -4293,7 +4288,6 @@ psgcom:	db 00h,00h,00h,00h	;  0 - command 1 = key on, 2 = key off, 4 = stop snd
 	db 00h,00h,00h,00h	; 56 - General timer
 
 ; --------------------------------------------------------
-; Instrument storage
 fmcach_1	ds 28h
 fmcach_2	ds 28h
 fmcach_3	ds 28h
@@ -4367,60 +4361,60 @@ tblList:	dw tblPSG-tblList		;  80h
 		dw tblPWM-tblList		; 0E0h
 ; 		dw 0				; 0F0h
 ; --------------------------------------------------------
-tblPCM:		db 00h,00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
+tblPCM:		db 00h,00h,00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,01h,00h,00h,00h,00h,00h	; Channel 2
+		db 00h,00h,00h,01h,00h,00h,00h,00h,00h,00h	; Channel 2
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,02h,00h,00h,00h,00h,00h	; Channel 3
+		db 00h,00h,00h,02h,00h,00h,00h,00h,00h,00h	; Channel 3
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,03h,00h,00h,00h,00h,00h	; Channel 4
+		db 00h,00h,00h,03h,00h,00h,00h,00h,00h,00h	; Channel 4
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,04h,00h,00h,00h,00h,00h	; Channel 5
+		db 00h,00h,00h,04h,00h,00h,00h,00h,00h,00h	; Channel 5
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,05h,00h,00h,00h,00h,00h	; Channel 6
+		db 00h,00h,00h,05h,00h,00h,00h,00h,00h,00h	; Channel 6
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,06h,00h,00h,00h,00h,00h	; Channel 7
+		db 00h,00h,00h,06h,00h,00h,00h,00h,00h,00h	; Channel 7
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,07h,00h,00h,00h,00h,00h	; Channel 8
-		db 00h,00h,00h,00h,00h,00h,00h,00h
-		dw -1	; end-of-list
-tblFM:		db 00h,00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
-		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,01h,00h,00h,00h,00h,00h	; Channel 2
-		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,04h,00h,00h,00h,00h,00h	; Channel 4 <--
-		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,05h,00h,00h,00h,00h,00h	; Channel 5
-		db 00h,00h,00h,00h,00h,00h,00h,00h
-tblFM3:		db 00h,00h,00h,02h,00h,00h,00h,00h,00h	; Channel 3 <--
-		db 00h,00h,00h,00h,00h,00h,00h,00h
-tblFM6:		db 00h,00h,00h,06h,00h,00h,00h,00h,00h	; Channel 6 <--
+		db 00h,00h,00h,07h,00h,00h,00h,00h,00h,00h	; Channel 8
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		dw -1	; end-of-list
-tblPSG:		db 00h,00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
+tblFM:		db 00h,00h,00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,01h,00h,00h,00h,00h,00h	; Channel 2
+		db 00h,00h,00h,01h,00h,00h,00h,00h,00h,00h	; Channel 2
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,02h,00h,00h,00h,00h,00h	; Channel 3
+		db 00h,00h,00h,04h,00h,00h,00h,00h,00h,00h	; Channel 4 <--
+		db 00h,00h,00h,00h,00h,00h,00h,00h
+		db 00h,00h,00h,05h,00h,00h,00h,00h,00h,00h	; Channel 5
+		db 00h,00h,00h,00h,00h,00h,00h,00h
+tblFM3:		db 00h,00h,00h,02h,00h,00h,00h,00h,00h,00h	; Channel 3 <--
+		db 00h,00h,00h,00h,00h,00h,00h,00h
+tblFM6:		db 00h,00h,00h,06h,00h,00h,00h,00h,00h,00h	; Channel 6 <--
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		dw -1	; end-of-list
-tblPSGN:	db 00h,00h,00h,03h,00h,00h,00h,00h,00h	; Noise
+tblPSG:		db 00h,00h,00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-tblPWM:		db 00h,00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
+		db 00h,00h,00h,01h,00h,00h,00h,00h,00h,00h	; Channel 2
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,01h,00h,00h,00h,00h,00h	; Channel 2
+		db 00h,00h,00h,02h,00h,00h,00h,00h,00h,00h	; Channel 3
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,02h,00h,00h,00h,00h,00h	; Channel 3
+		dw -1	; end-of-list
+tblPSGN:	db 00h,00h,00h,03h,00h,00h,00h,00h,00h,00h	; Noise
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,03h,00h,00h,00h,00h,00h	; Channel 4
+tblPWM:		db 00h,00h,00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,04h,00h,00h,00h,00h,00h	; Channel 5
+		db 00h,00h,00h,01h,00h,00h,00h,00h,00h,00h	; Channel 2
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,05h,00h,00h,00h,00h,00h	; Channel 6
+		db 00h,00h,00h,02h,00h,00h,00h,00h,00h,00h	; Channel 3
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,06h,00h,00h,00h,00h,00h	; Channel 7
+		db 00h,00h,00h,03h,00h,00h,00h,00h,00h,00h	; Channel 4
 		db 00h,00h,00h,00h,00h,00h,00h,00h
-		db 00h,00h,00h,07h,00h,00h,00h,00h,00h	; Channel 8
+		db 00h,00h,00h,04h,00h,00h,00h,00h,00h,00h	; Channel 5
+		db 00h,00h,00h,00h,00h,00h,00h,00h
+		db 00h,00h,00h,05h,00h,00h,00h,00h,00h,00h	; Channel 6
+		db 00h,00h,00h,00h,00h,00h,00h,00h
+		db 00h,00h,00h,06h,00h,00h,00h,00h,00h,00h	; Channel 7
+		db 00h,00h,00h,00h,00h,00h,00h,00h
+		db 00h,00h,00h,07h,00h,00h,00h,00h,00h,00h	; Channel 8
 		db 00h,00h,00h,00h,00h,00h,00h,00h
 		dw -1	; end-of-list
 

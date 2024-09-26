@@ -9,16 +9,18 @@
 ; ------------------------------------------------------
 
 MAX_SNDPICK		equ 7
+SET_SNDVIEWY		equ 22
 
 ; ====================================================================
 ; ------------------------------------------------------
 ; Structs
 ; ------------------------------------------------------
 
-; test 			struct
-; x_pos			ds.w 1
-; y_pos			ds.w 1
-; 			endstuct
+			memory 2
+setVram_Dodo		ds.b $30
+setVram_Mimi		ds.b $30
+setVram_Fifi		ds.b $30
+			endmemory
 
 ; ====================================================================
 ; ------------------------------------------------------
@@ -36,14 +38,13 @@ RAM_GemaCache_PWM	ds.l 8
 
 RAM_CurrPick		ds.w 1
 RAM_LastPick		ds.w 1
-RAM_GemaArg0		ds.w 1
-RAM_GemaArg1		ds.w 1
-RAM_GemaArg2		ds.w 1
-RAM_GemaArg3		ds.w 1
-RAM_GemaArg4		ds.w 1
-RAM_GemaArg5		ds.w 1
-RAM_GemaArg6		ds.w 1
-RAM_ChnlLinks		ds.w 26
+RAM_GemaIndx		ds.w 1		; DONT MOVE
+RAM_GemaSeq		ds.w 1		; ''
+RAM_GemaBlk		ds.w 1		; ''
+RAM_GemaStatus		ds.w 4
+RAM_FairyVars		ds.w 1
+			ds.w 1
+
 sizeof_thisbuff		ds.l 0
 			endmemory
 
@@ -68,46 +69,74 @@ sizeof_thisbuff		ds.l 0
 		move.l	#ASCII_FONT_W,d0
 		move.w	#DEF_PrintVramW|$6000,d1
 		bsr	Video_PrintInitW
-		lea	(RAM_PaletteFade+$60).w,a0	; Palette line 4:
-		move.w	#$0000,(a0)+			; black (background)
-		move.w	#$0EEE,(a0)+			; white
-		move.w	#$0888,(a0)+			; gray
+		lea	(RAM_PaletteFade+$40).w,a0	; Palette line 4:
+		move.w	#$0000,(a0)
+		move.w	#$00E0,2(a0)
+		move.w	#$0080,4(a0)
+		adda	#$20,a0
+		move.w	#$0000,(a0)
+		move.w	#$0EEE,2(a0)
+		move.w	#$0888,4(a0)
 
+		lea	(objPal_Dodo+2),a0
+		moveq	#1,d0
+		move.w	#15,d1
+		bsr	Video_FadePal
+		lea	ArtList_Stuff(pc),a0
+		bsr	Video_LoadArt_List
+		move.l	#obj_Fairy,d0
+		moveq	#0,d2
+		bsr	Object_Make
+		addq.w	#1,d2
+		bsr	Object_Make
+		addq.w	#1,d2
+		bsr	Object_Make
+	; ----------------------------------------------
 		lea	str_TesterTitle(pc),a0
 		moveq	#6,d0
-		moveq	#1,d1
+		moveq	#2,d1
 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bsr	Video_PrintW
 		lea	str_TesterInfo(pc),a0
-		moveq	#1,d0
-		moveq	#4,d1
-		move.w	#DEF_PrintVram|DEF_PrintPal,d2
-		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
+		moveq	#5,d0
+		moveq	#6,d1
+		move.w	#DEF_PrintVram|$4000,d2
+		bsr	Video_Print
+		lea	str_Instruc(pc),a0
+		moveq	#2,d0
+		moveq	#14,d1
+		move.w	#DEF_PrintVram|$4000,d2
 		bsr	Video_Print
 		lea	str_VmInfo(pc),a0
 		moveq	#2,d0
-		moveq	#22,d1
-; 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
-; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
+		moveq	#SET_SNDVIEWY,d1
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bsr	Video_Print
-		bsr	.show_cursor
+; 		bsr	.show_cursor
 
 	; ----------------------------------------------
 		bsr	gemaReset				; Load default GEMA sound data
-		move.w	#215,(RAM_GemaArg6).w
-		move.w	#215,d0
-		bsr	gemaSetBeats
+; 		move.w	#215,(RAM_GemaArg6).w
+; 		move.w	#215,d0
+; 		bsr	gemaSetBeats
 ; 		moveq	#1,d0
 ; 		bsr	gemaPlaySeq
+
+; 		moveq	#1,d0
+; 		moveq	#%10,d1
+; 		bsr	Video_Resolution
 
 	; ----------------------------------------------
 		bsr	.show_me
 		bsr	.gema_view
 ; 		bsr	.steal_vars
-		bsr	Object_Run
 	; ----------------------------------------------
 		bsr	Video_DisplayOn
+		bsr	Object_Run
+		bsr	Video_BuildSprites
+		bsr	System_Render
 		bsr	Video_FadeIn_Full
 
 ; ====================================================================
@@ -117,273 +146,318 @@ sizeof_thisbuff		ds.l 0
 
 .loop:
 		bsr	System_Render
-		bsr	.show_cursor
+; 		bsr	.show_cursor
 		bsr	.gema_view
+		bsr	Object_Run
+		bsr	Video_BuildSprites
 
-; 		bsr	Object_Run
+
+
 ; 		lea	str_Info(pc),a0
 ; 		moveq	#31,d0
-; 		moveq	#2,d1
-; 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+; 		moveq	#4,d1
+; 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
 ; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
-; 		bsr	Video_Print
+; 		bsr	Video_PrintW
 
-; 	; Controls
-
+	; NEW controls
 		lea	(Controller_1).w,a6
-		lea	(RAM_CurrPick).w,a5
-	; UP/DOWN
 		move.w	on_hold(a6),d7
-		andi.w	#JoyA+JoyB+JoyC,d7
-		bne.s	.n_up
+		btst	#bitJoyStart,d7
+		bne	.exit_all
+	; LEFT/RIGHT
 		move.w	on_press(a6),d7
-		btst	#bitJoyDown,d7
-		beq.s	.n_down
-		addq.w	#1,(a5)
-		cmp.w	#MAX_SNDPICK,(a5)		; MAX OPTIONS
-		ble.s	.n_downd
-		clr.w	(a5)
-.n_downd:
-		bsr.s	.show_me
-.n_down:
+		andi.w	#JoyLeft+JoyRight,d7
+		beq.s	.lr_seq
+		moveq	#1,d0
+		andi.w	#JoyLeft,d7
+		beq.s	.lr_right
+		neg.w	d0
+.lr_right:
+		add.w	d0,(RAM_GemaSeq).w
+		bsr	.show_me
+.lr_seq:
+
+	; UP/DOWN
 		move.w	on_press(a6),d7
-		btst	#bitJoyUp,d7
-		beq.s	.n_up
-		subq.w	#1,(a5)
-		bpl.s	.n_ups
-		move.w	#MAX_SNDPICK,(a5)
-.n_ups:
-		bsr.s	.show_me
-.n_up:
-		move.w	(RAM_CurrPick).w,d7
-		lsl.w	#2,d7
-		jsr	.jump_list(pc,d7.w)
-		tst.w	(RAM_ScreenMode).w	; Check -1
-		bpl.s	.n_cbtn
+		andi.w	#JoyUp+JoyDown,d7
+		beq.s	.ud_seq
+		moveq	#1,d0
+		andi.w	#JoyUp,d7
+		beq.s	.ud_right
+		neg.w	d0
+.ud_right:
+		add.w	d0,(RAM_GemaBlk).w
+		bsr	.show_me
+.ud_seq:
+
+	; X/Y
+		move.w	on_press(a6),d7
+		andi.w	#JoyX+JoyY,d7
+		beq.s	.xy_seq
+		moveq	#1,d0
+		andi.w	#JoyX,d7
+		beq.s	.xy_right
+		neg.w	d0
+.xy_right:
+		add.w	d0,(RAM_GemaIndx).w
+		bsr	.show_me
+.xy_seq:
+
+	; C BUTTON
+		move.w	on_press(a6),d7
+		andi.w	#JoyC+JoyZ,d7
+		beq.s	.c_press
+		lea	(RAM_GemaIndx).w,a5
+		move.w	(a5)+,d0
+		andi.w	#JoyZ,d7
+		beq.s	.not_auto
+		moveq	#-1,d0
+.not_auto:
+		move.w	(a5)+,d1
+		move.w	(a5)+,d2
+		bsr	gemaPlaySeq
+		move.w	(RAM_GemaSeq).w,d0	; External beats
+		move.w	d0,d1
+		add.w	d1,d1
+		lea	.extnal_beats(pc),a0
+		move.w	(a0,d1.w),d0
+		bsr	gemaSetBeats
+.c_press:
+	; B BUTTON
+		move.w	on_press(a6),d7
+		andi.w	#JoyB,d7
+		beq.s	.b_press
+		lea	(RAM_GemaIndx).w,a5
+		move.w	(a5)+,d0
+		move.w	(a5)+,d1
+		bsr	gemaStopSeq
+.b_press:
+		move.w	on_press(a6),d7
+		andi.w	#JoyA,d7
+		beq.s	.a_press
 		bsr	gemaStopAll
-		bsr	Video_FadeOut_Full
-		move.w	#0,(RAM_ScreenMode).w	; Return to mode 0
-		rts				; EXIT
-.n_cbtn:
+.a_press:
+
+
+; 		move.w	on_hold(a6),d7
+; 		andi.w	#JoyA+JoyB+JoyC,d7
+; 		bne.s	.n_up
+; 		move.w	on_press(a6),d7
+; 		btst	#bitJoyDown,d7
+; 		beq.s	.n_down
+; 		addq.w	#1,(a5)
+; 		cmp.w	#MAX_SNDPICK,(a5)		; MAX OPTIONS
+; 		ble.s	.n_downd
+; 		clr.w	(a5)
+; .n_downd:
+; 		bsr.s	.show_me
+; .n_down:
+; 		move.w	on_press(a6),d7
+; 		btst	#bitJoyUp,d7
+; 		beq.s	.n_up
+; 		subq.w	#1,(a5)
+; 		bpl.s	.n_ups
+; 		move.w	#MAX_SNDPICK,(a5)
+; .n_ups:
+; 		bsr.s	.show_me
+; .n_up:
+; 		move.w	(RAM_CurrPick).w,d7
+; 		lsl.w	#2,d7
+; 		jsr	.jump_list(pc,d7.w)
+; 		tst.w	(RAM_ScreenMode).w	; Check -1
+; 		bpl.s	.n_cbtn
+
+; .n_cbtn:
 		bra	.loop
 
 ; ------------------------------------------------------
 
-.show_cursor:
-		move.w	(RAM_LastPick).w,d7
-		cmp.w	(RAM_CurrPick).w,d7
-		beq.s	.last_pick
-		lea	str_CursorDel(pc),a0
-		moveq	#1,d0
-		moveq	#4,d1
-		add.w	(RAM_LastPick).w,d1
-		move.w	#DEF_PrintVram|DEF_PrintPal,d2
-		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
-		bsr	Video_Print
-		move.w	(RAM_CurrPick).w,(RAM_LastPick).w
-.last_pick:
-		lea	str_Cursor(pc),a0
-		moveq	#1,d0
-		moveq	#4,d1
-		add.w	(RAM_CurrPick).w,d1
-		move.w	#DEF_PrintVram|DEF_PrintPal,d2
-		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
-		bra	Video_Print
+.exit_all:
+		bsr	gemaStopAll
+		bsr	Video_FadeOut_Full
+		move.w	#0,(RAM_ScreenMode).w	; Return to mode 0
+		rts				; EXIT
 
 ; ------------------------------------------------------
 
 .show_me:
 		lea	str_ShowVars(pc),a0
-		moveq	#23,d0
-		moveq	#5,d1
-		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		moveq	#7,d0
+		moveq	#8,d1
+		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
-		bra	Video_Print
+		bra	Video_PrintW
 
-; ------------------------------------------------------
-
-.jump_list:
-		bra.w	.nothing
-		bra.w	.option_1
-		bra.w	.option_2
-		bra.w	.option_3
-		bra.w	.option_4
-		bra.w	.option_5
-		bra.w	.option_6
-		bra.w	.option_7
-
-; ------------------------------------------------------
-; OPTION 0
-; ------------------------------------------------------
-
-.nothing:
-		move.w	on_press(a6),d7
-		btst	#bitJoyStart,d7
-		beq.s	.no_press
-		bsr.s	.show_me
-		bra	gemaTest
-.no_press:
-		rts
-
+; ; ------------------------------------------------------
+;
+; .jump_list:
+; 		bra.w	.nothing
+; 		bra.w	.option_1
+; 		bra.w	.option_2
+; 		bra.w	.option_3
+; 		bra.w	.option_4
+; 		bra.w	.option_5
+; 		bra.w	.option_6
+; 		bra.w	.option_7
+;
+; ; ------------------------------------------------------
+; ; OPTION 0
+; ; ------------------------------------------------------
+;
+; .nothing:
+; 		move.w	on_press(a6),d7
+; 		btst	#bitJoyStart,d7
+; 		beq.s	.no_press
+; 		bsr.s	.show_me
+; 		bra	gemaTest
+; .no_press:
+; 		rts
+;
 ; ------------------------------------------------------
 ; OPTION 1
 ; ------------------------------------------------------
 
-.option_1:
-		lea	(RAM_GemaArg0).w,a5
-		move.w	on_press(a6),d7
-		btst	#bitJoyStart,d7
-		beq.s	.option1_args
-		move.w	(a5)+,d0
-		move.w	(a5)+,d1
-		move.w	(a5)+,d2
-		bsr	gemaPlaySeq
-		move.w	(RAM_GemaArg1).w,d0
-		move.w	d0,d1
-		add.w	d1,d1
-		lea	.extnal_beats(pc),a0
-		move.w	(a0,d1.w),d0
-		bra	gemaSetBeats
 ; 		bra.s	.show_me
-.option1_args:
-		move.w	on_hold(a6),d7
-		move.w	d7,d6
-		andi.w	#JoyA+JoyB+JoyC,d6
-		beq.s	.no_press
-		btst	#bitJoyB,d7
-		beq.s	.d2_opt
-		adda	#2,a5
-.d2_opt:
-		btst	#bitJoyC,d7
-		beq.s	.d3_opt
-		adda	#4,a5
-.d3_opt:
-		move.w	on_press(a6),d7
-		btst	#bitJoyRight,d7
-		beq.s	.op1_right
-		addq.w	#1,(a5)
-		bra	.show_me
-.op1_right:
-		btst	#bitJoyLeft,d7
-		beq.s	.op1_left
-		subq.w	#1,(a5)
-		bra	.show_me
-.op1_left:
-		move.w	on_hold(a6),d7
-		btst	#bitJoyUp,d7
-		beq.s	.op1_down
-		addq.w	#1,(a5)
-		bra	.show_me
-.op1_down:
-		btst	#bitJoyDown,d7
-		beq.s	.op1_up
-		subq.w	#1,(a5)
-		bra	.show_me
-.op1_up:
-
-		rts
-
-; ------------------------------------------------------
-; OPTION 2
-; ------------------------------------------------------
-
-.option_2:
-		lea	(RAM_GemaArg0).w,a5
-		move.w	on_press(a6),d7
-		btst	#bitJoyStart,d7
-		beq.s	.option1_args
-		move.w	(a5)+,d0
-		move.w	(a5)+,d1
-		bra	gemaStopSeq
-
-; ------------------------------------------------------
-; OPTION 3
-; ------------------------------------------------------
-
-.option_3:
-		lea	(RAM_GemaArg3).w,a5
-		move.w	on_press(a6),d7
-		btst	#bitJoyStart,d7
-		beq	.option1_args
-		move.w	(a5)+,d0
-		move.w	(a5)+,d1
-		bra	gemaFadeSeq
-
-; ------------------------------------------------------
-; OPTION 4
-; ------------------------------------------------------
-
-.option_4:
-		lea	(RAM_GemaArg3).w,a5
-		move.w	on_press(a6),d7
-		btst	#bitJoyStart,d7
-		beq	.option1_args
-		move.w	(a5)+,d0
-		move.w	(a5)+,d1
-		bra	gemaSetSeqVol
-
-; ------------------------------------------------------
-; OPTION 5
-; ------------------------------------------------------
-
-.option_5:
-		move.w	on_press(a6),d7
-		btst	#bitJoyStart,d7
-		beq.s	.no_press2
-		bsr	.show_me
-		bra	gemaStopAll
-.no_press2:
-		rts
-
-; ------------------------------------------------------
-; OPTION 6
-; ------------------------------------------------------
-
-.option_6:
-		lea	(RAM_GemaArg6).w,a5
-		move.w	on_hold(a6),d7
-		andi.w	#JoyA,d7
-		beq.s	.no_press2
-		move.w	on_press(a6),d7
-		btst	#bitJoyRight,d7
-		beq.s	.op2_right
-		addq.w	#1,(a5)
-		bra	.show_me_2
-.op2_right:
-		btst	#bitJoyLeft,d7
-		beq.s	.op2_left
-		subq.w	#1,(a5)
-		bsr	.show_me_2
-.op2_left:
-		move.w	on_hold(a6),d7
-		btst	#bitJoyDown,d7
-		beq.s	.op2_down
-		addq.w	#1,(a5)
-		bsr	.show_me_2
-.op2_down:
-		btst	#bitJoyUp,d7
-		beq.s	.op2_up
-		subq.w	#1,(a5)
-		bsr	.show_me_2
-.op2_up:
-		move.w	on_press(a6),d7
-		btst	#bitJoyStart,d7
-		beq.s	.no_press2
-.show_me_2:
-		bsr	.show_me
-		move.w	(a5),d0
-		bra	gemaSetBeats
-
-; ------------------------------------------------------
-; OPTION 7
-; ------------------------------------------------------
-
-.option_7:
-		move.w	on_press(a6),d7
-		btst	#bitJoyStart,d7
-		beq.s	.no_press2
-		move.w	#-1,(RAM_ScreenMode).w	; risky but works.
-		rts
+; .option1_args:
+; 		move.w	on_hold(a6),d7
+; 		move.w	d7,d6
+; 		andi.w	#JoyA+JoyB+JoyC,d6
+; 		beq.s	.no_press
+; 		btst	#bitJoyB,d7
+; 		beq.s	.d2_opt
+; 		adda	#2,a5
+; .d2_opt:
+; 		btst	#bitJoyC,d7
+; 		beq.s	.d3_opt
+; 		adda	#4,a5
+; .d3_opt:
+; 		move.w	on_press(a6),d7
+; 		btst	#bitJoyRight,d7
+; 		beq.s	.op1_right
+; 		addq.w	#1,(a5)
+; 		bra	.show_me
+; .op1_right:
+; 		btst	#bitJoyLeft,d7
+; 		beq.s	.op1_left
+; 		subq.w	#1,(a5)
+; 		bra	.show_me
+; .op1_left:
+; 		move.w	on_hold(a6),d7
+; 		btst	#bitJoyUp,d7
+; 		beq.s	.op1_down
+; 		addq.w	#1,(a5)
+; 		bra	.show_me
+; .op1_down:
+; 		btst	#bitJoyDown,d7
+; 		beq.s	.op1_up
+; 		subq.w	#1,(a5)
+; 		bra	.show_me
+; .op1_up:
+;
+; 		rts
+;
+; ; ------------------------------------------------------
+; ; OPTION 2
+; ; ------------------------------------------------------
+;
+; .option_2:
+; 		lea	(RAM_GemaIndx).w,a5
+; 		move.w	on_press(a6),d7
+; 		btst	#bitJoyStart,d7
+; 		beq.s	.option1_args
+; 		move.w	(a5)+,d0
+; 		move.w	(a5)+,d1
+; 		bra	gemaStopSeq
+;
+; ; ------------------------------------------------------
+; ; OPTION 3
+; ; ------------------------------------------------------
+;
+; .option_3:
+; 		lea	(RAM_GemaArg3).w,a5
+; 		move.w	on_press(a6),d7
+; 		btst	#bitJoyStart,d7
+; 		beq	.option1_args
+; 		move.w	(a5)+,d0
+; 		move.w	(a5)+,d1
+; 		bra	gemaFadeSeq
+;
+; ; ------------------------------------------------------
+; ; OPTION 4
+; ; ------------------------------------------------------
+;
+; .option_4:
+; 		lea	(RAM_GemaArg3).w,a5
+; 		move.w	on_press(a6),d7
+; 		btst	#bitJoyStart,d7
+; 		beq	.option1_args
+; 		move.w	(a5)+,d0
+; 		move.w	(a5)+,d1
+; 		bra	gemaSetSeqVol
+;
+; ; ------------------------------------------------------
+; ; OPTION 5
+; ; ------------------------------------------------------
+;
+; .option_5:
+; 		move.w	on_press(a6),d7
+; 		btst	#bitJoyStart,d7
+; 		beq.s	.no_press2
+; 		bsr	.show_me
+; 		bra	gemaStopAll
+; .no_press2:
+; 		rts
+;
+; ; ------------------------------------------------------
+; ; OPTION 6
+; ; ------------------------------------------------------
+;
+; .option_6:
+; 		lea	(RAM_GemaArg6).w,a5
+; 		move.w	on_hold(a6),d7
+; 		andi.w	#JoyA,d7
+; 		beq.s	.no_press2
+; 		move.w	on_press(a6),d7
+; 		btst	#bitJoyRight,d7
+; 		beq.s	.op2_right
+; 		addq.w	#1,(a5)
+; 		bra	.show_me_2
+; .op2_right:
+; 		btst	#bitJoyLeft,d7
+; 		beq.s	.op2_left
+; 		subq.w	#1,(a5)
+; 		bsr	.show_me_2
+; .op2_left:
+; 		move.w	on_hold(a6),d7
+; 		btst	#bitJoyDown,d7
+; 		beq.s	.op2_down
+; 		addq.w	#1,(a5)
+; 		bsr	.show_me_2
+; .op2_down:
+; 		btst	#bitJoyUp,d7
+; 		beq.s	.op2_up
+; 		subq.w	#1,(a5)
+; 		bsr	.show_me_2
+; .op2_up:
+; 		move.w	on_press(a6),d7
+; 		btst	#bitJoyStart,d7
+; 		beq.s	.no_press2
+; .show_me_2:
+; 		bsr	.show_me
+; 		move.w	(a5),d0
+; 		bra	gemaSetBeats
+;
+; ; ------------------------------------------------------
+; ; OPTION 7
+; ; ------------------------------------------------------
+;
+; .option_7:
+; 		move.w	on_press(a6),d7
+; 		btst	#bitJoyStart,d7
+; 		beq.s	.no_press2
+; 		move.w	#-1,(RAM_ScreenMode).w	; risky but works.
+; 		rts
 
 ; ------------------------------------------------------
 ; EXTERNAL BEATS FOR EACH TRACK
@@ -417,6 +491,21 @@ sizeof_thisbuff		ds.l 0
 ; ------------------------------------------------------
 
 .gema_view:
+		lea	(RAM_GemaStatus),a1
+		moveq	#0,d0
+		bsr	sndLockZ80
+		move.b	(z80_cpu+trkBuff_0),d0
+		bsr	sndUnlockZ80
+		move.w	d0,(a1)+
+		bsr	sndLockZ80
+		move.b	(z80_cpu+trkBuff_1),d0
+		bsr	sndUnlockZ80
+		move.w	d0,(a1)+
+		bsr	sndLockZ80
+		move.b	(z80_cpu+trkBuff_2),d0
+		bsr	sndUnlockZ80
+		move.w	d0,(a1)+
+
 		lea	(z80_cpu+tblPSG),a0
 		lea	(RAM_GemaCache_PSG),a1
 		moveq	#3-1,d7
@@ -442,22 +531,22 @@ sizeof_thisbuff		ds.l 0
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		lea	(RAM_GemaCache_PSG),a3
 		moveq	#7,d0
-		moveq	#22,d1
+		moveq	#SET_SNDVIEWY,d1
 		moveq	#3-1,d7
 		bsr	.show_table
 		lea	(RAM_GemaCache_PSGN),a3
 		moveq	#7+12,d0
-		moveq	#22,d1
+		moveq	#SET_SNDVIEWY,d1
 		moveq	#1-1,d7
 		bsr	.show_table
 
 		lea	(RAM_GemaCache_FM),a3
 		moveq	#7,d0
-		moveq	#22+1,d1
+		moveq	#SET_SNDVIEWY+1,d1
 		moveq	#5-1,d7
 		bsr	.show_table_fm
 		moveq	#7+16,d0
-		moveq	#22+1,d1
+		moveq	#SET_SNDVIEWY+1,d1
 		bsr	sndLockZ80
 		move.b	(z80_cpu+fmSpecial),d7
 		bsr	sndUnlockZ80
@@ -473,7 +562,7 @@ sizeof_thisbuff		ds.l 0
 .b_sampl:
 
 		moveq	#7+20,d0
-		moveq	#22+1,d1
+		moveq	#SET_SNDVIEWY+1,d1
 		bsr	sndLockZ80
 		move.b	(z80_cpu+8),d7
 		bsr	sndUnlockZ80
@@ -490,12 +579,12 @@ sizeof_thisbuff		ds.l 0
 
 		lea	(RAM_GemaCache_PCM),a3
 		moveq	#7,d0
-		moveq	#22+2,d1
+		moveq	#SET_SNDVIEWY+2,d1
 		moveq	#8-1,d7
 		bsr	.show_table
 		lea	(RAM_GemaCache_PWM),a3
 		moveq	#7,d0
-		moveq	#22+3,d1
+		moveq	#SET_SNDVIEWY+3,d1
 		moveq	#8-1,d7
 		bra	.show_table
 
@@ -513,7 +602,7 @@ sizeof_thisbuff		ds.l 0
 		moveq	#-1,d1
 .link_ok:
 		move.w	d1,(a1)
-		adda	#$11,a0
+		adda	#MAX_TBLSIZE,a0		; *** EXTERNAL LABEL
 		adda	#4,a1
 		dbf	d7,.copy_me
 		rts
@@ -581,57 +670,130 @@ file_scrn1_main:
 ; Objects
 ; ------------------------------------------------------
 
-; ; --------------------------------------------------
-; ; Sisi
-; ; --------------------------------------------------
-;
-; Object_Sisi:
-; 		moveq	#0,d0
-; 		move.b	obj_index(a6),d0
-; 		add.w	d0,d0
-; 		move.w	.list(pc,d0.w),d1
-; 		jmp	.list(pc,d1.w)
-; ; ----------------------------------------------
-; .list:		dc.w .init-.list
-; 		dc.w .main-.list
-; ; ----------------------------------------------
-; .init:
-; 		move.b	#1,obj_index(a6)
-; 		clr.w	obj_frame(a6)
-; 		bsr	object_ResetAnim
-;
-; ; ----------------------------------------------
-; .main:
-; 		moveq	#0,d0
-; 		move.w	(RAM_CurrPick).w,d1
-; 		lsl.w	#3,d1
-; 		addi.w	#$18,d0
-; 		addi.w	#$20,d1
-; 		move.w	d0,obj_x(a6)
-; 		move.w	d1,obj_y(a6)
-; .dont_link:
-; 		lea	.anim_data(pc),a0
-; 		bsr	object_Animate
-; 		lea	(objMap_Sisi),a0
-; 		move.w	obj_x(a6),d0
-; 		move.w	obj_y(a6),d1
-; 		move.w	#setVramST_Sisi,d2
-; 		or.w	#$800,d2
-; 		move.w	obj_frame(a6),d3
-; 		bra	Video_MkSprMap
-;
-; ; ----------------------------------------------
-;
-; .anim_data:
-; 		dc.w .anim_00-.anim_data
-; 		dc.w .anim_00-.anim_data
-; 		dc.w .anim_00-.anim_data
-; 		dc.w .anim_00-.anim_data
-; .anim_00:
-; 		dc.w 8
-; 		dc.w 0,1,2,1
-; 		dc.w -2
-; 		align 2
+; ====================================================================
+; ------------------------------------------------------
+; Objects
+; ------------------------------------------------------
+
+; --------------------------------------------------
+; Sisi
+; --------------------------------------------------
+
+obj_Fairy:
+		moveq	#0,d0
+		move.b	obj_index(a6),d0
+		add.w	d0,d0
+		move.w	.list(pc,d0.w),d1
+		jmp	.list(pc,d1.w)
+; ----------------------------------------------
+.list:		dc.w .init-.list
+		dc.w .main-.list
+; ----------------------------------------------
+.init:
+		move.b	#1,obj_index(a6)
+		clr.w	obj_frame(a6)
+		bsr	object_ResetAnim
+
+		move.b	obj_subid(a6),d7
+		move.w	d7,d6
+		lsl.w	#2,d6
+		lea	.fixd_pos(pc),a0
+		lea	obj_ram(a6),a1
+		adda	d6,a0
+		move.w	(a0)+,(a1)+
+		move.w	(a0)+,(a1)+
+
+		move.b	obj_subid(a6),d7
+		mulu.w	#42,d7
+		lsl.w	#4,d7
+		neg.w	d7
+		move.w	d7,4(a1)
+
+; ----------------------------------------------
+.main:
+		lea	obj_ram(a6),a5
+		lea	(RAM_GemaStatus).w,a4
+
+	; a5
+	; 0 - X base
+	; 2 - Y base
+	; 4 - Tan
+
+		moveq	#0,d3
+		move.b	obj_subid(a6),d3
+		add.w	d3,d3
+		adda	d3,a4
+; 		lsl.w	#3,d3
+		move.w	(a5),d2
+		move.w	2(a5),d3
+		move.w	#1,d4			; Multiply
+		btst	#7,1(a4)
+		beq.s	.not_enbls
+		move.w	#4,d4
+.not_enbls:
+		move.w	4(a5),d0
+; 		add.w	d3,d0
+		lsr.w	#4,d0
+		bsr	System_SineWave
+		muls.w	d4,d1
+		asr.w	#8,d1
+		sub.w	d1,d2
+		move.w	4(a5),d0
+; 		add.w	d3,d0
+		lsr.w	#4,d0
+		bsr	System_SineWave_Cos
+		muls.w	d4,d1
+		asr.w	#8,d1
+		sub.w	d1,d3
+
+		move.w	#$40,d4	; RAM value
+		btst	#7,1(a4)
+		beq.s	.not_enbl
+		add.w	d4,d4
+.not_enbl:
+		addi.w	d4,4(a5)
+		move.w	d2,obj_x(a6)
+		move.w	d3,obj_y(a6)
+
+.not_mouse:
+		lea	.anim_data(pc),a0
+		bsr	object_Animate
+
+		moveq	#0,d0
+		move.b	obj_subid(a6),d0
+		lsl.w	#3,d0
+		lea	.sub_ids(pc,d0.w),a0
+		move.w	4(a0),d2
+		move.l	(a0),a1
+		move.l	#0,a0
+		move.w	obj_x(a6),d0
+		move.w	obj_y(a6),d1
+		move.w	obj_frame(a6),d3
+		bra	Video_MakeSprMap
+
+; ----------------------------------------------
+
+.anim_data:
+		dc.w .anim_00-.anim_data
+.anim_00:
+		dc.w 8
+		dc.w 0,1,2,1
+		dc.w -2
+		align 2
+.sub_ids:
+		dc.l objMap_Dodo
+		dc.w setVram_Dodo,0
+		dc.l objMap_Mimi
+		dc.w setVram_Mimi,0
+		dc.l objMap_Fifi
+		dc.w setVram_Fifi,0
+		align 2
+
+.fixd_pos:
+		dc.w $B8,$40
+		dc.w $B8+$24,$40
+		dc.w $B8+$48,$40
+		align 2
 
 ; ====================================================================
 ; ------------------------------------------------------
@@ -657,25 +819,43 @@ file_scrn1_main:
 ; Small data section
 ; ------------------------------------------------------
 
-str_Cursor:	dc.b "-->",0
-		align 2
-str_CursorDel:	dc.b "   ",0
-		align 2
+ArtList_Stuff:
+		dc.w 3
+		dc.l Art_FairyDodo
+		dc.w cell_vram(setVram_Dodo)
+		dc.w cell_vram($30)
+		dc.l Art_FairyMimi
+		dc.w cell_vram(setVram_Mimi)
+		dc.w cell_vram($30)
+		dc.l Art_FairyFifi
+		dc.w cell_vram(setVram_Fifi)
+		dc.w cell_vram($30)
+
+; str_Cursor:	dc.b "-->",0
+; 		align 2
+; str_CursorDel:	dc.b "   ",0
+; 		align 2
 
 str_TesterTitle:
 		dc.b "GEMA Sound driver  V1.x(dev)",0
 		align 2
 str_TesterInfo:
-		dc.b "    gemaTest          Indx Seq. Blk.",$0A
-		dc.b "    gemaPlaySeq",$0A
-		dc.b "    gemaStopSeq",$0A
-		dc.b "    gemaFadeSeq",$0A
-		dc.b "    gemaSetSeqVol",$0A
-		dc.b "    gemaStopAll       Beat",$0A
-		dc.b "    gemaSetBeats",$0A
-		dc.b "    EXIT",$0A
+; 		dc.b "Sound data: 00000000",$0A
+; 		dc.b $0A
+; 		dc.b $0A
+		dc.b " Seq# Blk# Indx"
 		dc.b 0
 		align 2
+str_Instruc:
+		dc.b "LR - Seq. Num#   XY - Track index",$0A
+		dc.b "UD - Seq. Blk#",$0A
+		dc.b " A - STOP ALL",$0A
+		dc.b " B - STOP Seq.",$0A
+		dc.b " C - PLAY Seq.    Z - PLAY auto-fill",$0A,$0A
+		dc.b "START - Exit"
+		dc.b 0
+		align 2
+
 str_VmInfo:
 		dc.b "PSG",$0A
 		dc.b "FM",$0A
@@ -703,19 +883,11 @@ str_Speci:	dc.b "spc",0
 str_Sampl:	dc.b "wav",0
 
 str_ShowVars:
-		dc.l pstr_mem(1,RAM_GemaArg0)
-		dc.b " "
-		dc.l pstr_mem(1,RAM_GemaArg1)
-		dc.b " "
-		dc.l pstr_mem(1,RAM_GemaArg2)
-		dc.b $0A,$0A
-		dc.l pstr_mem(1,RAM_GemaArg3)
-		dc.b " "
-		dc.l pstr_mem(1,RAM_GemaArg4)
-		dc.b " "
-		dc.l pstr_mem(1,RAM_GemaArg5)
-		dc.b $0A,$0A,$0A
-		dc.l pstr_mem(1,RAM_GemaArg6)
+		dc.l pstr_mem(0,RAM_GemaSeq+1)
+		dc.b "   "
+		dc.l pstr_mem(0,RAM_GemaBlk+1)
+		dc.b "   "
+		dc.l pstr_mem(0,RAM_GemaIndx+1)
 		dc.b 0
 		align 2
 str_Info:

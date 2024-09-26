@@ -144,7 +144,7 @@ anim_indx		ds.w 1		; ** Animation script index
 anim_icur		ds.b 1		; ** Current animation id
 anim_spd		ds.b 1		; ** Animation delay set on animation script
 ram			ds.b $40	; Object's own RAM
-; len			ds.l 0
+; obj_len		ds.l 0
 			endstruct
 
 ; ====================================================================

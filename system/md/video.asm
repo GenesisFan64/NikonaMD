@@ -2227,17 +2227,17 @@ Video_PrintW:
 		btst	#2,d6
 		beq.s	.nibbl_norm
 
+	; TODO CHECAR ESTO
 		bsr.s	.get_preval
+		subi.w	#$20,d6
 		swap	d7
 ; 		move.w	(RAM_SetPrntVramW).w,d4
 		move.w	d2,d4
-		subi.w	#$20*2,d4
 		andi.w	#$7FF,d4
 		lsr.w	#1,d4
 		add.w	d4,d6
 ; 		move.w	(RAM_SetPrntVramW).w,d4
 		move.w	d2,d4
-		subi.w	#$20*2,d4
 		andi.w	#$F800,d4
 		or.w	d4,d6
 		move.w	d7,d4
@@ -2252,10 +2252,9 @@ Video_PrintW:
 
 .nibbl_norm:
 		bsr.s	.get_preval
+		subi.w	#$20,d6
 		add.w	d6,d6
-; 		add.w	(RAM_SetPrntVramW).w,d6
-		move.w	d2,d6
-		subi.w	#$20*2,d6
+		add.w	d2,d6
 		swap	d7
 		move.w	d7,d4
 		swap	d7

@@ -13,20 +13,20 @@ gtrk_Test:
 .ins:
 		gInsFm -24,FmIns_Organ_drawbar
 		gInsNull
+		gInsPcm +24,PcmIns_Kick,0
+		gInsNull
+		gInsPcm +24,PcmIns_BBoxHats,0
+		gInsPcm +24,PcmIns_BBoxHats,0
 		gInsNull
 		gInsNull
-		gInsNull
-		gInsNull
-		gInsNull
-		gInsNull
-		gInsNull
-		gInsNull
+		gInsPcm +24,PcmIns_BBoxHats,0
+		gInsPcm +24,PcmIns_BBoxSnare,0
 		gInsFm -12,FmIns_Bass_Groove_1
-		gInsPsgN +24,$00,$00,$00,$00,$18,0,%011
 		gInsNull
+		gInsFm -12,FmIns_Trumpet_1
+		gInsPcm 0,PcmIns_Trumpet1,0
 		gInsNull
-		gInsNull
-		gInsNull
+		gInsFm -24,FmIns_Vibraphone_1
 		gInsNull
 
 ; gtrk_Test:

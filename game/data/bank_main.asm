@@ -11,6 +11,10 @@
 		binclude_dma	Art_Haruna,"game/data/md/sprites/haruna/art.bin"
 		binclude_dma_e	Art_Sisi,Art_Sisi_e,"game/data/md/sprites/sisi/art.bin"
 
+		binclude_dma	Art_FairyDodo,"game/data/md/sprites/dodo/art.bin"
+		binclude_dma	Art_FairyMimi,"game/data/md/sprites/mimi/art.bin"
+		binclude_dma	Art_FairyFifi,"game/data/md/sprites/fifi/art.bin"
+
 ; ----------------------------------------------------------------
 ; Everything else...
 ; ----------------------------------------------------------------
@@ -34,4 +38,14 @@ Map_TESTBG:	binclude "game/data/md/maps/test/map.bin"
 Pal_TESTBG2:	binclude "game/data/md/maps/test2/pal.bin"
 		align 2
 Map_TESTBG2:	binclude "game/data/md/maps/test2/map.bin"
+		align 2
+
+
+objPal_Dodo:	binclude "game/data/md/sprites/dodo/pal.bin"
+		align 2
+objMap_Dodo:	binclude "game/data/md/sprites/dodo/map.bin"
+		align 2
+objMap_Mimi:	binclude "game/data/md/sprites/mimi/map.bin"
+		align 2
+objMap_Fifi:	binclude "game/data/md/sprites/fifi/map.bin"
 		align 2
