@@ -4,9 +4,61 @@
 ; -------------------------------------------------------------------
 
 MainGemaSeqList:
-		gemaTrk 1,3,gtrk_Test
+		gemaTrk 1,10,gtrk_Test
+		gemaTrk 1,3,gtrk_Test2
+		gemaTrk 1,3,gtrk_Test3
+
 ; ----------------------------------------------------
 gtrk_Test:
+		gemaHead .blk,.pat,.ins,10
+.blk:		binclude "sound/tracks/test_blk.bin"
+.pat:		binclude "sound/tracks/test_patt.bin"
+.ins:
+		gInsPwm -12,PwmIns_trnthem_01,1
+		gInsFm -24,FmIns_Hats_1
+		gInsFm3 0,FmIns_Sp_OpenHat
+		gInsFm -24,FmIns_Trumpet_low
+		gInsPcm -12,PcmIns_trnthem_05,0
+		gInsPcm -12,PcmIns_trnthem_06,0
+		gInsFm -56,FmIns_Bass_club_108
+		gInsFm -56,FmIns_Bass_club_108
+		gInsFm -56,FmIns_Bass_Groove_1
+		gInsPwm -12,PwmIns_trnthem_10,0
+		gInsPwm -12,PwmIns_trnthem_11,0
+		gInsPwm -12,PwmIns_trnthem_12,0
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsPcm 0,PcmIns_trnthem_20,0
+
+; ----------------------------------------------------
+gtrk_Test2:
+		gemaHead .blk,.pat,.ins,16
+.blk:		binclude "sound/tracks/trnthem_blk.bin"
+.pat:		binclude "sound/tracks/trnthem_patt.bin"
+.ins:
+		gInsPwm -12,PwmIns_trnthem_01,1
+		gInsFm -24,FmIns_Hats_1
+		gInsFm3 0,FmIns_Sp_OpenHat
+		gInsFm -24,FmIns_Trumpet_low
+		gInsPcm -12,PcmIns_trnthem_05,0
+		gInsPcm -12,PcmIns_trnthem_06,0
+		gInsFm -56,FmIns_Bass_club_108
+		gInsFm -56,FmIns_Bass_club_108
+		gInsFm -56,FmIns_Bass_Groove_1
+		gInsPwm -12,PwmIns_trnthem_10,0
+		gInsPwm -12,PwmIns_trnthem_11,0
+		gInsPwm -12,PwmIns_trnthem_12,0
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsPcm 0,PcmIns_trnthem_20,0
+
+; -----------------------------------------------------------
+
+gtrk_Test3:
 		gemaHead .blk,.pat,.ins,16
 .blk:		binclude "sound/tracks/box_blk.bin"
 .pat:		binclude "sound/tracks/box_patt.bin"
@@ -134,8 +186,13 @@ FmIns_Xylophone:
 
 FmIns_Bass_low81:
 		binclude "sound/instr/fm/bin/bass_low_46.bin"
-FmIns_Trumpet_15:
-		binclude "sound/instr/fm/bin/trumpet_27.bin"
+
+FmIns_Trumpet_low:
+		binclude "sound/instr/fm/bin/trumpet_low.bin"
+FmIns_Trumpet_genie:
+		binclude "sound/instr/fm/bin/trumpet_genie.bin"
+FmIns_Trumpet_bus:
+		binclude "sound/instr/fm/bin/trumpet_bus.bin"
 
 FmIns_Hats_1:
 		binclude "sound/instr/fm/bin/hats_96.bin"

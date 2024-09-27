@@ -69,14 +69,14 @@ trk_ChnIndx	equ 25h	; CHANNEL INDEXES START HERE
 ; 	 v - Volume*
 ; 	 i - Intrument*
 ; 	 n - Note*
-chnl_Flags	equ 0	; Playback flags: %E0LRevin ** MUST STAY AT 0
+chnl_Flags	equ 0	; !! Playback flags: %E0LRevin ** MUST BE LOCATED AT 0 **
 chnl_Chip	equ 1	; %ccccpppp c - Current Chip ID / p - Priority level
 chnl_Note	equ 2	; IT Musical note or command
 chnl_Ins	equ 3	; IT Instrument starting from 1 (0 is invalid)
 chnl_Vol	equ 4	; IT Volume: MAX(64) to MIN(0)
 chnl_EffId	equ 5	; IT Effect number
 chnl_EffArg	equ 6	; IT Effect argument
-chnl_Type	equ 7	; Impulse update bits
+chnl_Type	equ 7	; Impulse type bits
 
 
 ; Table struct
@@ -1589,11 +1589,11 @@ tblbuff_read:
 		ld	a,(hl)		; Read priority
 		dec	hl
 		dec	hl
-		or	a		; Failsafe zero priority overwrite
+		or	a			; Failsafe zero priority overwrite
 		jr	z,.new_link_o
 		cp	c
 		jr	z,.new_link_o
-		jr	c,.new_link_o
+		jr	c,.new_link_o		; PRIORITY
 		rst	8
 		call	.nextsrch_tbl
 		jr	.next_prio
@@ -1780,8 +1780,9 @@ dtbl_singl:
 .siln_dac:
 		call	dac_off
 .siln_fm:
-		call	.fm_keyoff
-		jp	.fm_tloff
+		jp	.fm_keyoff
+; 		call	.fm_keyoff
+; 		jp	.fm_tloff
 
 ; ----------------------------------------
 ; Process channel now
@@ -2033,8 +2034,8 @@ dtbl_singl:
 ; --------------------------------
 
 .mk_fmspc:
-; 		ld	c,(iy+ztbl_Chip)	; c - KeyID (011b always)
-		ld	c,011b			; <-- FM3 special ID
+		ld	c,(iy+ztbl_Chip)	; c - KeyID (011b always)
+; 		ld	c,011b			; <-- FM3 special ID
 		bit	0,b			; NEW Note?
 		jp	z,.mkfm_set
 		ld	a,(ix+chnl_Note)
@@ -2042,6 +2043,7 @@ dtbl_singl:
 		jp	z,.fm_cut
 		cp	-1
 		jp	z,.fm_off
+
 		call	.fm_keyoff
 		rst	8
 		ld	hl,fmcach_3		; DIRECT point to FM3 data
@@ -2063,6 +2065,7 @@ dtbl_singl:
 		call	fm_send_1
 		ld	a,1
 		ld	(fmSpecial),a
+
 		jp	.mkfm_set
 .this_regs:
 		db 0ADh,0A9h
@@ -2112,6 +2115,9 @@ dtbl_singl:
 		add	a,4
 		djnz	.tl_down
 		ret
+
+; --------------------------------
+
 ; c - KeyID
 .fm_setfreq:
 		ld	a,c
@@ -2132,20 +2138,11 @@ dtbl_singl:
 
 ; --------------------------------
 ; Make FM
+; --------------------------------
 
 .mkfm_set:
-		ld	hl,fmcach_list
 		ld	a,(iy+ztbl_Chip)
-		and	0111b
-		ld	d,0
-		rst	8
-		add	a,a
-		ld	e,a
-		add	hl,de
-		ld	a,(hl)
-		inc	hl
-		ld	h,(hl)
-		ld	l,a
+		call	.get_fmcach
 		ld	de,1Ch			; Go to last regs
 		add	hl,de
 		ld	c,(hl)			; c - 0B0h from here
@@ -2153,10 +2150,6 @@ dtbl_singl:
 		ld	de,-18h			; <-- backwards relocate to TLs
 		add	hl,de
 		rst	8
-		ld	a,(iy+ztbl_Chip)
-		and	011b
-		or	40h			; TL registers
-		ld	d,a
 ; d - 40h+
 ; hl - TL data
 ; .mkfm_set:
@@ -2165,9 +2158,13 @@ dtbl_singl:
 		ld	hl,.fm_cindx		; hl - jump carry list
 		ld	a,c			; Read 0B0h copy
 		and	0111b
-		ld	b,0
-		ld	c,a
-		add	hl,bc
+		ld	d,0
+		ld	e,a
+		add	hl,de
+		ld	a,(iy+ztbl_Chip)
+		and	011b
+		or	40h			; TL registers
+		ld	d,a
 		ld	a,(iy+ztbl_Volume)	; Read current Volume
 		rst	8
 		sub	a,(iy+ztbl_MasterVol)	; + MASTER vol
@@ -2276,6 +2273,28 @@ dtbl_singl:
 		db 1111b
 
 ; --------------------------------
+; Input:
+; a - FM id (0-2,4-6)
+;
+; Ouput:
+; hl - instrument data
+; --------------------------------
+
+.get_fmcach:
+		ld	hl,fmcach_list
+		and	0111b
+		ld	d,0
+		rst	8
+		add	a,a
+		ld	e,a
+		add	hl,de
+		ld	a,(hl)
+		inc	hl
+		ld	h,(hl)
+		ld	l,a
+		ret
+
+; --------------------------------
 ; DAC
 ; --------------------------------
 
@@ -2347,7 +2366,8 @@ dtbl_singl:
 		cp	-1
 		jp	z,.pcm_off
 		rst	8
-		bit	0,b			; Note flag?
+		ld	a,b
+		and	0011b			; Note and Ins?
 		jr	nz,.pcm_note
 		bit	3,b			; Effect flag?
 		jr	nz,.pcm_effc
@@ -2452,7 +2472,7 @@ dtbl_singl:
 		jp	z,.pwm_off
 		rst	8
 		ld	a,b
-		bit	0,b			; Note?
+		and	0011b			; Note and Ins?
 		jr	nz,.pw_note
 		bit	3,b			; Effect?
 		jr	nz,.pw_effc
@@ -2479,7 +2499,7 @@ dtbl_singl:
 		jr	nc,.vpwm_siln
 		ld	c,a
 		ld	a,(iy+ztbl_Volume)	; Read current volume
-		sub	a,c		; + MASTER vol
+		sub	a,c			; + MASTER vol
 		jr	.vpwm_much
 .vpwm_siln:
 		ld	a,-40h
@@ -2560,8 +2580,8 @@ dtbl_singl:
 		ld	a,(ix+chnl_EffId)	; d - effect id
 		ld	d,a
 		rst	8
-		cp	4			; Effect D?
-		jr	z,.effc_D
+; 		cp	4			; Effect D?
+; 		jr	z,.effc_D
 		cp	5			; Effect E?
 		jr	z,.effc_E
 		cp	6			; Effect F?
@@ -2909,14 +2929,19 @@ dtbl_singl:
 	;   ix - last MID and LOW bytes
 	;   de - current FM cache
 	; b,hl - 24-bit ROM address
+		ld	a,(ix+2)
+		cp	b
+		jr	nz,.new_romdat
+		rst	8
 		ld	a,(ix+1)
 		cp	h
 		jr	nz,.new_romdat
-		rst	8
 		ld	a,(ix)
 		cp	l
 		jr	z,.same_patch
+		rst	8
 .new_romdat:
+		ld	(ix+2),b
 		ld	(ix+1),h
 		ld	(ix),l
 		ld	a,b
@@ -4243,7 +4268,7 @@ wavFreq_CdPcm:
 	dw  01F8h, 0214h, 023Ch, 0258h, 027Ch, 02A0h, 02C8h, 02FCh, 031Ch, 0354h, 037Ch, 03B8h	; x-3  8000 ok
 	dw  03F0h, 0428h, 0468h, 04ACh, 04ECh, 0540h, 0590h, 05E4h, 063Ch, 0698h, 0704h, 0760h	; x-4 16000 ok
 	dw  07DCh, 0848h, 08D4h, 0960h, 09F0h, 0A64h, 0B04h, 0BAAh, 0C60h, 0D18h, 0DE4h, 0EB8h	; x-5 32000 ok
-; 	dw  0FB0h, 1074h, 1184h, 1280h, 139Ch, 14C8h, 1624h, 174Ch, 18DCh, 1A38h, 1BE0h, 1D94h	; x-6 64000 unstable
+	dw  0FB0h;, 1074h, 1184h, 1280h, 139Ch, 14C8h, 1624h, 174Ch, 18DCh, 1A38h, 1BE0h, 1D94h	; x-6 64000 unstable
 ; 	dw  1F64h, 20FCh, 2330h, 2524h, 2750h, 29B4h, 2C63h, 2F63h, 31E0h, 347Bh, 377Bh, 3B41h	; x-7 128000 bad
 ; 	dw  3EE8h, 4206h, 4684h, 4A5Ah, 4EB5h, 5379h, 58E1h, 5DE0h, 63C0h, 68FFh, 6EFFh, 783Ch	; x-8 256000 bad
 ; 	dw  7FC2h, 83FCh, 8D14h, 9780h,0AA5Dh,0B1F9h,   -1 ,   -1 ,   -1 ,   -1 ,   -1 ,   -1 	; x-9 bad
@@ -4421,17 +4446,6 @@ tblPWM:		db 00h,00h,00h,00h,00h,00h,00h,00h,00h,00h	; Channel 1
 ; ----------------------------------------------------------------
 ; Variables inside 1B00h-1CFFh
 
-psgHatMode	db 0		; Current PSGN mode
-fmSpecial	db 0		; copy of FM3 enable bit
-tickSpSet	db 0		; **
-tickFlag	db 0		; Tick flag from VBlank
-tickCnt		db 0		; ** Tick counter (PUT THIS AFTER tickFlag)
-currTickBits	db 0		; Current Tick/Subbeat flags (000000BTb B-beat, T-tick)
-sbeatAcc	dw 0		; Accumulates on each tick to trigger the sub beats
-sbeatPtck	dw 214		; Default global subbeats (this-32 for PAL) 214=125
-dDacFifoMid	db 0		; WAVE play halfway refill flag (00h/80h)
-dDacPntr	db 0,0,0	; WAVE play current ROM position
-dDacCntr	db 0,0,0	; WAVE play length counter
 wave_Start	dw 0		; START: 68k 24-bit pointer
 		db 0
 wave_Len	dw 0		; LENGTH 24-bit
@@ -4440,11 +4454,14 @@ wave_Loop	dw 0		; LOOP POINT 24-bit
 		db 0
 wave_Pitch	dw 0100h	; 01.00h
 wave_Flags	db 0		; WAVE playback flags (%10x: 1 loop / 0 no loop)
-x68ksrclsb	db 0		; transferRom temporal LSB
-x68ksrcmid	db 0		; transferRom temporal MID
-headerOut	ds 00Eh		; Temporal storage for 68k pointers
-headerOut_e	ds 2		; <-- reverse readpoint
-		ds 1		; FREE BYTE
+psgHatMode	db 0		; Current PSGN mode
+fmSpecial	db 0		; copy of FM3 enable bit
+tickSpSet	db 0		; **
+tickFlag	db 0		; Tick flag from VBlank
+tickCnt		db 0		; ** Tick counter (PUT THIS AFTER tickFlag)
+currTickBits	db 0		; Current Tick/Subbeat flags (000000BTb B-beat, T-tick)
+sbeatAcc	dw 0		; Accumulates on each tick to trigger the sub beats
+sbeatPtck	dw 214		; Default global subbeats (this-32 for PAL) 214=125
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -4461,7 +4478,13 @@ trkCach_1	ds MAX_RCACH
 trkCach_2	ds MAX_RCACH
 ; trkCach_3	ds MAX_RCACH
 ; --------------------------------------------------------
-; Last variables...
+x68ksrclsb	db 0		; transferRom temporal LSB
+x68ksrcmid	db 0		; transferRom temporal MID
+dDacFifoMid	db 0		; WAVE play halfway refill flag (00h/80h)
+dDacPntr	db 0,0,0	; WAVE play current ROM position
+dDacCntr	db 0,0,0	; WAVE play length counter
+headerOut	ds 00Eh		; Temporal storage for 68k pointers
+headerOut_e	ds 2		; <-- reverse readpoint
 sampleHead	ds 006h
 instListOut	ds 8
 ; --------------------------------------------------------

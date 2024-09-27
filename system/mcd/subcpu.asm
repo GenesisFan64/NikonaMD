@@ -5,6 +5,9 @@
 ; Loaded on BOOT
 ; -------------------------------------------------------------------
 
+SET_PCMBLK		equ $100
+SET_PCMAND		equ $F00
+
 SET_STAMPPOV		equ 256
 ; MAX_MCDSTAMPS		equ 64		; see shared.asm
 
@@ -50,23 +53,16 @@ ONREG		equ $11		; Channel On/Off (BITS: 1 - off, 0 - on)
 ; Structs
 ; ----------------------------------------------------------------
 
-; cdpcm_status:
-; %EF-- ---l
-; E-Enabled
-; F-Channel is "floating"
-; l-loop enabled
-
 cdpcm		struct
-status		ds.b 1		; %EFSU ----l
-flags		ds.b 1
-strmf		ds.b 1
-strmhalf	ds.b 1		; Halfway MSB $00/$04/$08/$0C
+status		ds.b 1		; Status bits %EFSU ----l
+flags		ds.b 1		; Playback flags %----ECON
 start		ds.l 1
 slast		ds.l 1
 length		ds.l 1
 loop		ds.l 1
 clen		ds.l 1
 cread		ds.l 1
+strmhalf	ds.w 1		; Halfway MSB $00/$04/$08/$0C
 pitch		ds.w 1
 cblock		ds.w 1
 pan		ds.b 1
@@ -184,7 +180,7 @@ SCPU_IRQ:
 		andi.w	#$C0,d0
 		cmpi.w	#$C0,d0
 		bne	.not_sound
-		st.b	(RAM_CdSub_PcmReqUpd).w
+		addq.b	#1,(RAM_CdSub_PcmReqUpd).w
 		rts
 .not_sound:
 ; 		cmpi.w	#$80,d0
@@ -237,6 +233,7 @@ SCPU_User:
 ; ----------------------------------------------------------------
 
 SCPU_Main:
+		bsr	CdSub_PCM_Process
 		bsr	CdSub_StampRender
 		bsr	CdSub_PCM_Process
 		move.b	(SCPU_reg+mcd_comm_m).w,d0	; Read MAIN comm
@@ -1728,7 +1725,7 @@ CdSub_PCM_Process:
 		tst.b	(RAM_CdSub_PcmReqUpd).w		; IRQ check
 		beq.s	.no_req
 		bsr	.get_table
-		clr.b	(RAM_CdSub_PcmReqUpd).w
+		subq.b	#1,(RAM_CdSub_PcmReqUpd).w
 		bra	CdSub_PCM_Process
 .no_req:
 		rts
@@ -1791,8 +1788,7 @@ CdSub_PCM_Stream:
 .get_addr:
 		move.b	cdpcm_flags(a6),d0
 		bpl.s	.non_upd
-		clr.b	cdpcm_flags(a6)
-		btst	#3,d0
+		bclr	#3,d0
 		bne.s	.keep_strm
 		btst	#2,d0
 		bne.s	.force_off
@@ -1800,6 +1796,7 @@ CdSub_PCM_Stream:
 		bne.s	.force_off
 		btst	#0,d0
 		beq.s	.non_upd
+		clr.b	cdpcm_flags(a6)
 		bsr	.stop_pcm
 		bsr	.first_fill			; Do first fill
 		bclr	d6,d5
@@ -1808,8 +1805,9 @@ CdSub_PCM_Stream:
 		bset	#7,cdpcm_status(a6)
 .keep_strm:
 		bsr	.update_set
-
 .non_upd:
+
+	; Stream data
 		btst	#7,cdpcm_status(a6)		; Channel slot is active?
 		beq.s	.non_strm
 		move.b	(a4),d3				; Get playback MSB
@@ -1817,23 +1815,25 @@ CdSub_PCM_Stream:
 .force_off:
 		bsr	.stop_pcm
 		clr.b	cdpcm_status(a6)		; Reset flags
+		clr.w	cdpcm_cblock(a6)
+		clr.w	cdpcm_strmhalf(a6)
 		bra.s	.non_strm
 .not_float:
 		btst	#6,cdpcm_status(a6)
 		beq.s	.non_strm
-		move.b	cdpcm_strmhalf(a6),d4		; Check current block MSB
-		andi.b	#$0E,d3				; in blocks of $0200 bytes.
-		cmp.b	d4,d3
+		move.w	cdpcm_strmhalf(a6),d4		; Check current block MSB
+		andi.w	#SET_PCMAND>>8,d3		; in blocks of $0200 bytes.
+		cmp.w	d4,d3
 		bne.s	.non_strm
 		move.w	d3,d4
-		addq.w	#$02,d4
-		andi.w	#$0E,d4				; d4 - Next block slot
-		move.b	d4,cdpcm_strmhalf(a6)
+		addq.w	#SET_PCMBLK>>8,d4
+		andi.w	#SET_PCMAND>>8,d4		; d4 - Next block slot
+		move.w	d4,cdpcm_strmhalf(a6)
 		move.l	cdpcm_cread(a6),a0		; a0 - Current Wave data to read
 		move.l	cdpcm_clen(a6),d1		; d1 - Current wave size
 		lsl.w	#8,d4				; Slot << 8
-		move.l	#$0200,d3			; d3 - Block size
-		cmp.w	#$0E00,d4			; Is this the looping block?
+		move.l	#SET_PCMBLK,d3			; d3 - Block size
+		cmp.w	#SET_PCMAND,d4			; Is this the looping block?
 		bne.s	.lowhalf
 		subq.l	#8,d3				; Size-4 to skip the loop bytes.
 .lowhalf:
@@ -1966,28 +1966,14 @@ CdSub_PCM_Stream:
 .first_fill:
 		move.l	cdpcm_start(a6),d0
 		move.l	cdpcm_length(a6),d1
-; 		move.l	cdpcm_slast(a6),d2
-; 		beq.s	.diff_sample
-; 		cmp.l	d2,d0
-; 		bne.s	.diff_sample
-; 		cmp.l	#(($200)*4)-8,cdpcm_length(a6)
-; 		bcc.s	.diff_sample
-; 		move.w	cdpcm_cblock(a6),d2
-; 		beq.s	.diff_sample
-; 		move.l	#$200,d2
-; 		add.l	d2,d0
-; 		add.l	d2,d1
-; 		move.l	d0,a0
-; 		bra	.small_sampl
-; .diff_sample:
-; 		move.w	#4,cdpcm_cblock(a6)		; <-- 4 BLOCKS
 		move.l	cdpcm_start(a6),cdpcm_slast(a6)
 		move.l	d0,a0
 		bsr	.make_lblk
-.fake_fill:
-		move.l	a0,cdpcm_cread(a6)		; Return starint read points.
+		bsr	.make_lblk
+		move.l	a0,cdpcm_cread(a6)		; Return read points.
 		move.l	d1,cdpcm_clen(a6)
-		move.b	#0,cdpcm_strmhalf(a6)
+		move.w	#0,cdpcm_strmhalf(a6)
+.from_fill:
 		bsr	.update_set			; Do first Pitch/Vol/Panning
 		moveq	#0,d0
 		move.b	d6,d0				; $000x
@@ -2038,7 +2024,7 @@ CdSub_PCM_Stream:
 		move.b	d0,CTREG(a5)
 ; 		bsr	CdSub_PCM_Wait
 		lea	$2001(a5),a1		; a1 - WAVE RAM port
-		move.w	#$200,d3		; d3 - Block size
+		move.w	#SET_PCMBLK,d3		; d3 - Block size
 		lsr.w	#3,d3			; size / 4
 		subq.w	#1,d3
 .wave_blkl:

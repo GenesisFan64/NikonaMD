@@ -183,6 +183,7 @@ sizeof_thisbuff		ds.l 0
 		andi.w	#JoyUp+JoyDown,d7
 		beq.s	.ud_seq
 		moveq	#1,d0
+; 		andi.w	#JoyUp,d7
 		andi.w	#JoyUp,d7
 		beq.s	.ud_right
 		neg.w	d0
@@ -464,8 +465,8 @@ sizeof_thisbuff		ds.l 0
 ; ------------------------------------------------------
 
 .extnal_beats:
-	dc.w 200
 	dc.w 192
+	dc.w 215
 	dc.w 192
 	dc.w 192
 	dc.w 215
