@@ -87,7 +87,7 @@ ztbl_MasterVol	equ 04h			; MASTER volume for this channel
 ztbl_FreqIndx	equ 05h			; Frequency list index (YM2612: %oooiiiii oct|index)
 ztbl_PitchBend	equ 06h			; Pitchbend incr/decr
 ztbl_Volume	equ 07h			; Current Volume: 00-max
-ztbl_EffBuff	equ 08h			; Effect setting
+ztbl_VolSlide	equ 08h			; Effect setting
 ztbl_InstCach	equ 0Ah			; <-- 8 bytes
 
 ; --------------------------------------------------------
@@ -1922,15 +1922,13 @@ dtbl_singl:
 		dec	hl
 .not_palp:
 		ld	a,(iy+ztbl_PitchBend)	; pitchbend
-		rlca				; << 3
-		rlca
-		rst	8
-		rlca
+		rlca				; << 1
 		ld	d,a
 		and	11111000b
 		ld	e,a
 		ld	a,d
 		and	00000111b
+		rst	8
 		ld	d,a
 		scf
 		ccf
@@ -1938,7 +1936,10 @@ dtbl_singl:
 		ld	(ix+DTL),l
 		ld	(ix+DTH),h
 .psg_keyon:
+		ld	a,(iy+ztbl_VolSlide)
+		ld	e,a
 		ld	a,(iy+ztbl_Volume)	; Set current Volume
+		sub	a,e
 		sub	a,(iy+ztbl_MasterVol)	; + MASTER vol
 		neg	a
 		rst	8
@@ -2017,10 +2018,10 @@ dtbl_singl:
 		rst	8
 		xor	a			; clear high
 		ccf				; clear carry
-		sla	e			; pitchbend << 3
-		sla	e
-		sla	e
-		sbc	a,a			; a - 0 or -1 if carry is set
+; 		sla	e			; pitchbend << 3
+; 		sla	e
+		sla	e			; << 1
+		sbc	a,a			; get carry MSB
 		ld	d,a
 		add	hl,de			; Pitchbend the freq
 		call	.fm_setfreq
@@ -2165,8 +2166,9 @@ dtbl_singl:
 		and	011b
 		or	40h			; TL registers
 		ld	d,a
-		ld	a,(iy+ztbl_Volume)	; Read current Volume
 		rst	8
+		ld	a,(iy+ztbl_Volume)	; Read current Volume
+; 		sub	a,(iy+ztbl_VolSlide)
 		sub	a,(iy+ztbl_MasterVol)	; + MASTER vol
 		ld	c,a			; c - Current Volume
 		ld	b,(hl)			; b - Current jump-carry byte
@@ -2336,10 +2338,8 @@ dtbl_singl:
 		rst	8
 		xor	a			; Clear high
 		ccf				; Clear carry
-		sla	e			; << 3
-		sla	e
-		sla	e
-		sbc	a,a			; -1 if carry is set
+		sla	e			; << 1
+		sbc	a,a			; Get carry MSB
 		ld	d,a
 		add	hl,de
 		ld	(wave_Pitch),hl
@@ -2410,6 +2410,7 @@ dtbl_singl:
 		add	a,a
 		ld	b,a
 		ld	a,(iy+ztbl_Volume)	; Read current Volume
+		sub	a,(iy+ztbl_VolSlide)
 		add	a,a			; * 2
 		ccf
 		sbc	a,b			; + MASTER vol
@@ -2474,6 +2475,7 @@ dtbl_singl:
 		ld	a,b
 		and	0011b			; Note and Ins?
 		jr	nz,.pw_note
+
 		bit	3,b			; Effect?
 		jr	nz,.pw_effc
 		bit	2,b			; Volume?
@@ -2482,23 +2484,25 @@ dtbl_singl:
 .pw_effc:
 		ld	e,00001001b
 		jr	.pw_send
+
 .pw_note:
-		ld	e,00000001b	; KeyON request
+		ld	e,00000001b		; KeyON request
 .pw_send:
-		ld	(ix),e		; Set command
+		ld	(ix),e			; Set command
 		call	.readfreq_pwm
 	; hl - current freq
-		ld	a,c		; Read panning bits
-		cpl			; Reverse and filter bits
+		ld	a,c			; Read panning bits
+		cpl				; Reverse and filter bits
 		and	00110000b
 		rst	8
-		ld	e,a		; Save panning to e
+		ld	e,a			; Save panning to e
 		ld	a,(iy+ztbl_MasterVol)
 		cp	40h
 		jr	z,.vpwm_siln
 		jr	nc,.vpwm_siln
 		ld	c,a
 		ld	a,(iy+ztbl_Volume)	; Read current volume
+		sub	a,(iy+ztbl_VolSlide)
 		sub	a,c			; + MASTER vol
 		jr	.vpwm_much
 .vpwm_siln:
@@ -2562,11 +2566,10 @@ dtbl_singl:
 		ld	l,a
 		ld	e,(iy+ztbl_PitchBend)	; pitchbend
 		rst	8
-		xor	a		; Clear high
-		ccf			; Clear carry
-		sla	e		; << 2
-		sla	e
-		sbc	a,a		; -1 if carry is set
+		xor	a			; Clear high
+		ccf				; Clear carry
+		sla	e			; Get carry MSB
+		sbc	a,a			; -1 if carry is set
 		ld	d,a
 		add	hl,de
 		ret
@@ -2580,8 +2583,8 @@ dtbl_singl:
 		ld	a,(ix+chnl_EffId)	; d - effect id
 		ld	d,a
 		rst	8
-; 		cp	4			; Effect D?
-; 		jr	z,.effc_D
+		cp	4			; Effect D?
+		jr	z,.effc_D
 		cp	5			; Effect E?
 		jr	z,.effc_E
 		cp	6			; Effect F?
@@ -2592,61 +2595,71 @@ dtbl_singl:
 		ret
 
 ; ----------------------------------------
-; Effect D
+; Effect D: Volume slide up/down
 ;
-; Volume slide down
-;
-; 0xh-Exh - Normal
-; Fxh-Fxh - Fine slide / 2
+; 00h - Keep effect
+; 0xh - Slide down normal
+; Fxh - Slide down fine
+; xFh - Slide up normal
+; x0h - Slide up fine
 ; ----------------------------------------
 
 .effc_D:
-		call	.save_arg
-		ld	a,c		; Setting == 0?
-		or	a
-		ret	z
-		and	0F0h
-		jr	z,.norm_down	; 0xh
-		cp	0F0h
-		jr	z,.fine_down	; Fxh
-		rst	8
-		ld	a,c
-		and	00Fh
-		jr	z,.norm_up	; x0h
-		cp	00Fh
-		jr	z,.fine_up	; xFh
-		ret
-; Go down
-.norm_down:
-		sla	c
-.fine_down:
-		sla	c
-		ld	a,c
-		and	00111100b
-		ld	c,a
-		ld	a,(iy+ztbl_Volume)	; Current volume
-		rst	8
-		sub	a,c
-		ld	e,0C0h
-		cp	e
-		jp	nc,.vol_dvld
 		ld	a,e
-		jr 	.vol_dvld
-; Go up
-.fine_up:
-		srl	c
-.norm_up:
-		srl	c
-		ld	a,c
-		and	00111100b
+		rrca
+		rrca
+		rrca
+		rrca
+		and	0Fh
 		ld	c,a
-		ld	a,(iy+ztbl_Volume)	; Current volume
-		rst	8
-		add	a,c
-		jr	c,.vol_dvld
+	; e - DOWN value (full arg)
+	; c - UP value
+		ld	a,e
+		or	a		; Check full 00h
+		ret	z
+		and	0F0h		; 0Xh
+		jr	z,.D_down
+		cp	0F0h		; FXh
+		jr	z,.D_downhf
+		ld	a,e
+		and	00Fh		; X0h
+		jr	z,.D_up
+		cp	00Fh		; XFh
+		ret	nz
+; 		jr	z,.D_uphf
+; Go UP
+.D_uphf:
+		ld	a,c
+		jr	.setefU_D
+.D_up:
+		ld	a,c
+		add	a,a
+.setefU_D:
+		ld	e,a
+		ld	a,(iy+ztbl_VolSlide)
+		sub	a,e
+		jp	p,.setef_mcU
 		xor	a
-.vol_dvld:
-		ld	(iy+ztbl_Volume),a
+.setef_mcU:
+		ld	(iy+ztbl_VolSlide),a
+		ret
+; Go DOWN
+.D_downhf:
+		ld	a,e
+		and	0Fh
+		jr	.setef_D
+.D_down:
+		ld	a,e
+		and	0Fh
+		add	a,a
+.setef_D:
+		ld	e,a
+		ld	a,(iy+ztbl_VolSlide)
+		add	a,e
+		jp	p,.setef_mcD
+		ld	a,7Fh
+.setef_mcD:
+		ld	(iy+ztbl_VolSlide),a
 		ret
 
 ; ----------------------------------------
@@ -2654,8 +2667,7 @@ dtbl_singl:
 ; ----------------------------------------
 
 .effc_E:
-		call	.save_arg
-		ld	a,c
+		ld	a,e
 		and	0F0h
 		cp	0F0h
 		ret	z
@@ -2663,7 +2675,7 @@ dtbl_singl:
 		ret	z
 		rst	8
 		ld	a,(iy+ztbl_PitchBend)
-		sub	a,c
+		sub	a,e
 		ld	(iy+ztbl_PitchBend),a
 		ret
 
@@ -2672,8 +2684,7 @@ dtbl_singl:
 ; ----------------------------------------
 
 .effc_F:
-		call	.save_arg
-		ld	a,c
+		ld	a,e
 		and	0F0h
 		cp	0F0h
 		ret	z
@@ -2681,21 +2692,8 @@ dtbl_singl:
 		ret	z
 		rst	8
 		ld	a,(iy+ztbl_PitchBend)
-		add	a,c
+		add	a,e
 		ld	(iy+ztbl_PitchBend),a
-		ret
-
-; --------------------------------
-; e - got arg
-; c - new arg
-.save_arg:
-		ld	c,(iy+ztbl_EffBuff)	; Current slide setting
-		ld	a,e			; EffArg is non-zero?
-		or	a
-		jr	z,.D_cont		; 00h = slide continue
-		ld	c,a
-		ld	(iy+ztbl_EffBuff),c	; Store NEW slide setting
-.D_cont:
 		ret
 
 ; ----------------------------------------
@@ -2721,7 +2719,6 @@ dtbl_singl:
 	; ----------------------------------------
 	; Common panning bits: %00LR0000
 	; (REVERSE: 0-on 1-off)
-		ld	(iy+ztbl_EffBuff),0
 		rst	8
 		push	hl
 		ld	hl,.comn_panlist
@@ -2820,6 +2817,7 @@ dtbl_singl:
 ; ----------------------------------------
 
 .volu:
+		ld	(iy+ztbl_VolSlide),0
 		ld	a,(ix+chnl_Vol)
 		sub	a,64
 		ld	(iy+ztbl_Volume),a	; BASE volume
@@ -3128,12 +3126,13 @@ dtbl_singl:
 ; ----------------------------------------
 
 .note:
-		ld	a,b		; Volume bit?
+		ld	a,b			; Volume bit?
 		and	0100b
 		jr	nz,.fm_hasvol
 		ld	(iy+ztbl_Volume),0	; Reset to default volume
 		rst	8
 .fm_hasvol:
+		ld	(iy+ztbl_PitchBend),0
 		ld	a,(ix+chnl_Note)
 		ld	c,a
 		cp	-1
@@ -3172,7 +3171,6 @@ dtbl_singl:
 		rst	8
 		add	a,a			; * 2
 		ld	(iy+ztbl_FreqIndx),a
-		ld	(iy+ztbl_PitchBend),0	; reset pitchbend
 		ret
 .n_psgn:
 		ld	a,c
@@ -3208,7 +3206,6 @@ dtbl_singl:
 		rst	8
 		or	c
 		ld	(iy+ztbl_FreqIndx),a	; Save octave + index: OOOiiiiib
-		ld	(iy+ztbl_PitchBend),0
 		ret
 
 ; ----------------------------------------
@@ -4268,7 +4265,7 @@ wavFreq_CdPcm:
 	dw  01F8h, 0214h, 023Ch, 0258h, 027Ch, 02A0h, 02C8h, 02FCh, 031Ch, 0354h, 037Ch, 03B8h	; x-3  8000 ok
 	dw  03F0h, 0428h, 0468h, 04ACh, 04ECh, 0540h, 0590h, 05E4h, 063Ch, 0698h, 0704h, 0760h	; x-4 16000 ok
 	dw  07DCh, 0848h, 08D4h, 0960h, 09F0h, 0A64h, 0B04h, 0BAAh, 0C60h, 0D18h, 0DE4h, 0EB8h	; x-5 32000 ok
-	dw  0FB0h;, 1074h, 1184h, 1280h, 139Ch, 14C8h, 1624h, 174Ch, 18DCh, 1A38h, 1BE0h, 1D94h	; x-6 64000 unstable
+	dw  0FB0h, 1074h, 1184h, 1280h, 139Ch, 14C8h, 1624h, 174Ch, 18DCh, 1A38h, 1BE0h, 1D94h	; x-6 64000 unstable
 ; 	dw  1F64h, 20FCh, 2330h, 2524h, 2750h, 29B4h, 2C63h, 2F63h, 31E0h, 347Bh, 377Bh, 3B41h	; x-7 128000 bad
 ; 	dw  3EE8h, 4206h, 4684h, 4A5Ah, 4EB5h, 5379h, 58E1h, 5DE0h, 63C0h, 68FFh, 6EFFh, 783Ch	; x-8 256000 bad
 ; 	dw  7FC2h, 83FCh, 8D14h, 9780h,0AA5Dh,0B1F9h,   -1 ,   -1 ,   -1 ,   -1 ,   -1 ,   -1 	; x-9 bad

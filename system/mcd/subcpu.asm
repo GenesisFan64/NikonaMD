@@ -1797,10 +1797,10 @@ CdSub_PCM_Stream:
 		btst	#0,d0
 		beq.s	.non_upd
 		clr.b	cdpcm_flags(a6)
-		bsr	.stop_pcm
+; 		bsr	.stop_pcm
 		bsr	.first_fill			; Do first fill
 		bclr	d6,d5
-		move.b	d5,ONREG(a5)			; Enable channel
+		st.b	(RAM_CdSub_PcmMkNew).w
 		bsr	CdSub_PCM_Wait
 		bset	#7,cdpcm_status(a6)
 .keep_strm:
@@ -1815,8 +1815,6 @@ CdSub_PCM_Stream:
 .force_off:
 		bsr	.stop_pcm
 		clr.b	cdpcm_status(a6)		; Reset flags
-		clr.w	cdpcm_cblock(a6)
-		clr.w	cdpcm_strmhalf(a6)
 		bra.s	.non_strm
 .not_float:
 		btst	#6,cdpcm_status(a6)
@@ -1845,6 +1843,11 @@ CdSub_PCM_Stream:
 		adda	#4,a4				; Next MSB to check
 		addq.w	#1,d6				; Next PCM Channel number
 		dbf	d7,.get_addr
+		tst.b	(RAM_CdSub_PcmMkNew).w
+		beq.s	.not_new
+		clr.b	(RAM_CdSub_PcmMkNew).w
+		move.b	d5,ONREG(a5)			; Enable channel
+.not_new:
 		not.w	d5				; Reverse return bits
 		move.b	d5,(RAM_CdSub_PcmEnbl).w
 		rts
@@ -1853,7 +1856,8 @@ CdSub_PCM_Stream:
 
 .stop_pcm:
 		bset	d6,d5
-		move.b	d5,ONREG(a5)
+		st.b	(RAM_CdSub_PcmMkNew).w
+; 		move.b	d5,ONREG(a5)
 		rts
 
 ; --------------------------------------------------------
@@ -2111,6 +2115,7 @@ RAM_CdSub_StampPending	ds.w 1
 RAM_CdSub_PcmEnbl	ds.b 1				; PCM Enable bits
 RAM_CdSub_PcmReqUpd	ds.b 1				; PCM new data request
 RAM_CdSub_StampReqUpd	ds.b 1
+RAM_CdSub_PcmMkNew	ds.b 1
 			align 2
 
 ; ====================================================================

@@ -19,6 +19,6 @@
 ; 	gSmplData PwmIns_TEST,"sound/instr/smpl/test_st.wav",0
 
 	gSmplData PwmIns_trnthem_01,"sound/instr/smpl/trnthem/01.wav",12048
-	gSmplData PwmIns_trnthem_10,"sound/instr/smpl/trnthem/10.wav",0
+	gSmplData PwmIns_trnthem_10,"sound/instr/smpl/trnthem/10.wav",3033
 	gSmplData PwmIns_trnthem_11,"sound/instr/smpl/trnthem/11.wav",0
 	gSmplData PwmIns_trnthem_12,"sound/instr/smpl/trnthem/12.wav",0

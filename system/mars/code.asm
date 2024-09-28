@@ -896,8 +896,6 @@ scmd_tasks:
 		mov	@(marspwm_enbl,r7),r0
 		tst	#$80,r0
 		bt	.no_chng
-; 		mov	#0,r0
-; 		mov	r0,@(marspwm_enbl,r7)
 		add	#8,r3			; Next: Volume and Pitch MSB
 		mov.b	@r3,r0			; r0: %vvvvvvpp
 		mov	r0,r2			; Save pp-pitch

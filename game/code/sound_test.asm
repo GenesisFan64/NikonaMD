@@ -59,8 +59,38 @@ sizeof_thisbuff		ds.l 0
 		bsr	System_Default
 	; ----------------------------------------------
 	; Load assets
-
-		lea	file_scrn1_main(pc),a0		; ** LOAD BANK **
+; 	if MARS|MARSCD
+; 		lea	file_tscrn_mars(pc),a0			; Load DATA BANK for 32X stuff
+; 		bsr	System_SetDataBank
+; 		lea	(PalMars_Test+color_indx(1)),a0
+; 		moveq	#1,d0
+; 		move.w	#192,d1
+; 		moveq	#0,d2
+; 		bsr	Video_MdMars_FadePal
+; 		lea	(PalMars_Haruna),a0
+; 		move.w	#192,d0
+; 		moveq	#16,d1
+; 		moveq	#0,d2
+; 		bsr	Video_MdMars_FadePal
+; 		lea	(PalMars_Sisi),a0
+; 		move.w	#208,d0
+; 		moveq	#16,d1
+; 		moveq	#0,d2
+; 		bsr	Video_MdMars_FadePal
+; 		lea	(ArtMars_Test2D),a0
+; 		move.l	#0,a1
+; 		move.l	#ArtMars_Test2D_e-ArtMars_Test2D,d0
+; 		bsr	Video_MdMars_LoadVram
+; 		lea	(RAM_MdMars_Models).w,a0
+; 		move.l	#MarsObj_test_2,mmdl_data(a0)
+; 		move.l	#12,mmdl_y_pos(a0)
+; ; 		bsr	Camera_Update
+; 		moveq	#2,d0					; 32X 3D mode
+; 		bsr	Video_MdMars_VideoMode
+; 	endif
+	; ----------------------------------------------
+	; Load assets
+		lea	file_tscrn_main(pc),a0		; ** LOAD BANK **
 		bsr	System_SetDataBank
 	; ----------------------------------------------
 		move.l	#ASCII_FONT,d0			; Load and setup PRINT system
@@ -72,10 +102,12 @@ sizeof_thisbuff		ds.l 0
 		lea	(RAM_PaletteFade+$40).w,a0	; Palette line 4:
 		move.w	#$0000,(a0)
 		move.w	#$00E0,2(a0)
+		move.w	#$00A0,4(a0)
 		move.w	#$0080,4(a0)
 		adda	#$20,a0
 		move.w	#$0000,(a0)
 		move.w	#$0EEE,2(a0)
+		move.w	#$0AAA,4(a0)
 		move.w	#$0888,4(a0)
 
 		lea	(objPal_Dodo+2),a0
@@ -661,9 +693,13 @@ sizeof_thisbuff		ds.l 0
 ; DATA asset locations
 ; ------------------------------------------------------
 
-file_scrn1_main:
+file_tscrn_main:
 		dc.l DATA_BANK0
 		dc.b "BNK_MAIN.BIN",0
+		align 2
+file_tscrn_mars:
+		dc.l DATA_BANK1
+		dc.b "BNK_MARS.BIN",0
 		align 2
 
 ; ====================================================================
@@ -880,8 +916,8 @@ strL_FmOnly:	dc.b "---",0
 		dc.b "C- ",0,"C# ",0,"D- ",0,"D# ",0,"E- ",0,"F- ",0,"F# ",0,"G- ",0,"G# ",0,"A- ",0,"A# ",0,"B- ",0
 strL_LazyVal:	dc.b "0",0,"1",0,"2",0,"3",0,"4",0,"5",0,"6",0,"7",0,"8",0,"9",0
 
-str_Speci:	dc.b "spc",0
-str_Sampl:	dc.b "wav",0
+str_Speci:	dc.b "fm3",0
+str_Sampl:	dc.b "dac",0
 
 str_ShowVars:
 		dc.l pstr_mem(0,RAM_GemaSeq+1)

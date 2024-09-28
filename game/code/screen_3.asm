@@ -72,7 +72,7 @@ RAM_ThisSpeed		ds.w 1
 		move.w	#256/16,d3
 		moveq	#0,d4
 		bsr	Video_MdMars_LoadMap
-		moveq	#1,d0					; 32X 3D mode
+		moveq	#1,d0					; 32X 2D mode
 		bsr	Video_MdMars_VideoMode
 	endif
 	; ----------------------------------------------
