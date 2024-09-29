@@ -1797,11 +1797,9 @@ CdSub_PCM_Stream:
 		btst	#0,d0
 		beq.s	.non_upd
 		clr.b	cdpcm_flags(a6)
-; 		bsr	.stop_pcm
 		bsr	.first_fill			; Do first fill
 		bclr	d6,d5
 		st.b	(RAM_CdSub_PcmMkNew).w
-		bsr	CdSub_PCM_Wait
 		bset	#7,cdpcm_status(a6)
 .keep_strm:
 		bsr	.update_set
@@ -1810,6 +1808,8 @@ CdSub_PCM_Stream:
 	; Stream data
 		btst	#7,cdpcm_status(a6)		; Channel slot is active?
 		beq.s	.non_strm
+		btst	#6,cdpcm_status(a6)
+		beq.s	.non_strm
 		move.b	(a4),d3				; Get playback MSB
 		bpl.s	.not_float			; If negative $80 (Silence block)
 .force_off:
@@ -1817,8 +1817,6 @@ CdSub_PCM_Stream:
 		clr.b	cdpcm_status(a6)		; Reset flags
 		bra.s	.non_strm
 .not_float:
-		btst	#6,cdpcm_status(a6)
-		beq.s	.non_strm
 		move.w	cdpcm_strmhalf(a6),d4		; Check current block MSB
 		andi.w	#SET_PCMAND>>8,d3		; in blocks of $0200 bytes.
 		cmp.w	d4,d3
@@ -1942,43 +1940,24 @@ CdSub_PCM_Stream:
 		rts
 
 ; --------------------------------------------------------
-; Channel changes
-; --------------------------------------------------------
-
-.update_set:
-		move.b	d6,d0			; Set PCM to control mode
-		or.b	#$C0,d0
-		move.b	d0,CTREG(a5)
-		bsr	CdSub_PCM_Wait
-		move.b	cdpcm_pan(a6),d0	; Panning
-		move.b	d0,PAN(a5)
-		bsr	CdSub_PCM_Wait
-		move.b	cdpcm_env(a6),d0	; Envelope
-		move.b	d0,ENV(a5)
-		bsr	CdSub_PCM_Wait
-		move.w	cdpcm_pitch(a6),d0	; Write frequency
-		move.b	d0,FDL(a5)
-		bsr	CdSub_PCM_Wait
-		lsr.w	#8,d0
-		move.b	d0,FDH(a5)
-		bra	CdSub_PCM_Wait
-
-; --------------------------------------------------------
 ; First fill
 ; --------------------------------------------------------
 
 .first_fill:
+		bset	d6,d5
+		move.b	d5,ONREG(a5)			; Enable channel
 		move.l	cdpcm_start(a6),d0
 		move.l	cdpcm_length(a6),d1
 		move.l	cdpcm_start(a6),cdpcm_slast(a6)
 		move.l	d0,a0
 		bsr	.make_lblk
-		bsr	.make_lblk
 		move.l	a0,cdpcm_cread(a6)		; Return read points.
 		move.l	d1,cdpcm_clen(a6)
 		move.w	#0,cdpcm_strmhalf(a6)
 .from_fill:
-		bsr	.update_set			; Do first Pitch/Vol/Panning
+		move.b	d6,d0				; Set PCM to control mode
+		or.b	#$C0,d0
+		move.b	d0,CTREG(a5)
 		moveq	#0,d0
 		move.b	d6,d0				; $000x
 		lsl.w	#4,d0				; $00x0
@@ -2014,6 +1993,29 @@ CdSub_PCM_Stream:
 		bsr	CdSub_PCM_Wait
 		lsr.w	#8,d0
 		move.b	d0,LSH(a5)
+		bsr	CdSub_PCM_Wait
+		; continue...
+
+; --------------------------------------------------------
+; Channel changes
+; --------------------------------------------------------
+
+.update_set:
+		move.b	d6,d0			; Set PCM to control mode
+		or.b	#$C0,d0
+		move.b	d0,CTREG(a5)
+		bsr	CdSub_PCM_Wait
+		move.b	cdpcm_pan(a6),d0	; Panning
+		move.b	d0,PAN(a5)
+		bsr	CdSub_PCM_Wait
+		move.b	cdpcm_env(a6),d0	; Envelope
+		move.b	d0,ENV(a5)
+		bsr	CdSub_PCM_Wait
+		move.w	cdpcm_pitch(a6),d0	; Write frequency
+		move.b	d0,FDL(a5)
+		bsr	CdSub_PCM_Wait
+		lsr.w	#8,d0
+		move.b	d0,FDH(a5)
 		bra	CdSub_PCM_Wait
 
 ; --------------------------------------------------------
@@ -2032,12 +2034,13 @@ CdSub_PCM_Stream:
 		lsr.w	#3,d3			; size / 4
 		subq.w	#1,d3
 .wave_blkl:
-		tst.l	d1
-		bmi.s	.fill_blank
+; 		tst.l	d1
+; 		bmi.s	.fill_blank
 	rept 8
 		moveq	#-1,d0			; d0 - Loop flag
-		subq.l	#1,d1			; Lenght counter
+		subq.l	#1,d1			; Length counter
 		beq.s	.len_it			; If ran out of wave data, write -1 now.
+		bmi.s	.len_it
 		move.b	(a0)+,d0		; Read wave and convert
 		bsr	CdSub_PCM_WavToPcm
 .len_it:

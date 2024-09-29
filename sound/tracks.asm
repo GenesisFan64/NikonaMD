@@ -1,6 +1,6 @@
 ; ===========================================================================
 ; -------------------------------------------------------------------
-; GEMA/Nikona Track data
+; Main sound data
 ; -------------------------------------------------------------------
 
 MainGemaSeqList:
@@ -14,6 +14,9 @@ gtrk_Test:
 .blk:		binclude "sound/tracks/test_blk.bin"
 .pat:		binclude "sound/tracks/test_patt.bin"
 .ins:
+		gInsPsg 0,$00,$00,$00,$00,$00,0
+		gInsPsgN 0,$00,$00,$00,$00,$00,0,%011
+
 ; 		gInsPwm -12,PwmIns_trnthem_01,1
 ; 		gInsFm -24,FmIns_Hats_1
 ; 		gInsFm3 0,FmIns_Sp_OpenHat
@@ -47,7 +50,7 @@ gtrk_Test2:
 		gInsFm -56,FmIns_Bass_club_108
 		gInsFm -56,FmIns_Bass_club_108
 		gInsFm -56,FmIns_Bass_Groove_1
-		gInsPwm -12,PwmIns_trnthem_10,1
+		gInsPcm -12,PcmIns_trnthem_10,1
 		gInsPwm -12,PwmIns_trnthem_11,0
 		gInsPwm -12,PwmIns_trnthem_12,0
 		gInsNull
@@ -172,7 +175,6 @@ FmIns_bass_synth_73:
 		binclude "sound/instr/fm/bin/bass_synth_73.bin"
 FmIns_bass_vlow_74:
 		binclude "sound/instr/fm/bin/bass_vlow_74.bin"
-
 FmIns_Organ_drawbar:
 		binclude "sound/instr/fm/bin/organ_drawbar.bin"
 FmIns_Flaute_1:
@@ -185,23 +187,18 @@ FmIns_Vibraphone_2:
 		binclude "sound/instr/fm/bin/vibraphone_2.bin"
 FmIns_Xylophone:
 		binclude "sound/instr/fm/bin/xylophone2_43.bin"
-
 FmIns_Bass_low81:
 		binclude "sound/instr/fm/bin/bass_low_46.bin"
-
 FmIns_Trumpet_low:
 		binclude "sound/instr/fm/bin/trumpet_low.bin"
 FmIns_Trumpet_genie:
 		binclude "sound/instr/fm/bin/trumpet_genie.bin"
 FmIns_Trumpet_bus:
 		binclude "sound/instr/fm/bin/trumpet_bus.bin"
-
 FmIns_Hats_1:
 		binclude "sound/instr/fm/bin/hats_96.bin"
-
 FmIns_Bell_mid36:
 		binclude "sound/instr/fm/bin/bell_mid_36.bin"
-
 FmIns_Drum_Kick:
 		binclude "sound/instr/fm/bin/kick_low.bin"
 
@@ -257,7 +254,6 @@ FmIns_Bass_groove_2:
 		binclude "sound/instr/fm/gsx/bass_groove_2.gsx",$2478,$20
 FmIns_PSynth_plus:
 		binclude "sound/instr/fm/gsx/psynth_plus.gsx",$2478,$20
-
 FmIns_Brass_7:
 		binclude "sound/instr/fm/gsx/brass_7.gsx",$2478,$20
 

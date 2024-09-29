@@ -87,7 +87,7 @@ ztbl_MasterVol	equ 04h			; MASTER volume for this channel
 ztbl_FreqIndx	equ 05h			; Frequency list index (YM2612: %oooiiiii oct|index)
 ztbl_PitchBend	equ 06h			; Pitchbend incr/decr
 ztbl_Volume	equ 07h			; Current Volume: 00-max
-ztbl_VolSlide	equ 08h			; Effect setting
+ztbl_VolSlide	equ 08h			; Volume slide incr/decr
 ztbl_InstCach	equ 0Ah			; <-- 8 bytes
 
 ; --------------------------------------------------------
@@ -1807,16 +1807,18 @@ dtbl_singl:
 	; iy - Our chip table
 	; ix - Track channel
 	; hl - Intrument data
+		ld	a,b		; Note + Inst?
+		and	0011b
+		call	nz,.reset_effc	; Reset effects
+		bit	2,b		; Volume
+		call	nz,.volu
 		bit	0,b		; Note
 		call	nz,.note
 		bit	1,b		; Intrument
 		call	nz,.inst
 		rst	8
-		bit	2,b		; Volume
-		call	nz,.volu
 		bit	3,b		; Effect
 		call	nz,.effc
-
 		ld	a,(hl)		; Read INS type
 		and	01110000b	; Filter bits
 		rrca
@@ -1832,6 +1834,12 @@ dtbl_singl:
 		ld	h,(hl)
 		ld	l,a
 		jp	(hl)
+.reset_effc:
+		ld	(iy+ztbl_PitchBend),0
+		ld	(iy+ztbl_VolSlide),0
+		ld	(iy+ztbl_Volume),0
+		ret
+
 ; --------------------------------
 .mk_list:
 		dw .mk_psg
@@ -1848,11 +1856,15 @@ dtbl_singl:
 
 .mk_psgn:
 		ld	a,(ix+chnl_Note)
+		ld	c,a
 		push	ix
-		ld	ix,psgcom+3	; Steal PSG3
-		bit	0,b
-		jp	z,.psg_keyon
-		rst	8
+		ld	ix,psgcom+3	; PSGN com
+		ld	a,b
+		and	0011b
+		jr	nz,.psgn_mkn
+		jr	.psgc_proc
+.psgn_mkn:
+		ld	a,c
 		cp	-2
 		jr	z,.kycut_psgn
 		cp	-1
@@ -1862,8 +1874,9 @@ dtbl_singl:
 		ld	a,(psgHatMode)	; Tone 3?
 		and	011b
 		cp	011b
-		jr	nz,.psg_keyon	; Normal
-		jr	.from_psgn	; Tone 3
+		jp	nz,.psg_keyon	; Normal
+		call	.psgn_getfreq
+		jr	.psgc_keyon	; Tone 3
 
 ; --------------------------------
 ; PSG
@@ -1891,52 +1904,58 @@ dtbl_singl:
 		rst	8
 		ret
 
+; --------------------------------
+
 .mk_psg:
 		ld	a,(ix+chnl_Note)
+		ld	c,a
 		push	ix
 		rst	8
 		ld	ix,psgcom	; ix - psgcom
 		ld	e,(iy+ztbl_Chip)
 		ld	d,0
 		add	ix,de
-		bit	0,b
-		jr	z,.psg_keyon
+		ld	a,b
+		and	0011b
+		jr	nz,.psg_mkn
+		jr	.psgc_proc
+.psg_mkn:
+		ld	a,c
 		cp	-2
 		jr	z,.kycut_psg
 		cp	-1
 		jr	z,.kyoff_psg
-		ld	(ix+COM),001b	; Key ON
-.from_psgn:
+		call	.psg_getfreq
+		ld	(ix+COM),001b		; Key ON
+		jr	.psgc_keyon
+
+; --------------------------------
+; hl - current freq
+; ix - psgcom
+; b - flags
+.psgc_proc:
 		rst	8
-		ld	d,0			; de - note*2
-		ld	e,(iy+ztbl_FreqIndx)	; Freq index
-		ld	hl,psgFreq_List-(36*2)	; <-- 48
-		add	hl,de
-		ld	a,(hl)
-		inc	hl
-		ld	h,(hl)
-		ld	l,a
-		ld	a,(palMode)
-		or	a
-		jr	z,.not_palp
-		dec	hl
-.not_palp:
+		ld	l,(ix+DTL)
+		ld	h,(ix+DTH)
+.psgc_keyon:
 		ld	a,(iy+ztbl_PitchBend)	; pitchbend
-		rlca				; << 1
-		ld	d,a
-		and	11111000b
+		or	a
+		jp	z,.no_req
+		neg	a
 		ld	e,a
-		ld	a,d
-		and	00000111b
-		rst	8
-		ld	d,a
-		scf
+		xor	a
+		ld	(iy+ztbl_PitchBend),a
 		ccf
-		sbc	hl,de
+		sla	e
+		sbc	a,a
+		ld	d,a
+		add	hl,de
+.no_req:
 		ld	(ix+DTL),l
 		ld	(ix+DTH),h
 .psg_keyon:
 		ld	a,(iy+ztbl_VolSlide)
+		add	a,a
 		ld	e,a
 		ld	a,(iy+ztbl_Volume)	; Set current Volume
 		sub	a,e
@@ -1950,6 +1969,30 @@ dtbl_singl:
 .vmuch:
 		ld	(ix+PVOL),a
 		pop	ix
+		ret
+
+; --------------------------------
+
+.psgn_getfreq:
+		ld	de,12*2
+		jr	.psg_freqc
+.psg_getfreq:
+		ld	de,0
+.psg_freqc:
+		ld	hl,psgFreq_List-(36*2)
+		add	hl,de
+; 		ld	d,0
+		ld	e,(iy+ztbl_FreqIndx)	; de - note*2
+		add	hl,de
+		ld	a,(hl)
+		inc	hl
+		ld	h,(hl)
+		ld	l,a
+		ld	a,(palMode)
+		or	a
+		jr	z,.fnot_pal
+		dec	hl
+.fnot_pal:
 		ret
 
 ; --------------------------------
@@ -2597,7 +2640,8 @@ dtbl_singl:
 ; ----------------------------------------
 ; Effect D: Volume slide up/down
 ;
-; 00h - Keep effect
+; 00h - DON'T USE HERE
+;       (Original: Keep effect)
 ; 0xh - Slide down normal
 ; Fxh - Slide down fine
 ; xFh - Slide up normal
@@ -2612,10 +2656,11 @@ dtbl_singl:
 		rrca
 		and	0Fh
 		ld	c,a
-	; e - DOWN value (full arg)
-	; c - UP value
+	; e - DOWN value: ????dddd
+	; c - UP value:   0000uuuu
+
 		ld	a,e
-		or	a		; Check full 00h
+		or	a
 		ret	z
 		and	0F0h		; 0Xh
 		jr	z,.D_down
@@ -2638,11 +2683,7 @@ dtbl_singl:
 		ld	e,a
 		ld	a,(iy+ztbl_VolSlide)
 		sub	a,e
-		jp	p,.setef_mcU
-		xor	a
-.setef_mcU:
-		ld	(iy+ztbl_VolSlide),a
-		ret
+		jr	.setef_mcD
 ; Go DOWN
 .D_downhf:
 		ld	a,e
@@ -2656,9 +2697,21 @@ dtbl_singl:
 		ld	e,a
 		ld	a,(iy+ztbl_VolSlide)
 		add	a,e
-		jp	p,.setef_mcD
-		ld	a,7Fh
+; 		jr	.setef_mcD
+
+; Write slide
 .setef_mcD:
+; 		ld	e,-64
+; 		cp	e
+; 		jp	c,.sld_Min
+; 		ld	a,e
+; .sld_Min:
+; 		ld	e,64
+; 		cp	e
+; 		jp	c,.sld_Max
+; 		ld	a,e
+; .sld_Max:
+
 		ld	(iy+ztbl_VolSlide),a
 		ret
 
@@ -2674,10 +2727,9 @@ dtbl_singl:
 		cp	0E0h
 		ret	z
 		rst	8
-		ld	a,(iy+ztbl_PitchBend)
-		sub	a,e
-		ld	(iy+ztbl_PitchBend),a
-		ret
+		ld	a,e
+		neg	a
+		jr	.wrt_EF
 
 ; ----------------------------------------
 ; Effect F
@@ -2691,8 +2743,10 @@ dtbl_singl:
 		cp	0E0h
 		ret	z
 		rst	8
-		ld	a,(iy+ztbl_PitchBend)
-		add	a,e
+		ld	a,e
+.wrt_EF:
+		add	a,a
+		add	a,a
 		ld	(iy+ztbl_PitchBend),a
 		ret
 
@@ -2817,7 +2871,6 @@ dtbl_singl:
 ; ----------------------------------------
 
 .volu:
-		ld	(iy+ztbl_VolSlide),0
 		ld	a,(ix+chnl_Vol)
 		sub	a,64
 		ld	(iy+ztbl_Volume),a	; BASE volume
@@ -3132,7 +3185,6 @@ dtbl_singl:
 		ld	(iy+ztbl_Volume),0	; Reset to default volume
 		rst	8
 .fm_hasvol:
-		ld	(iy+ztbl_PitchBend),0
 		ld	a,(ix+chnl_Note)
 		ld	c,a
 		cp	-1
@@ -3140,24 +3192,11 @@ dtbl_singl:
 		cp	-2
 		ret	z
 		rst	20h
+		rst	8
 		ld	a,(hl)
 		and	11110000b
-		cp	80h
-		jr	z,.n_indx
-		rst	8
-		cp	90h
-		jr	z,.n_psgn
 		cp	0A0h
 		jr	z,.n_fm
-; 		cp	0B0h		; ** Can't use notes on FM special **
-; 		jr	z,.n_fm
-		cp	0C0h
-		jr	z,.n_indx
-		cp	0D0h
-		jr	z,.n_indx
-		cp	0E0h
-		jr	z,.n_indx
-		ret
 
 ; --------------------------------
 
@@ -3172,12 +3211,10 @@ dtbl_singl:
 		add	a,a			; * 2
 		ld	(iy+ztbl_FreqIndx),a
 		ret
-.n_psgn:
-		ld	a,c
-		add	a,12		; <-- Manual adjust for NOISE
-		jr	.n_stfreq
 
-; FM freqs
+; --------------------------------
+; FM custom search
+
 .n_fm:
 		ld	a,c
 		inc	hl		; Skip ID

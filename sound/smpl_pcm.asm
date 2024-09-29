@@ -30,7 +30,7 @@
 	gSmplData PcmIns_trnthem_07,"sound/instr/smpl/trnthem/07.wav",2938
 ; 	gSmplData PcmIns_trnthem_08,"sound/instr/smpl/trnthem/08.wav",3875
 ; 	gSmplData PcmIns_trnthem_09,"sound/instr/smpl/trnthem/09.wav",4608
-; 	gSmplData PcmIns_trnthem_10,"sound/instr/smpl/trnthem/10.wav",3033
+	gSmplData PcmIns_trnthem_10,"sound/instr/smpl/trnthem/10.wav",3033
 ; 	gSmplData PcmIns_trnthem_11,"sound/instr/smpl/trnthem/11.wav",0
 ; 	gSmplData PcmIns_trnthem_12,"sound/instr/smpl/trnthem/12.wav",0
 ; 	gSmplData PcmIns_trnthem_13,"sound/instr/smpl/trnthem/13.wav",0
