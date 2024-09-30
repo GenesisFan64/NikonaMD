@@ -81,8 +81,8 @@ chnl_Type	equ 7	; Impulse type bits
 
 ; Table struct
 ztbl_Link	equ 00h			; !! current linked channel in trkChnls
-ztbl_Priority	equ 02h			; !! 00h-7Fh: Priority level or 80h+chipID Silence request
-ztbl_Chip	equ 03h			; Chip index (If YM2612: direct KEY index) *MUST BE ON THE LIST*
+ztbl_Priority	equ 02h			; !! 00h-7Fh: Priority level 0-15 + 80h+chipID Silence request
+ztbl_Chip	equ 03h			; Chip index (YM2612: direct index) *MUST BE ON THE LIST*
 ztbl_MasterVol	equ 04h			; MASTER volume for this channel
 ztbl_FreqIndx	equ 05h			; Frequency list index (YM2612: %oooiiiii oct|index)
 ztbl_PitchBend	equ 06h			; Pitchbend incr/decr
@@ -113,9 +113,9 @@ DTL		equ 28
 DTH		equ 32
 ALV		equ 36
 FLG		equ 40
-TMR		equ 44
-PVOL		equ 48
-PARP		equ 52
+ARP		equ 44
+MVOL		equ 48
+EFFV		equ 52
 PTMR		equ 56
 
 ; ====================================================================
@@ -615,6 +615,7 @@ upd_track:
 		call	.read_track
 		ld	iy,trkBuff_1
 		call	.read_track
+		rst	8
 		ld	iy,trkBuff_2
 
 ; ----------------------------------------
@@ -1280,6 +1281,7 @@ set_chips:
 		call	tblbuff_read
 		ld	iy,trkBuff_1
 		call	tblbuff_read
+		rst	8
 		ld	iy,trkBuff_2
 		call	tblbuff_read
 		call	get_tick
@@ -1843,99 +1845,79 @@ dtbl_singl:
 ; --------------------------------
 .mk_list:
 		dw .mk_psg
-		dw .mk_psgn
+		dw .mk_psg;.mk_psgn
 		dw .mk_fm
-		dw .mk_fmspc
+		dw .mk_fm_sp
 		dw .mk_dac
 		dw .mk_pcm
 		dw .mk_pwm
 
 ; --------------------------------
-; PSGN
+; PSG and PSGN
 ; --------------------------------
 
-.mk_psgn:
+.mk_psg:
 		ld	a,(ix+chnl_Note)
-		ld	c,a
-		push	ix
-		ld	ix,psgcom+3	; PSGN com
-		ld	a,b
+		ld	c,a			; c - Note
+		push	ix			; * Save ix
+		rst	8
+		ld	ix,psgcom		; ix - psgcom
+		ld	d,0
+		ld	e,(iy+ztbl_Chip)
+		add	ix,de			; Get com index
+		ld	a,b			; New NOTE and/or INS?
 		and	0011b
-		jr	nz,.psgn_mkn
-		jr	.psgc_proc
-.psgn_mkn:
+		jr	z,.psgc_proc		; Process only
+.psg_mkn:
 		ld	a,c
-		cp	-2
-		jr	z,.kycut_psgn
-		cp	-1
-		jr	z,.kyoff_psgn
-		ld	(ix+COM),001b	; Key ON
-		ld	e,a
-		ld	a,(psgHatMode)	; Tone 3?
+		cp	-2			; Key cut?
+		jr	z,.kycut_psg
+		cp	-1			; Key off?
+		jr	z,.kyoff_psg
+		ld	(ix+COM),001b		; Set Key ON
+		ld	a,e			; a - Channel 0-3
+		ld	de,0			; Clear de
+		cp	3			; NOISE channel?
+		jr	nz,.not_ns
+		ld	a,(psgHatMode)		; Tone 3?
 		and	011b
 		cp	011b
-		jp	nz,.psg_keyon	; Normal
-		call	.psgn_getfreq
-		jr	.psgc_keyon	; Tone 3
+		jp	nz,.psg_keyon		; Normal
+		ld	de,12*2			; Add octave to freq
+.not_ns:
+		call	.psg_getfreq
+		jr	.psgc_keyon
 
-; --------------------------------
-; PSG
 ; --------------------------------
 
 ; -1
 .kyoff_psgn:
 		call	.kypsgn_hatoff
 .kyoff_psg:
-		ld	c,010b
-		ld	(ix),c
-		pop	ix
+		ld	(ix),010b		; Write key off
+		pop	ix			; * Restore ix
 		jp	.chnl_ulnkoff
 ; -2
 .kycut_psgn:
 		call	.kypsgn_hatoff
 .kycut_psg:
-		ld	c,100b
-		ld	(ix),c
-		pop	ix
+		ld	(ix),100b		; Write key cut
+		pop	ix			; * Restore ix
 		jp	.chnl_ulnkcut
 .kypsgn_hatoff:
 		ld	a,000b
-		ld	(psgHatMode),a	; ** GLOBAL SETTING
+		ld	(psgHatMode),a		; ** GLOBAL SETTING
 		rst	8
 		ret
-
-; --------------------------------
-
-.mk_psg:
-		ld	a,(ix+chnl_Note)
-		ld	c,a
-		push	ix
-		rst	8
-		ld	ix,psgcom	; ix - psgcom
-		ld	e,(iy+ztbl_Chip)
-		ld	d,0
-		add	ix,de
-		ld	a,b
-		and	0011b
-		jr	nz,.psg_mkn
-		jr	.psgc_proc
-.psg_mkn:
-		ld	a,c
-		cp	-2
-		jr	z,.kycut_psg
-		cp	-1
-		jr	z,.kyoff_psg
-		call	.psg_getfreq
-		ld	(ix+COM),001b		; Key ON
-		jr	.psgc_keyon
 
 ; --------------------------------
 ; hl - current freq
 ; ix - psgcom
 ; b - flags
+
 .psgc_proc:
 		rst	8
-		ld	l,(ix+DTL)
+		ld	l,(ix+DTL)		; Read saved freq
 		ld	h,(ix+DTH)
 .psgc_keyon:
 		ld	a,(iy+ztbl_PitchBend)	; pitchbend
@@ -1967,21 +1949,16 @@ dtbl_singl:
 		jr	nc,.vmuch
 		ld	a,-1
 .vmuch:
-		ld	(ix+PVOL),a
-		pop	ix
+		ld	(ix+MVOL),a
+		pop	ix			; * Restore ix
 		ret
 
 ; --------------------------------
+; de - increment
 
-.psgn_getfreq:
-		ld	de,12*2
-		jr	.psg_freqc
 .psg_getfreq:
-		ld	de,0
-.psg_freqc:
 		ld	hl,psgFreq_List-(36*2)
 		add	hl,de
-; 		ld	d,0
 		ld	e,(iy+ztbl_FreqIndx)	; de - note*2
 		add	hl,de
 		ld	a,(hl)
@@ -2001,10 +1978,9 @@ dtbl_singl:
 
 .mk_fm:
 		ld	c,(iy+ztbl_Chip)	; c - YM key
-		bit	0,b			; NEW note (---n)?
-		jr	nz,.mkfm_new
-		jr	.mkfm_upd		; Else: Update FM
-.mkfm_new:
+		ld	a,b			; New NOTE and/or INS?
+		and	0011b
+		jr	z,.mkfm_proc		; Process only
 		ld	a,(ix+chnl_Note)	; Get IT note
 		cp	-2			; Key-cut?
 		jp	z,.fm_cut
@@ -2028,10 +2004,14 @@ dtbl_singl:
 		call	fm_send_1
 .not_dspc:
 		call	.fm_keyoff		; Turn FM keys off
+.mkfm_proc:
+		call	.mkfm_freq
+		jp	.mkfm_set		; Volume
 
 ; --------------------------------
+; Read FM freq
 
-.mkfm_upd:
+.mkfm_freq:
 		push	bc
 		ld	a,(iy+ztbl_FreqIndx)
 		ld	b,a
@@ -2069,25 +2049,43 @@ dtbl_singl:
 		add	hl,de			; Pitchbend the freq
 		call	.fm_setfreq
 		pop	bc
-		jp	.mkfm_set		; Volume
 .nofm_note:
+		ret
+
+; --------------------------------
+
+; c - KeyID
+.fm_setfreq:
+		ld	a,c
+		and	011b
+		or	0A4h
+		ld	d,a
+		ld	e,h
+		rst	8
+		call	fm_autoreg
+		ld	a,c
+		and	011b
+		or	0A0h
+		ld	d,a
+		ld	e,l
+		call	fm_autoreg
+		rst	8
 		ret
 
 ; --------------------------------
 ; FM3 special
 ; --------------------------------
 
-.mk_fmspc:
-		ld	c,(iy+ztbl_Chip)	; c - KeyID (011b always)
-; 		ld	c,011b			; <-- FM3 special ID
-		bit	0,b			; NEW Note?
-		jp	z,.mkfm_set
+.mk_fm_sp:
+		ld	c,010b			; ** FM3 special ID
+		ld	a,b			; New NOTE and/or INS?
+		and	0011b
+		jp	z,.mkfm_set		; Process only
 		ld	a,(ix+chnl_Note)
 		cp	-2
 		jp	z,.fm_cut
 		cp	-1
 		jp	z,.fm_off
-
 		call	.fm_keyoff
 		rst	8
 		ld	hl,fmcach_3		; DIRECT point to FM3 data
@@ -2109,7 +2107,6 @@ dtbl_singl:
 		call	fm_send_1
 		ld	a,1
 		ld	(fmSpecial),a
-
 		jp	.mkfm_set
 .this_regs:
 		db 0ADh,0A9h
@@ -2148,11 +2145,11 @@ dtbl_singl:
 		ld	c,(iy+ztbl_Chip)
 		ld	a,c
 		and	011b
-		or	40h	; TL regs
+		or	40h		; TL regs
 		ld	e,7Fh
 .tl_down:
 		ld	d,a
-; 		ld	e,7Fh
+		; e - 7Fh
 		call	fm_autoreg
 		rst	8
 		ld	a,d
@@ -2160,29 +2157,7 @@ dtbl_singl:
 		djnz	.tl_down
 		ret
 
-; --------------------------------
-
-; c - KeyID
-.fm_setfreq:
-		ld	a,c
-		and	011b
-		or	0A4h
-		ld	d,a
-		ld	e,h
-		rst	8
-		call	fm_autoreg
-		ld	a,c
-		and	011b
-		or	0A0h
-		ld	d,a
-		ld	e,l
-		call	fm_autoreg
-		rst	8
-		ret
-
-; --------------------------------
-; Make FM
-; --------------------------------
+; ----------------------------------------
 
 .mkfm_set:
 		ld	a,(iy+ztbl_Chip)
@@ -2211,7 +2186,7 @@ dtbl_singl:
 		ld	d,a
 		rst	8
 		ld	a,(iy+ztbl_Volume)	; Read current Volume
-; 		sub	a,(iy+ztbl_VolSlide)
+		sub	a,(iy+ztbl_VolSlide)
 		sub	a,(iy+ztbl_MasterVol)	; + MASTER vol
 		ld	c,a			; c - Current Volume
 		ld	b,(hl)			; b - Current jump-carry byte
@@ -2344,32 +2319,25 @@ dtbl_singl:
 ; --------------------------------
 
 .mk_dac:
-		bit	0,b
-		ret	z
+		ld	a,b
+		and	0011b
+		jr	z,.dac_proc
 		ld	a,(ix+chnl_Note)
 		cp	-2
 		jp	z,.dac_cut
 		cp	-1
 		jp	z,.dac_off
-		call	.dac_pitch
-		ld	a,(ix+chnl_Flags)	; Read panning
-		cpl				; REVERSE bits
-		and	00110000b
-		rlca
-		rlca
-		rst	8
-		ld	e,a
-		ld	d,0B6h			; Channel 6 panning
-		call	fm_send_2
-		call	dac_off
+		call	.dac_proc
 		jp	dac_play
 .dac_cut:
 		call	dac_off
 		jp	.chnl_ulnkoff
 .dac_off:
+		call	dac_off
 		jp	.chnl_ulnkcut
-.dac_pitch:
-		ld	d,0		; Freq index
+
+.dac_proc:
+		ld	d,0			; Freq index
 		ld	e,(iy+ztbl_FreqIndx)
 		ld	hl,wavFreq_List-(2*36)
 		add	hl,de
@@ -2389,7 +2357,15 @@ dtbl_singl:
 		exx				; *
 		ld	de,(wave_Pitch)		; *
 		exx				; *
-		ret
+		ld	a,(ix+chnl_Flags)	; Read panning
+		cpl				; REVERSE bits
+		and	00110000b
+		rlca
+		rlca
+		rst	8
+		ld	e,a
+		ld	d,0B6h			; Channel 6 panning
+		jp	fm_send_2
 
 ; --------------------------------
 ; PCM
@@ -2397,31 +2373,25 @@ dtbl_singl:
 
 .mk_pcm:
 	if MCD|MARSCD
-		ld	a,(ix+chnl_Note)
+		ld	l,(ix+chnl_Note)
+		ld	c,(ix+chnl_Flags)	; c - Panning bits
 		ld	d,0
 		ld	e,(iy+ztbl_Chip)	; e - Channel ID
-		ld	c,(ix+chnl_Flags)	; c - Panning bits
 		push	ix
 		ld	ix,pcmcom
 		add	ix,de
+		rst	8
+		ld	a,b
+		and	0011b			; Note and Ins?
+		jr	z,.pcm_effc
+		ld	a,l
 		cp	-2
 		jp	z,.pcm_cut
 		cp	-1
 		jp	z,.pcm_off
-		rst	8
-		ld	a,b
-		and	0011b			; Note and Ins?
-		jr	nz,.pcm_note
-		bit	3,b			; Effect flag?
-		jr	nz,.pcm_effc
-		bit	2,b			; Volume flag?
-		jr	nz,.pcm_effc
-		ret
-
-; --------------------------------
-
+		jr	.pcm_note
 .pcm_effc:
-		ld	e,00001001b
+		ld	e,00001000b
 		jr	.mkpcm_wrton
 .pcm_note:
 		ld	a,c			; <-- Lazy panning reset
@@ -2503,31 +2473,26 @@ dtbl_singl:
 
 .mk_pwm:
 	if MARS|MARSCD
-		ld	a,(ix+chnl_Note)
-		ld	d,0
-		ld	e,(iy+ztbl_Chip)		; e - Channel ID
+		ld	l,(ix+chnl_Note)
 		ld	c,(ix+chnl_Flags)	; c - Panning bits
+		ld	d,0
+		ld	e,(iy+ztbl_Chip)	; e - Channel ID
 		push	ix
 		ld	ix,pwmcom
 		add	ix,de
+		rst	8
+		ld	a,b
+		and	0011b			; Note and Ins?
+		jr	z,.pw_effc
+		ld	a,l
 		cp	-2
 		jp	z,.pwm_cut
 		cp	-1
 		jp	z,.pwm_off
-		rst	8
-		ld	a,b
-		and	0011b			; Note and Ins?
-		jr	nz,.pw_note
-
-		bit	3,b			; Effect?
-		jr	nz,.pw_effc
-		bit	2,b			; Volume?
-		jr	nz,.pw_effc
-		ret
+		jr	.pw_note
 .pw_effc:
 		ld	e,00001001b
 		jr	.pw_send
-
 .pw_note:
 		ld	e,00000001b		; KeyON request
 .pw_send:
@@ -2600,7 +2565,7 @@ dtbl_singl:
 .readfreq_pwm:
 		ld	hl,wavFreq_List-(2*36)
 .set_wavfreq:
-		ld	d,0		; Freq index
+		ld	d,0			; Freq index
 		ld	e,(iy+ztbl_FreqIndx)
 		add	hl,de
 		ld	a,(hl)
@@ -2701,17 +2666,6 @@ dtbl_singl:
 
 ; Write slide
 .setef_mcD:
-; 		ld	e,-64
-; 		cp	e
-; 		jp	c,.sld_Min
-; 		ld	a,e
-; .sld_Min:
-; 		ld	e,64
-; 		cp	e
-; 		jp	c,.sld_Max
-; 		ld	a,e
-; .sld_Max:
-
 		ld	(iy+ztbl_VolSlide),a
 		ret
 
@@ -2939,7 +2893,7 @@ dtbl_singl:
 		inc	hl
 		ld	a,(hl)
 		rst	8
-		ld	(ix+PARP),a	; ARP
+		ld	(ix+ARP),a	; ARP
 		pop	hl
 		pop	ix
 		ret
@@ -3996,7 +3950,7 @@ chip_env:
 		ld	(ix),a
 		rst	8
 .vonly:
-		ld	a,(iy+PVOL)		; c - Level
+		ld	a,(iy+MVOL)		; c - Level
 		add	a,(iy+LEV)		; Add MASTER volume
 		jr	nc,.vlmuch
 		ld	a,-1

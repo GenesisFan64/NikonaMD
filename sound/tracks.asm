@@ -4,7 +4,7 @@
 ; -------------------------------------------------------------------
 
 MainGemaSeqList:
-		gemaTrk 0,6,gtrk_Test
+		gemaTrk 1,3,gtrk_Test
 		gemaTrk 1,3,gtrk_Test2
 		gemaTrk 1,3,gtrk_Test3
 
@@ -14,26 +14,23 @@ gtrk_Test:
 .blk:		binclude "sound/tracks/test_blk.bin"
 .pat:		binclude "sound/tracks/test_patt.bin"
 .ins:
-		gInsPsg 0,$00,$00,$00,$00,$00,0
-		gInsPsgN 0,$00,$00,$00,$00,$00,0,%011
-
-; 		gInsPwm -12,PwmIns_trnthem_01,1
-; 		gInsFm -24,FmIns_Hats_1
-; 		gInsFm3 0,FmIns_Sp_OpenHat
-; 		gInsFm -24,FmIns_Vibraphone_1
-; 		gInsPcm -12,PcmIns_trnthem_05,0
-; 		gInsPcm -12,PcmIns_trnthem_06,0
-; 		gInsFm -56,FmIns_Bass_club_108
-; 		gInsFm -56,FmIns_Bass_club_108
-; 		gInsFm -56,FmIns_Bass_Groove_1
-; 		gInsPwm -12,PwmIns_trnthem_10,1
-; 		gInsPwm -12,PwmIns_trnthem_11,0
-; 		gInsPwm -12,PwmIns_trnthem_12,0
-; 		gInsNull
-; 		gInsNull
-; 		gInsNull
-; 		gInsNull
-; 		gInsPcm 0,PcmIns_trnthem_20,0
+		gInsPwm -12,PwmIns_trnthem_01,1
+		gInsFm -24,FmIns_Hats_1
+		gInsFm3 0,FmIns_Sp_OpenHat
+		gInsFm -24,FmIns_Trumpet_1
+		gInsPcm -12,PcmIns_trnthem_05,0
+		gInsPcm -12,PcmIns_trnthem_06,0
+		gInsFm -56,FmIns_Bass_club_108
+		gInsFm -56,FmIns_Bass_club_108
+		gInsFm -56,FmIns_Bass_Groove_1
+		gInsNull;		gInsPcm -12,PcmIns_trnthem_10,1
+		gInsPwm -12,PwmIns_trnthem_11,0
+		gInsPwm -12,PwmIns_trnthem_12,0
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsPcm 0,PcmIns_trnthem_20,0
 
 ; ----------------------------------------------------
 gtrk_Test2:
@@ -50,7 +47,7 @@ gtrk_Test2:
 		gInsFm -56,FmIns_Bass_club_108
 		gInsFm -56,FmIns_Bass_club_108
 		gInsFm -56,FmIns_Bass_Groove_1
-		gInsPcm -12,PcmIns_trnthem_10,1
+		gInsNull;		gInsPcm -12,PcmIns_trnthem_10,1
 		gInsPwm -12,PwmIns_trnthem_11,0
 		gInsPwm -12,PwmIns_trnthem_12,0
 		gInsNull
@@ -265,9 +262,8 @@ FmIns_Brass_7:
 ; -------------------------------------------------------------------
 
 		align $800
-		gSmplData DacIns_Arena_01,"sound/instr/smpl/arena_01.wav",0
-		gSmplData DacIns_Arena_02,"sound/instr/smpl/arena_02.wav",0
-		gSmplData DacIns_Arena_03,"sound/instr/smpl/arena_03.wav",0
+		gSmplData DacIns_trnthem_10,"sound/instr/smpl/trnthem/10.wav",3033
+
 		gSmplData DacIns_Kick,"sound/instr/smpl/kick.wav",0
 		gSmplData DacIns_Snare,"sound/instr/smpl/snare.wav",0
 		gSmplData DacIns_Timpani,"sound/instr/smpl/timpani.wav",0

@@ -1720,11 +1720,14 @@ CdSub_PCM_ReadTable:
 ; ----------------------------------------
 
 CdSub_PCM_Process:
-		bsr	CdSub_PCM_ReadTable		; Update PCM channels
+		bsr	CdSub_PCM_Stream
 		bsr	CdSub_PCM_Stream
 		tst.b	(RAM_CdSub_PcmReqUpd).w		; IRQ check
 		beq.s	.no_req
 		bsr	.get_table
+		bsr	CdSub_PCM_ReadTable		; Update PCM channels
+		bsr	CdSub_PCM_Stream
+		bsr	CdSub_PCM_Stream
 		subq.b	#1,(RAM_CdSub_PcmReqUpd).w
 		bra	CdSub_PCM_Process
 .no_req:
@@ -1841,11 +1844,11 @@ CdSub_PCM_Stream:
 		adda	#4,a4				; Next MSB to check
 		addq.w	#1,d6				; Next PCM Channel number
 		dbf	d7,.get_addr
-		tst.b	(RAM_CdSub_PcmMkNew).w
-		beq.s	.not_new
-		clr.b	(RAM_CdSub_PcmMkNew).w
-		move.b	d5,ONREG(a5)			; Enable channel
-.not_new:
+; 		tst.b	(RAM_CdSub_PcmMkNew).w
+; 		beq.s	.not_new
+; 		clr.b	(RAM_CdSub_PcmMkNew).w
+; 		move.b	d5,ONREG(a5)			; Enable channel
+; .not_new:
 		not.w	d5				; Reverse return bits
 		move.b	d5,(RAM_CdSub_PcmEnbl).w
 		rts
@@ -1854,8 +1857,8 @@ CdSub_PCM_Stream:
 
 .stop_pcm:
 		bset	d6,d5
-		st.b	(RAM_CdSub_PcmMkNew).w
-; 		move.b	d5,ONREG(a5)
+; 		st.b	(RAM_CdSub_PcmMkNew).w
+		move.b	d5,ONREG(a5)
 		rts
 
 ; --------------------------------------------------------

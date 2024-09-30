@@ -572,12 +572,12 @@ sizeof_thisbuff		ds.l 0
 		moveq	#SET_SNDVIEWY,d1
 		moveq	#1-1,d7
 		bsr	.show_table
-
 		lea	(RAM_GemaCache_FM),a3
 		moveq	#7,d0
 		moveq	#SET_SNDVIEWY+1,d1
 		moveq	#5-1,d7
 		bsr	.show_table_fm
+		lea	(RAM_GemaCache_FM3),a3
 		moveq	#7+16,d0
 		moveq	#SET_SNDVIEWY+1,d1
 		bsr	sndLockZ80
@@ -585,11 +585,14 @@ sizeof_thisbuff		ds.l 0
 		bsr	sndUnlockZ80
 		tst.b	d7
 		beq.s	.no_spec
+		lea	(strL_FmOnly),a0
+		tst.w	(a3)
+		bmi.s	.no_prnt3
 		lea	(str_Speci),a0
+.no_prnt3:
 		bsr	Video_Print
 		bra.s	.b_sampl
 .no_spec:
-		lea	(RAM_GemaCache_FM3),a3
 		moveq	#1-1,d7
 		bsr	.show_table_fm
 .b_sampl:
