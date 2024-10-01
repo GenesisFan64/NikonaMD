@@ -877,7 +877,7 @@ ArtList_Stuff:
 ; 		align 2
 
 str_TesterTitle:
-		dc.b "GEMA Sound driver  V1.x(dev)",0
+		dc.b "GEMA Sound driver   V1.?-dev",0
 		align 2
 str_TesterInfo:
 ; 		dc.b "Sound data: 00000000",$0A

@@ -14,23 +14,7 @@ gtrk_Test:
 .blk:		binclude "sound/tracks/test_blk.bin"
 .pat:		binclude "sound/tracks/test_patt.bin"
 .ins:
-		gInsPwm -12,PwmIns_trnthem_01,1
-		gInsFm -24,FmIns_Hats_1
-		gInsFm3 0,FmIns_Sp_OpenHat
-		gInsFm -24,FmIns_Trumpet_1
-		gInsPcm -12,PcmIns_trnthem_05,0
-		gInsPcm -12,PcmIns_trnthem_06,0
-		gInsFm -56,FmIns_Bass_club_108
-		gInsFm -56,FmIns_Bass_club_108
-		gInsFm -56,FmIns_Bass_Groove_1
-		gInsNull;		gInsPcm -12,PcmIns_trnthem_10,1
-		gInsPwm -12,PwmIns_trnthem_11,0
-		gInsPwm -12,PwmIns_trnthem_12,0
-		gInsNull
-		gInsNull
-		gInsNull
-		gInsNull
-		gInsPcm 0,PcmIns_trnthem_20,0
+		gInsPsg 0,$20,$20,$20,$00,$00,0
 
 ; ----------------------------------------------------
 gtrk_Test2:
@@ -47,9 +31,9 @@ gtrk_Test2:
 		gInsFm -56,FmIns_Bass_club_108
 		gInsFm -56,FmIns_Bass_club_108
 		gInsFm -56,FmIns_Bass_Groove_1
-		gInsNull;		gInsPcm -12,PcmIns_trnthem_10,1
-		gInsPwm -12,PwmIns_trnthem_11,0
-		gInsPwm -12,PwmIns_trnthem_12,0
+		gInsPcm -12,PcmIns_trnthem_10,1
+		gInsPsgN -12,$30,$30,$30,$10,$20,$00,%110;gInsPwm -12,PwmIns_trnthem_11,0
+		gInsPsgN -12,$30,$30,$30,$10,$20,$00,%100;gInsPwm -12,PwmIns_trnthem_12,0
 		gInsNull
 		gInsNull
 		gInsNull
@@ -198,6 +182,8 @@ FmIns_Bell_mid36:
 		binclude "sound/instr/fm/bin/bell_mid_36.bin"
 FmIns_Drum_Kick:
 		binclude "sound/instr/fm/bin/kick_low.bin"
+FmIns_Tick:
+		binclude "sound/instr/fm/bin/tick_44.bin"
 
 ; -----------------------------------------------------------
 ; Special FM3 Instruments

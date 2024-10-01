@@ -24,6 +24,7 @@ WRAM_MdStampList	equ $3A000
 WRAM_TraceBuff		equ $3B000	; Size $780*2 ($F00)
 WRAM_StampsDone		equ $3BFFC
 WRAM_StampCurrFlip	equ $3BFFE
+WRAM_PcmTable		equ $3A000	; TODO
 WRAM_SaveDataCopy	equ $3C000	; ** DONT Overwrite THIS **
 
 ; ====================================================================
@@ -34,7 +35,7 @@ WRAM_SaveDataCopy	equ $3C000	; ** DONT Overwrite THIS **
 SCPU_wram	equ $00080000
 SCPU_bram	equ $FFFE8000
 SCPU_pcm	equ $FFFF0000
-; SCPU_pcmwave	equ $FFFF2001
+; SCPU_pcmram	equ $FFFF2001
 SCPU_reg	equ $FFFF8000
 
 PCM		equ $00
@@ -235,6 +236,7 @@ SCPU_User:
 SCPU_Main:
 		bsr	CdSub_PCM_Process
 		bsr	CdSub_StampRender
+		bsr	CdSub_PCM_Process
 		bsr	CdSub_PCM_Process
 		move.b	(SCPU_reg+mcd_comm_m).w,d0	; Read MAIN comm
 		move.b	d0,d1
@@ -1543,48 +1545,40 @@ CdSub_PCM_Wait:
 
 CdSub_PCM_Init:
 		lea	(SCPU_pcm),a6		; a6 - PCM registers
+		move.b	#-1,ONREG(a6)
+		bsr	CdSub_PCM_Wait
 		moveq	#0,d0			; d0 - BLANK byte
 		moveq	#-1,d1			; d1 - LOOP byte
 		move.w	#$80,d2			; d2 - Current BANK
 		moveq	#$0F,d7			; $0000-$7FFF
-		lea	$2001(a6),a5		; a5 - PCM RAM area
+		lea	$2001(a6),a5		; a5 - WAVE RAM
 .clr_pwm:
 		move.b	d2,CTREG(a6)
 		bsr	CdSub_PCM_Wait
 		move.l	a5,a4
-		move.w	#$0FF8-1,d6
+		move.w	#$0FF0-1,d6
 .wr_end:	move.b	d0,(a4)
 		addq.l	#2,a4
 		dbf	d6,.wr_end
-	rept 8
+	rept $10
 		move.b	d1,(a4)
 		addq.l	#2,a4
 	endm
 		addq.b	#$01,d2
 		dbf	d7,.clr_pwm
-		move.w	#$88,d2			; Make silence block
-		lea	.data_blk(pc),a0
+		move.w	#$80|8,d2		; Make silence block
 		move.b	d2,CTREG(a6)		; Slot $8000 for pre-silence
 		bsr	CdSub_PCM_Wait
-		moveq	#(.data_blk_e-.data_blk)-1,d7
+		moveq	#$00,d0
+		move.b	d0,(a5)
+		addq.l	#2,a5
+		subq.w	#1,d0
+		move.w	#$FFF-1,d7
 .copy_data:
-		move.b	(a0)+,d0
 		move.b	d0,(a5)
 		addq.l	#2,a5
 		dbf	d7,.copy_data
-		move.b	#-1,ONREG(a6)
 		bra	CdSub_PCM_Wait
-.data_blk:
-		dc.b $00,$00,$00,$00,$00,$00,$00,$00
-		dc.b $00,$00,$00,$00,$00,$00,$00,$00
-		dc.b $00,$00,$00,$00,$00,$00,$00,$00
-		dc.b $00,$00,$00,$00,$00,$00,$00,$00
-		dc.b $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-		dc.b $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-		dc.b $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-		dc.b $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-.data_blk_e:
-		align 2
 
 ; --------------------------------------------------------
 ; CdSub_PCM_ReadTable
@@ -1637,18 +1631,17 @@ CdSub_PCM_ReadTable:
 .cdcom_keyon:
 		bclr	#3,d5			; Effect update ONLY?
 		bne	.effect_only
-		bsr.s	.cdcom_keyoff
 		bsr.s	.effect_mod
 		moveq	#0,d0
-		move.b	(a0),d0		; 40
+		move.b	(a0),d0			; 40
 		move.b	d0,d3
 		adda	#8,a0
 		andi.w	#$7F,d0
 		swap	d0
-		move.b	(a0),d0		; 48
+		move.b	(a0),d0			; 48
 		adda	#8,a0
 		lsl.w	#8,d0
-		move.b	(a0),d0		; 56
+		move.b	(a0),d0			; 56
 		move.l	d0,a2
 		moveq	#0,d0
 		moveq	#0,d1			; Read LEN
@@ -1720,14 +1713,11 @@ CdSub_PCM_ReadTable:
 ; ----------------------------------------
 
 CdSub_PCM_Process:
-		bsr	CdSub_PCM_Stream
+		bsr	CdSub_PCM_ReadTable		; Update PCM channels
 		bsr	CdSub_PCM_Stream
 		tst.b	(RAM_CdSub_PcmReqUpd).w		; IRQ check
 		beq.s	.no_req
 		bsr	.get_table
-		bsr	CdSub_PCM_ReadTable		; Update PCM channels
-		bsr	CdSub_PCM_Stream
-		bsr	CdSub_PCM_Stream
 		subq.b	#1,(RAM_CdSub_PcmReqUpd).w
 		bra	CdSub_PCM_Process
 .no_req:
@@ -1753,7 +1743,7 @@ CdSub_PCM_Process:
 		andi.w	#%11000000,d0
 		move.b	d0,(SCPU_reg+mcd_comm_s).w
 .next_packet:
-		move.b	(SCPU_reg+mcd_comm_m).l,d0		; Read MAIN comm.
+		move.b	(SCPU_reg+mcd_comm_m).l,d0		; Read MAIN comm
 		btst	#5,d0					; Still LOCKed?
 		beq.s	.exit_now				; If not, finish.
 		btst	#4,d0					; PASS bit set?
@@ -1834,7 +1824,7 @@ CdSub_PCM_Stream:
 		move.l	#SET_PCMBLK,d3			; d3 - Block size
 		cmp.w	#SET_PCMAND,d4			; Is this the looping block?
 		bne.s	.lowhalf
-		subq.l	#8,d3				; Size-4 to skip the loop bytes.
+		subi.l	#$10,d3				; Size-4 to skip the loop bytes.
 .lowhalf:
 		bsr	.make_blk_strm
 		move.l	d1,cdpcm_clen(a6)		; Save next wave size
@@ -1844,11 +1834,11 @@ CdSub_PCM_Stream:
 		adda	#4,a4				; Next MSB to check
 		addq.w	#1,d6				; Next PCM Channel number
 		dbf	d7,.get_addr
-; 		tst.b	(RAM_CdSub_PcmMkNew).w
-; 		beq.s	.not_new
-; 		clr.b	(RAM_CdSub_PcmMkNew).w
-; 		move.b	d5,ONREG(a5)			; Enable channel
-; .not_new:
+		tst.b	(RAM_CdSub_PcmMkNew).w
+		beq.s	.not_new
+		clr.b	(RAM_CdSub_PcmMkNew).w
+		move.b	d5,ONREG(a5)			; Enable channel
+.not_new:
 		not.w	d5				; Reverse return bits
 		move.b	d5,(RAM_CdSub_PcmEnbl).w
 		rts
@@ -1857,8 +1847,8 @@ CdSub_PCM_Stream:
 
 .stop_pcm:
 		bset	d6,d5
-; 		st.b	(RAM_CdSub_PcmMkNew).w
-		move.b	d5,ONREG(a5)
+		st.b	(RAM_CdSub_PcmMkNew).w
+; 		move.b	d5,ONREG(a5)
 		rts
 
 ; --------------------------------------------------------
@@ -1915,9 +1905,8 @@ CdSub_PCM_Stream:
 
 .end_point:
 		subq.l	#1,d1			; Count current lenght
-		bpl.s	.last_smpl
+		bne.s	.last_smpl
 		moveq	#-1,d0			; Write loop byte
-		moveq	#$10,d4
 .set_lmark:
 		move.b	d0,(a1)
 		addq.l	#2,a1
@@ -1949,23 +1938,19 @@ CdSub_PCM_Stream:
 .first_fill:
 		bset	d6,d5
 		move.b	d5,ONREG(a5)			; Enable channel
+		bsr	CdSub_PCM_Wait
+		bsr	.update_set
 		move.l	cdpcm_start(a6),d0
 		move.l	cdpcm_length(a6),d1
-		move.l	cdpcm_start(a6),cdpcm_slast(a6)
 		move.l	d0,a0
 		bsr	.make_lblk
 		move.l	a0,cdpcm_cread(a6)		; Return read points.
 		move.l	d1,cdpcm_clen(a6)
 		move.w	#0,cdpcm_strmhalf(a6)
 .from_fill:
-		move.b	d6,d0				; Set PCM to control mode
-		or.b	#$C0,d0
-		move.b	d0,CTREG(a5)
 		moveq	#0,d0
 		move.b	d6,d0				; $000x
 		lsl.w	#4,d0				; $00x0
-		move.b	d0,ST(a5)			; Set starting MSB
-		bsr	CdSub_PCM_Wait
 		lsl.w	#8,d0				; $x000
 		tst.l	d1
 		beq.s	.small_sampl
@@ -1992,12 +1977,19 @@ CdSub_PCM_Stream:
 		move.l	cdpcm_loop(a6),d3
 		add.l	d3,d0			; Our block + this loop
 .set_mkloop:
+		move.b	d6,d1				; Set PCM to control mode
+		or.b	#$C0,d1
+		move.b	d1,CTREG(a5)
+		bsr	CdSub_PCM_Wait
 		move.b	d0,LSL(a5)
 		bsr	CdSub_PCM_Wait
 		lsr.w	#8,d0
 		move.b	d0,LSH(a5)
 		bsr	CdSub_PCM_Wait
-		; continue...
+		move.w	d6,d0
+		lsl.w	#4,d0				; $00x0
+		move.b	d0,ST(a5)			; Set starting MSB
+		bra	CdSub_PCM_Wait
 
 ; --------------------------------------------------------
 ; Channel changes
@@ -2037,8 +2029,8 @@ CdSub_PCM_Stream:
 		lsr.w	#3,d3			; size / 4
 		subq.w	#1,d3
 .wave_blkl:
-; 		tst.l	d1
-; 		bmi.s	.fill_blank
+		tst.l	d1
+		bmi.s	*
 	rept 8
 		moveq	#-1,d0			; d0 - Loop flag
 		subq.l	#1,d1			; Length counter
@@ -2057,9 +2049,9 @@ CdSub_PCM_Stream:
 ; Fill unused block
 .fill_blank:
 		moveq	#-1,d0
-		cmp.w	#4-1,d3
+		cmp.w	#8-1,d3
 		blt.s	.loop_blkl
-		move.w	#4-1,d3
+		move.w	#8-1,d3
 .loop_blkl:
 	rept 8
 		move.b	d0,(a1)

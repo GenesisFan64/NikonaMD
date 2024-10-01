@@ -1845,7 +1845,7 @@ dtbl_singl:
 ; --------------------------------
 .mk_list:
 		dw .mk_psg
-		dw .mk_psg;.mk_psgn
+		dw .mk_psg
 		dw .mk_fm
 		dw .mk_fm_sp
 		dw .mk_dac
@@ -1868,8 +1868,7 @@ dtbl_singl:
 		ld	a,b			; New NOTE and/or INS?
 		and	0011b
 		jr	z,.psgc_proc		; Process only
-.psg_mkn:
-		ld	a,c
+		ld	a,c			; c - Note
 		cp	-2			; Key cut?
 		jr	z,.kycut_psg
 		cp	-1			; Key off?
@@ -1889,7 +1888,6 @@ dtbl_singl:
 		jr	.psgc_keyon
 
 ; --------------------------------
-
 ; -1
 .kyoff_psgn:
 		call	.kypsgn_hatoff
@@ -1897,6 +1895,8 @@ dtbl_singl:
 		ld	(ix),010b		; Write key off
 		pop	ix			; * Restore ix
 		jp	.chnl_ulnkoff
+
+; --------------------------------
 ; -2
 .kycut_psgn:
 		call	.kypsgn_hatoff
@@ -1904,6 +1904,8 @@ dtbl_singl:
 		ld	(ix),100b		; Write key cut
 		pop	ix			; * Restore ix
 		jp	.chnl_ulnkcut
+
+
 .kypsgn_hatoff:
 		ld	a,000b
 		ld	(psgHatMode),a		; ** GLOBAL SETTING
@@ -1925,10 +1927,11 @@ dtbl_singl:
 		jp	z,.no_req
 		neg	a
 		ld	e,a
+		ld	c,a
 		xor	a
 		ld	(iy+ztbl_PitchBend),a
 		ccf
-		sla	e
+		sla	c
 		sbc	a,a
 		ld	d,a
 		add	hl,de
@@ -3202,23 +3205,15 @@ dtbl_singl:
 ; ----------------------------------------
 
 .chnl_ulnkcut:
-		ld	c,(ix+chnl_Chip)
-		jp	.chnl_ulnk
+
 .chnl_ulnkoff:
-; 		ld	c,0
 
 .chnl_ulnk:
-		xor	a
+		ld	d,(ix+chnl_Chip)
 		rst	8
-		ld	(iy),a				; Delete link, chip and prio
-		ld	(iy+1),a
-		ld	(iy+2),a
 		push	iy
 		pop	hl
-		inc	hl
-		inc	hl
-		inc	hl
-		jr	tblz_clear_e
+; 		jp	tblz_clear
 
 ; ----------------------------------------
 ; Reset all table
@@ -3237,29 +3232,18 @@ tblz_clear:
 		ld	(hl),0
 		inc	hl
 		ld	(hl),d			; Set "silence" chip ID.
-tblz_clear_e:
-		ld	bc,8-3			; Go to 08h
-		rst	8
-		add	hl,bc
-		ld	b,8/2
-.clrfull:
-		ld	(hl),0			; Reset settings 08-0Bh
-		inc	hl
-		ld	(hl),0
-		inc	hl
-		rst	8
-		djnz	.clrfull
 		ret
 
 ; ============================================================
 ; --------------------------------------------------------
 ; Communication with the SCD and 32X
 ;
-; SCD: Sends a level2 interrupt to Sub-CPU*
-; 32X: Interrupts Slave SH2 with CMD request
-;
-; *Originally meant for waiting VBlank, that's
-; the only one available for sending the table
+; SCD: Sends a level2 interrupt to Sub-CPU
+;    | Uses: commM,comm18-1F
+;    |
+; 32X: Interrupts Slave SH2
+;    | Uses: comm8-comm11 (CMD request)
+;    | two bits of comm14
 ; --------------------------------------------------------
 
 ; NOTE: careful modifing this
@@ -3290,7 +3274,7 @@ zmars_send:
 		jr	nz,.wait_in
 		ld	c,0C0h
 		ld	(iy),c		; Set our entrance ID
-		ld	b,16
+		ld	b,8
 .make_sure:
 		ld	a,(iy)		; Check if did write
 		cp	c
