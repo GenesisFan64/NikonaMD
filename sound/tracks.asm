@@ -14,7 +14,8 @@ gtrk_Test:
 .blk:		binclude "sound/tracks/test_blk.bin"
 .pat:		binclude "sound/tracks/test_patt.bin"
 .ins:
-		gInsPsg 0,$20,$20,$20,$00,$00,0
+		gInsPcm -12,PcmIns_trnthem_10,1
+		gInsPcm 0,PcmIns_trnthem_20,0
 
 ; ----------------------------------------------------
 gtrk_Test2:

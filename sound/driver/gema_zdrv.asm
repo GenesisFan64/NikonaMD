@@ -2406,8 +2406,8 @@ dtbl_singl:
 		ld	e,00000001b		; KeyON request
 .mkpcm_wrton:
 		ld	(ix),e			; Write key-on bit
-.mkpcm_proc:
 		call	.readfreq_pcm
+		ld	d,0
 		ld	e,(ix+64)		; Get Current PCM panning
 		push	de
 		ld	de,8			; Go to Pitch
@@ -2417,6 +2417,7 @@ dtbl_singl:
 		ld	(ix),l
 		add	ix,de
 		ld	c,-1
+
 		ld	a,(iy+ztbl_MasterVol)
 		cp	40h
 		jr	z,.vpcm_siln
@@ -3258,7 +3259,7 @@ zmars_send:
 		ld	iy,8000h|200Eh	; iy - command ports
 		ld	a,(mcdUpd)	; NEW transfer?
 		or	a
-		jp	z,.mcdt_noupd
+		jp	z,.mcdt_blocked
 		xor	a
 		ld	(mcdUpd),a
 		rst	20h
@@ -4258,6 +4259,7 @@ pcmcom:	db 00h,00h,00h,00h,00h,00h,00h,00h	; 0 - Playback bits: %0000PCOK Pitchb
 	db 00h,00h,00h,00h,00h,00h,00h,00h	; 40 - 24-bit sample location in Sub-CPU area
 	db 00h,00h,00h,00h,00h,00h,00h,00h	; 48
 	db 00h,00h,00h,00h,00h,00h,00h,00h	; 56
+
 pcmpan:	db 00h,00h,00h,00h,00h,00h,00h,00h	; 64 - External PCM panning
 
 pwmcom:	db 00h,00h,00h,00h,00h,00h,00h,00h	; 0 - Playback bits: %0000PCOK Pitchbend/keyCut/keyOff/KeyOn
