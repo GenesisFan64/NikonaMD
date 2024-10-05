@@ -1759,13 +1759,13 @@ dtbl_singl:
 		ld	a,1
 		ld	(mcdUpd),a
 		rst	8
-		ld	ix,pcmcom
+		ld	hl,pcmcom
 		jr	.rcyl_com
 .siln_pwm:
 		ld	a,1
 		ld	(marsUpd),a
 		rst	8
-		ld	ix,pwmcom
+		ld	hl,pwmcom
 ; 		jr	.rcyl_com
 
 ; --------------------------------
@@ -1773,8 +1773,8 @@ dtbl_singl:
 .rcyl_com:
 		ld	b,0
 		ld	c,(iy+ztbl_Chip)
-		add	ix,bc
-		ld	(ix),100b	; key-cut
+		add	hl,bc
+		ld	(hl),100b	; key-cut
 		ret
 
 ; --------------------------------
@@ -1809,7 +1809,7 @@ dtbl_singl:
 	; iy - Our chip table
 	; ix - Track channel
 	; hl - Intrument data
-		ld	a,b		; Note + Inst?
+		ld	a,b		; Note and/or Inst?
 		and	0011b
 		call	nz,.reset_effc	; Reset effects
 		bit	2,b		; Volume
@@ -1857,8 +1857,7 @@ dtbl_singl:
 ; --------------------------------
 
 .mk_psg:
-		ld	a,(ix+chnl_Note)
-		ld	c,a			; c - Note
+		ld	c,(ix+chnl_Note)	; c - Note
 		push	ix			; * Save ix
 		rst	8
 		ld	ix,psgcom		; ix - psgcom
@@ -2338,7 +2337,6 @@ dtbl_singl:
 .dac_off:
 		call	dac_off
 		jp	.chnl_ulnkcut
-
 .dac_proc:
 		ld	d,0			; Freq index
 		ld	e,(iy+ztbl_FreqIndx)
@@ -2376,10 +2374,9 @@ dtbl_singl:
 
 .mk_pcm:
 	if MCD|MARSCD
-		ld	l,(ix+chnl_Note)
-		ld	c,(ix+chnl_Flags)	; c - Panning bits
 		ld	d,0
 		ld	e,(iy+ztbl_Chip)	; e - Channel ID
+		ld	c,(ix+chnl_Note)	; c - Current note
 		push	ix
 		ld	ix,pcmcom
 		add	ix,de
@@ -2387,17 +2384,19 @@ dtbl_singl:
 		ld	a,b
 		and	0011b			; Note and Ins?
 		jr	z,.pcm_effc
-		ld	a,l
+		ld	a,c
 		cp	-2
 		jp	z,.pcm_cut
 		cp	-1
 		jp	z,.pcm_off
 		jr	.pcm_note
 .pcm_effc:
-		ld	e,00001000b
-		jr	.mkpcm_wrton
+		pop	ix
+		ret
+; 		ld	e,00001000b
+; 		jr	.mkpcm_wrton
 .pcm_note:
-		ld	a,c			; <-- Lazy panning reset
+		ld	a,(ix+chnl_Flags)
 		and	00110000b		; Read LR bits
 		or	a
 		jr	nz,.mp_reset
@@ -2456,12 +2455,12 @@ dtbl_singl:
 ; -1
 .pcm_off:
 		rst	8
-		ld	(ix),010b
+		ld	(ix),0010b
 		jr	.pcm_setcoff
 ; -2
 .pcm_cut:
 		rst	8
-		ld	(ix),100b
+		ld	(ix),0100b
 .pcm_setcoff:
 		ld	a,1
 		ld	(mcdUpd),a
@@ -3084,6 +3083,8 @@ dtbl_singl:
 		pop	bc
 		pop	hl
 		pop	ix
+		ld	a,1
+		ld	(mcdUpd),a
 		ret
 
 ; ----------------------------------------

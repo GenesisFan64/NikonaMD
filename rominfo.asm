@@ -92,5 +92,5 @@ HTAG_REGIONS	equ "F               "
 ; --------------------------------------------------------
 
 SET_SRAMSIZE	equ $100		; SRAM/BRAM filesize, must be "blocks" of $40 bytes ($20 w/Protection)
-HTAG_CDSAVE	equ "NIKONACD___"	; SEGA CD internal save name
-HTAG_MARSCDSAV	equ "NIKONACD32X"	; CD32X internal save name (if SET_SAMECDINFO is False)
+HTAG_CDSAVE	equ "NIKONACD___"	; SCD internal save name
+HTAG_MARSCDSAV	equ "NIKONACD32X"	; CD32X internal save name

@@ -4,7 +4,7 @@
 ; -------------------------------------------------------------------
 
 MainGemaSeqList:
-		gemaTrk 1,3,gtrk_Test
+		gemaTrk 1,24,gtrk_Test
 		gemaTrk 1,3,gtrk_Test2
 		gemaTrk 1,3,gtrk_Test3
 
@@ -14,7 +14,22 @@ gtrk_Test:
 .blk:		binclude "sound/tracks/test_blk.bin"
 .pat:		binclude "sound/tracks/test_patt.bin"
 .ins:
-		gInsPcm -12,PcmIns_trnthem_10,1
+		gInsPcm 0,PcmIns_TEST,0
+		gInsFm -24,FmIns_Hats_1
+		gInsFm3 0,FmIns_Sp_OpenHat
+		gInsFm -24,FmIns_Trumpet_1
+		gInsPcm -12,PcmIns_trnthem_05,0
+		gInsPcm -12,PcmIns_trnthem_06,0
+		gInsFm -56,FmIns_Bass_club_108
+		gInsFm -56,FmIns_Bass_club_108
+		gInsFm -56,FmIns_Bass_Groove_1
+		gInsPcm -12,PcmIns_trnthem_10,0
+		gInsPwm -12,PwmIns_trnthem_11,0
+		gInsPwm -12,PwmIns_trnthem_12,0
+		gInsNull
+		gInsNull
+		gInsNull
+		gInsNull
 		gInsPcm 0,PcmIns_trnthem_20,0
 
 ; ----------------------------------------------------
@@ -33,8 +48,8 @@ gtrk_Test2:
 		gInsFm -56,FmIns_Bass_club_108
 		gInsFm -56,FmIns_Bass_Groove_1
 		gInsPcm -12,PcmIns_trnthem_10,1
-		gInsPsgN -12,$30,$30,$30,$10,$20,$00,%110;gInsPwm -12,PwmIns_trnthem_11,0
-		gInsPsgN -12,$30,$30,$30,$10,$20,$00,%100;gInsPwm -12,PwmIns_trnthem_12,0
+		gInsPwm -12,PwmIns_trnthem_11,0
+		gInsPwm -12,PwmIns_trnthem_12,0
 		gInsNull
 		gInsNull
 		gInsNull
