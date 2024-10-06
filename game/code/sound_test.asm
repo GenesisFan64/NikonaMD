@@ -43,7 +43,7 @@ RAM_GemaSeq		ds.w 1		; ''
 RAM_GemaBlk		ds.w 1		; ''
 RAM_GemaStatus		ds.w 4
 RAM_FairyVars		ds.w 1
-			ds.w 1
+RAM_CurrBeats		ds.w 1
 
 sizeof_thisbuff		ds.l 0
 			endmemory
@@ -255,6 +255,7 @@ sizeof_thisbuff		ds.l 0
 		add.w	d1,d1
 		lea	.extnal_beats(pc),a0
 		move.w	(a0,d1.w),d0
+		move.w	d0,(RAM_CurrBeats).w
 		bsr	gemaSetBeats
 .c_press:
 	; B BUTTON
@@ -772,24 +773,26 @@ obj_Fairy:
 		move.w	#4,d4
 .not_enbls:
 		move.w	4(a5),d0
-; 		add.w	d3,d0
 		lsr.w	#4,d0
 		bsr	System_SineWave
 		muls.w	d4,d1
 		asr.w	#8,d1
 		sub.w	d1,d2
 		move.w	4(a5),d0
-; 		add.w	d3,d0
 		lsr.w	#4,d0
+		btst	#0,1(a4)
+		beq.s	.not_enbl2
+		add.w	d0,d0
+.not_enbl2:
 		bsr	System_SineWave_Cos
 		muls.w	d4,d1
 		asr.w	#8,d1
 		sub.w	d1,d3
 
-		move.w	#$40,d4	; RAM value
+		move.w	#$40,d4
 		btst	#7,1(a4)
 		beq.s	.not_enbl
-		add.w	d4,d4
+		move.w	#$90,d4
 .not_enbl:
 		addi.w	d4,4(a5)
 		move.w	d2,obj_x(a6)

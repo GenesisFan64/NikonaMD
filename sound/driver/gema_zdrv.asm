@@ -1728,6 +1728,9 @@ dtbl_singl:
 ; ----------------------------------------
 ; chip-silence request
 ; iy - Table
+
+		ld	b,0
+		ld	c,(iy+ztbl_Chip)
 		and	11110000b
 		cp	80h
 		jr	z,.siln_psg
@@ -1750,7 +1753,7 @@ dtbl_singl:
 		ld	(psgHatMode),a
 .siln_psg:
 		rst	8
-		ld	ix,psgcom
+		ld	hl,psgcom
 		jr	.rcyl_com
 
 ; --------------------------------
@@ -1759,6 +1762,9 @@ dtbl_singl:
 		ld	a,1
 		ld	(mcdUpd),a
 		rst	8
+		ld	hl,pcmcom+32
+		add	hl,bc
+		ld	(hl),-1
 		ld	hl,pcmcom
 		jr	.rcyl_com
 .siln_pwm:
@@ -1766,13 +1772,7 @@ dtbl_singl:
 		ld	(marsUpd),a
 		rst	8
 		ld	hl,pwmcom
-; 		jr	.rcyl_com
-
-; --------------------------------
-
 .rcyl_com:
-		ld	b,0
-		ld	c,(iy+ztbl_Chip)
 		add	hl,bc
 		ld	(hl),100b	; key-cut
 		ret
@@ -2391,23 +2391,19 @@ dtbl_singl:
 		jp	z,.pcm_off
 		jr	.pcm_note
 .pcm_effc:
-		pop	ix
-		ret
-; 		ld	e,00001000b
-; 		jr	.mkpcm_wrton
+		ld	e,00001000b
+		jr	.mkpcm_wrton
 .pcm_note:
-		ld	a,(ix+chnl_Flags)
-		and	00110000b		; Read LR bits
-		or	a
-		jr	nz,.mp_reset
-		ld	(ix+64),0		; Reset PCM panning
-.mp_reset:
+; 		ld	a,b
+; 		and	00110000b		; Read LR bits
+; 		or	a
+; 		jr	nz,.mp_reset
+; 		ld	(ix+32),-1		; Reset PCM panning
+; .mp_reset:
 		ld	e,00000001b		; KeyON request
 .mkpcm_wrton:
 		ld	(ix),e			; Write key-on bit
 		call	.readfreq_pcm
-; 		ld	a,(ix+64)		; Get Current PCM panning
-; 		ld	a,e
 		push	de
 		ld	de,8			; Go to Pitch
 		add	ix,de

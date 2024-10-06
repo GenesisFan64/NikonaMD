@@ -5,8 +5,8 @@
 ; Loaded on BOOT
 ; -------------------------------------------------------------------
 
-SET_PCMBLK		equ $040
-SET_PCMLAST		equ $FC0
+SET_PCMBLK		equ $080
+SET_PCMLAST		equ $F80
 
 SET_STAMPPOV		equ 256
 ; MAX_MCDSTAMPS		equ 64		; see shared.asm
@@ -132,7 +132,7 @@ flags		ds.w 1
 
 SCPU_Init:
 		bclr	#3,(SCPU_reg+$33).w		; Disable Timer interrupt
-		move.b	#$FF,(SCPU_reg+$31).w		; Set timer value
+		move.b	#$30,(SCPU_reg+$31).w		; Set timer value
 		move.l	#SCPU_Timer,(_LEVEL3+2).l	; Write LEVEL 3 jump
 		move.l	#SCPU_Stamp,(_LEVEL1+2).l	; Write LEVEL 1 jump
 		bsr	spCdda_ResetVolume		; Reset CDDA Volume
@@ -201,6 +201,14 @@ SCPU_IRQ:
 ; ----------------------------------------------------------------
 
 SCPU_Timer:
+; 		tst.b	(RAM_CdSub_PcmMkNew).w
+; 		bne.s	.not_timr
+; 		st.b	(RAM_CdSub_PcmMkNew).w
+; 		movem.l	d0-a6,-(sp)
+; 		bsr	CdSub_PCM_Stream
+; 		movem.l	(sp)+,d0-a6
+; 		clr.b	(RAM_CdSub_PcmMkNew).w
+; .not_timr
 		rte			; rte
 
 ; =====================================================================
@@ -1523,42 +1531,27 @@ CdSub_StampDefaults:
 ; $9000       | UNUSED
 
 CdSub_PCM_Init:
-		st.b	(RAM_CdSub_PcmEnbl).w
 		lea	(SCPU_pcm),a6		; a6 - PCM registers
 		move.b	#-1,ONREG(a6)
 		moveq	#0,d0			; d0 - BLANK byte
 		moveq	#-1,d1			; d1 - LOOP byte
 		move.w	#$80,d2			; d2 - Current BANK
-		moveq	#$0F+1,d7			; $0000-$7FFF
-		lea	$2001(a6),a5		; a5 - WAVE RAM
+		moveq	#$0F+1,d7		; $0000-$9FFF
+		lea	$2000(a6),a5		; a5 - WAVE RAM
 .clr_pwm:
 		move.b	d2,CTREG(a6)
 		nop
 		nop
 		move.l	a5,a4
 		move.w	#$0FF0-1,d6
-.wr_end:	move.b	d0,(a4)
-		addq.l	#2,a4
+.wr_end:	move.w	d0,(a4)+
 		dbf	d6,.wr_end
 	rept $10
-		move.b	d1,(a4)
-		addq.l	#2,a4
+		move.w	d1,(a4)+
 	endm
 		addq.b	#$01,d2
 		dbf	d7,.clr_pwm
-; 		move.w	#$80|8,d2		; Make silence block
-; 		move.b	d2,CTREG(a6)		; Slot $8000 for pre-silence
-; 		nop
-; 		nop
-; 		moveq	#$00,d0
-; 		move.b	d0,(a5)
-; 		addq.l	#2,a5
-; 		subq.w	#1,d0
-; 		move.w	#$FFF-1,d7
-; .copy_data:
-; 		move.b	d0,(a5)
-; 		addq.l	#2,a5
-; 		dbf	d7,.copy_data
+		st.b	(RAM_CdSub_PcmEnbl).w
 		rts
 
 ; ============================================================
@@ -1633,6 +1626,7 @@ CdSub_PCM_Process:
 ; --------------------------------------------------------
 
 CdSub_PCM_ReadTable:
+; 		bset	#3,(SCPU_reg+$33).w
 		lea	(RAM_CdSub_PcmBuff).l,a6
 		lea	(RAM_CdSub_PcmTable).l,a5
 		lea	(SCPU_pcm),a4
@@ -1654,13 +1648,16 @@ CdSub_PCM_ReadTable:
 .no_keycut:
 		bclr	#0,d5				; Key-on?
 		beq.s	.no_comm
+; 		bclr	#3,(SCPU_reg+$33).w
 		bsr	.cdcom_keyon
+; 		bset	#3,(SCPU_reg+$33).w
 .no_comm:
 		move.b	#0,(a5)+
 		adda	#cdpcm_len,a6			; Next PCM buffer
 ; 		adda	#1,a5				; Next PCM table column
 		addq.w	#1,d6
 		dbf	d7,.get_tbl
+; 		bclr	#3,(SCPU_reg+$33).w
 		rts
 
 ; --------------------------------------------------------
@@ -1762,6 +1759,14 @@ CdSub_PCM_ReadTable:
 		clr.b	cdpcm_status(a6)
 		bset	d6,(RAM_CdSub_PcmEnbl).w
 		move.b	(RAM_CdSub_PcmEnbl).w,ONREG(a4)
+; 		move.b	d6,d0			; Set PCM to control mode
+; 		or.b	#$C0,d0
+; 		move.b	d0,CTREG(a4)
+; 		move.b	#$80,ST(a4)
+; 		move.w	#$8000,d0
+; 		move.b	d0,LSL(a4)
+; 		lsr.w	#8,d0
+; 		move.b	d0,LSH(a4)
 		rts
 
 ; ------------------------------------------------
@@ -1838,7 +1843,7 @@ CdSub_PCM_Stream:
 .not_last:
 		move.l	cdpcm_cread(a6),a0		; a0 - Current Wave data to read
 		move.l	cdpcm_clen(a6),d1		; d1 - Current wave size
-		bsr	.make_blk_strm
+		bsr	CdSub_PCM_MkStrm
 		move.l	d1,cdpcm_clen(a6)		; Save next wave size
 		move.l	a0,cdpcm_cread(a6)		; Save next wave pos
 		tst.l	d1
@@ -1855,21 +1860,26 @@ CdSub_PCM_Stream:
 		rts
 
 ; --------------------------------------------------------
-; First fill
-; --------------------------------------------------------
-
-; --------------------------------------------------------
+; Fill wave block
+;
+; Input:
+; a6 - Current channel buffer
+; a5 - PCM chip
 ; a0 - wave data to write
 ; d1 - channel current length
 ; d3 - block size
 ; d4 - output location in wave ram
 ; d6 - current channel
+;
+; Uses:
+; d0-d2,a2
+; --------------------------------------------------------
 
-.make_blk_strm:
+CdSub_PCM_MkStrm:
 		move.b	d6,d0			; Set PCM memory mode on this channel
 		or.b	#$80,d0
 		move.b	d0,CTREG(a5)
-		lea	$2001(a5),a1		; a1 - WAVE RAM output
+		lea	$2000(a5),a1		; a1 - WAVE RAM output
 		andi.w	#$0FFF,d4
 		add.w	d4,d4
 		adda	d4,a1			; pos + current block
@@ -1898,9 +1908,7 @@ CdSub_PCM_Stream:
 .strlen_it:
 		move.b	(a0)+,d0		; Write wave data and
 		bsr	CdSub_PCM_WavToPcm	; auto-convert
-		move.b	d0,(a1)
-; 		;bsr	CdSub_PCM_Wait
-		addq.l	#2,a1
+		move.w	d0,(a1)+
 		dbf	d4,.loop_strm
 		rts
 
@@ -1914,16 +1922,14 @@ CdSub_PCM_Stream:
 .full_clean:
 		moveq	#0,d0			; Write loop byte
 .set_lmark:
-		move.b	d0,(a1)
-		addq.l	#2,a1
+		move.w	d0,(a1)+
 		dbf	d4,.set_lmark
 		rts
 .last_smpl:
 		move.b	(a0)+,d0		; If wave data remain, write it.
 		bsr	CdSub_PCM_WavToPcm
 .stlen_it:
-		move.b	d0,(a1)
-		addq.l	#2,a1
+		move.w	d0,(a1)+
 		dbf	d4,.end_point
 		rts
 

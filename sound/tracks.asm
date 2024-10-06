@@ -4,7 +4,7 @@
 ; -------------------------------------------------------------------
 
 MainGemaSeqList:
-		gemaTrk 1,8,gtrk_Test
+		gemaTrk 1,6,gtrk_Test
 		gemaTrk 1,3,gtrk_Test2
 		gemaTrk 1,3,gtrk_Test3
 
