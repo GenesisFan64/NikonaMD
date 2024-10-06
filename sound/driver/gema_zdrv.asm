@@ -2406,8 +2406,8 @@ dtbl_singl:
 .mkpcm_wrton:
 		ld	(ix),e			; Write key-on bit
 		call	.readfreq_pcm
-		ld	d,0
-		ld	e,(ix+64)		; Get Current PCM panning
+; 		ld	a,(ix+64)		; Get Current PCM panning
+; 		ld	a,e
 		push	de
 		ld	de,8			; Go to Pitch
 		add	ix,de
@@ -2439,11 +2439,11 @@ dtbl_singl:
 		add	a,c
 .vpcm_zero:
 		ld	(ix),a
-		add	ix,de
-		pop	de
-		ld	a,e
-		cpl
-		ld	(ix),a
+; 		add	ix,de
+; 		pop	de
+; 		ld	a,e
+; 		cpl
+; 		ld	(ix),a
 	if DBUG_DAC=0
 		ld	a,1
 		ld	(mcdUpd),a
@@ -2766,10 +2766,11 @@ dtbl_singl:
 		ld	e,a
 		add	hl,de
 		ld	a,(hl)
-		ld	hl,pcmpan
+		ld	hl,pcmcom+32
 		ld	d,0
 		ld	e,(iy+ztbl_Chip)
 		add	hl,de
+		cpl
 		ld	(hl),a
 		pop	de
 		pop	hl
@@ -4260,8 +4261,6 @@ pcmcom:	db 00h,00h,00h,00h,00h,00h,00h,00h	; 0 - Playback bits: %0000PCOK Pitchb
 	db 00h,00h,00h,00h,00h,00h,00h,00h	; 40 - 24-bit sample location in Sub-CPU area
 	db 00h,00h,00h,00h,00h,00h,00h,00h	; 48
 	db 00h,00h,00h,00h,00h,00h,00h,00h	; 56
-
-pcmpan:	db 00h,00h,00h,00h,00h,00h,00h,00h	; 64 - External PCM panning
 
 pwmcom:	db 00h,00h,00h,00h,00h,00h,00h,00h	; 0 - Playback bits: %0000PCOK Pitchbend/keyCut/keyOff/KeyOn
 	db 00h,00h,00h,00h,00h,00h,00h,00h	; 8 - Volume | Pitch MSB

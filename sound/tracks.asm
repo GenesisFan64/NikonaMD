@@ -4,33 +4,35 @@
 ; -------------------------------------------------------------------
 
 MainGemaSeqList:
-		gemaTrk 1,24,gtrk_Test
+		gemaTrk 1,8,gtrk_Test
 		gemaTrk 1,3,gtrk_Test2
 		gemaTrk 1,3,gtrk_Test3
 
 ; ----------------------------------------------------
 gtrk_Test:
-		gemaHead .blk,.pat,.ins,10
-.blk:		binclude "sound/tracks/test_blk.bin"
-.pat:		binclude "sound/tracks/test_patt.bin"
+	gemaHead .blk,.pat,.ins,4
+.blk:	binclude "sound/tracks/sauron_blk.bin"
+.pat:	binclude "sound/tracks/sauron_patt.bin"
 .ins:
-		gInsPcm 0,PcmIns_TEST,0
-		gInsFm -24,FmIns_Hats_1
-		gInsFm3 0,FmIns_Sp_OpenHat
-		gInsFm -24,FmIns_Trumpet_1
-		gInsPcm -12,PcmIns_trnthem_05,0
-		gInsPcm -12,PcmIns_trnthem_06,0
-		gInsFm -56,FmIns_Bass_club_108
-		gInsFm -56,FmIns_Bass_club_108
-		gInsFm -56,FmIns_Bass_Groove_1
-		gInsPcm -12,PcmIns_trnthem_10,0
-		gInsPwm -12,PwmIns_trnthem_11,0
-		gInsPwm -12,PwmIns_trnthem_12,0
-		gInsNull
-		gInsNull
-		gInsNull
-		gInsNull
-		gInsPcm 0,PcmIns_trnthem_20,0
+	gInsPcm -12,PcmIns_sauron_01,0
+	gInsPcm -12,PcmIns_sauron_02,0
+	gInsPcm -12,PcmIns_sauron_03,0
+	gInsPcm -12,PcmIns_sauron_04,0
+	gInsPcm -12,PcmIns_sauron_05,1
+	gInsPcm -12,PcmIns_sauron_06,0
+	gInsPcm -12,PcmIns_sauron_07,0
+	gInsPcm -12,PcmIns_sauron_08,0
+	gInsPcm -12,PcmIns_sauron_09,0
+	gInsPcm -12,PcmIns_sauron_10,0
+	gInsPcm -12,PcmIns_sauron_11,0
+	gInsPcm -12,PcmIns_sauron_12,0
+	gInsNull
+
+; 		gemaHead .blk,.pat,.ins,10
+; .blk:		binclude "sound/tracks/test_blk.bin"
+; .pat:		binclude "sound/tracks/test_patt.bin"
+; .ins:
+; 		gInsPcm 0,PcmIns_TEST,0
 
 ; ----------------------------------------------------
 gtrk_Test2:

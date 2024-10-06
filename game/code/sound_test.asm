@@ -497,7 +497,7 @@ sizeof_thisbuff		ds.l 0
 ; ------------------------------------------------------
 
 .extnal_beats:
-	dc.w 192
+	dc.w 215
 	dc.w 215
 	dc.w 192
 	dc.w 192

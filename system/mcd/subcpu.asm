@@ -133,16 +133,16 @@ flags		ds.w 1
 SCPU_Init:
 		bclr	#3,(SCPU_reg+$33).w		; Disable Timer interrupt
 		move.b	#$FF,(SCPU_reg+$31).w		; Set timer value
-		lea	(SCPU_RAM),a0
-		moveq	#0,d0
-		move.w	#($10000/4)-1,d1
-.clr_ram:	move.w	d0,(a0)+
-		dbf	d1,.clr_ram
 		move.l	#SCPU_Timer,(_LEVEL3+2).l	; Write LEVEL 3 jump
 		move.l	#SCPU_Stamp,(_LEVEL1+2).l	; Write LEVEL 1 jump
 		bsr	spCdda_ResetVolume		; Reset CDDA Volume
 		bsr	CdSub_PCM_Init			; Init PCM
 		move.b	#0,(SCPU_reg+mcd_memory).l	; Reset Memory mode
+		lea	(SCPU_RAM),a0
+		moveq	#0,d0
+		move.w	#($10000/4)-1,d1
+.clr_ram:	move.w	d0,(a0)+
+		dbf	d1,.clr_ram
 		lea	.drv_init(pc),a0
 		move.w	#DRVINIT,d0
 		jsr	_CDBIOS
@@ -1523,6 +1523,7 @@ CdSub_StampDefaults:
 ; $9000       | UNUSED
 
 CdSub_PCM_Init:
+		st.b	(RAM_CdSub_PcmEnbl).w
 		lea	(SCPU_pcm),a6		; a6 - PCM registers
 		move.b	#-1,ONREG(a6)
 		moveq	#0,d0			; d0 - BLANK byte
@@ -1568,13 +1569,17 @@ CdSub_PCM_Init:
 ; --------------------------------------------------------
 
 CdSub_PCM_Process:
-		bsr	CdSub_PCM_IRQ
-		bsr	CdSub_PCM_IRQ
+		bsr	CdSub_PCM_Stream
 		tst.b	(RAM_CdSub_PcmReqUpd).w
 		beq.s	.no_req
+		bsr	CdSub_PCM_Stream
 		bsr	.get_table
+		bsr	CdSub_PCM_Stream
 		bsr	CdSub_PCM_ReadTable
-		bsr	CdSub_PCM_IRQ
+		bsr	CdSub_PCM_Stream
+		lea	(SCPU_pcm),a6
+		move.b	(RAM_CdSub_PcmEnbl).w,ONREG(a6)
+		bsr	CdSub_PCM_Stream
 		subq.b	#1,(RAM_CdSub_PcmReqUpd).w
 		bra	CdSub_PCM_Process
 .no_req:
@@ -1656,7 +1661,6 @@ CdSub_PCM_ReadTable:
 ; 		adda	#1,a5				; Next PCM table column
 		addq.w	#1,d6
 		dbf	d7,.get_tbl
-		move.b	(RAM_CdSub_PcmEnbl).w,ONREG(a4)	; Make On/Off changes
 		rts
 
 ; --------------------------------------------------------
@@ -1728,14 +1732,20 @@ CdSub_PCM_ReadTable:
 		move.b	d6,d0
 		lsl.w	#4,d0
 		move.b	d0,ST(a4)
-		cmp.l	#$1000-$10,cdpcm_length(a6)
-		blt.s	.small_sampl
-		bset	#6,cdpcm_status(a6)
 		lsl.w	#8,d0
+		cmp.l	#$1000-$10,cdpcm_length(a6)
+		bcs.s	.small_sampl
+		bset	#6,cdpcm_status(a6)
 		bra.s	.cont_tloop
 .small_sampl:
 		bclr	#6,cdpcm_status(a6)
+		moveq	#0,d1
+		move.w	d0,d1
 		move.w	#$8000,d0
+		btst	#0,cdpcm_flags(a6)
+		beq.s	.cont_tloop
+		move.l	cdpcm_loop(a6),d0
+		add.l	d1,d0
 .cont_tloop:
 		move.b	d0,LSL(a4)
 		lsr.w	#8,d0
@@ -1776,10 +1786,10 @@ CdSub_PCM_ReadTable:
 
 ; ============================================================
 ; --------------------------------------------------------
-; CdSub_PCM_IRQ
+; CdSub_PCM_Stream
 ; --------------------------------------------------------
 
-CdSub_PCM_IRQ:
+CdSub_PCM_Stream:
 ; 		bclr	#3,(SCPU_reg+$33).w
 ; 		movem.l	d0-a6,-(sp)
 		lea	(RAM_CdSub_PcmBuff).l,a6
@@ -1789,22 +1799,36 @@ CdSub_PCM_IRQ:
 		moveq	#0,d6				; Starting channel number
 .pick_stream:
 		tst.b	cdpcm_status(a6)
-		bpl.s	.no_strm
+		bpl	.no_strm
 		tst.w	cdpcm_cblk(a6)
 		bne.s	.mid_blocks
-		btst	#6,cdpcm_status(a6)
-		beq.s	.no_strm
+
+		btst	#6,cdpcm_status(a6)		; Larger sample?
+		beq	.no_strm
 		move.b	2(a4),d0
 		move.b	(a4),d1
 		lsl.w	#8,d0
 		move.b	d1,d0
-		move.w	cdpcm_cout(a6),d1
+		move.w	cdpcm_cout(a6),d1		; Check half
 		andi.w	#$1000/2,d0
 		andi.w	#$1000/2,d1
 		eor.w	d0,d1
 		beq.s	.no_strm
-		move.w	#($1000/SET_PCMBLK)/2,cdpcm_cblk(a6)
+		btst	#5,cdpcm_status(a6)		; END flag?
+		beq.s	.not_end
+		clr.b	cdpcm_status(a6)
+		move.b	d6,d0				; Set PCM to control mode
+		or.b	#$C0,d0
+		move.b	d0,CTREG(a5)
+		nop
+		move.b	#$80,ST(a5)
+		bset	d6,(RAM_CdSub_PcmEnbl).w
+		move.b	(RAM_CdSub_PcmEnbl).w,ONREG(a5)
+		bra.s	.no_strm
+.not_end
+		move.w	#($1000/SET_PCMBLK)/2,cdpcm_cblk(a6)	; Make new blocks / 2
 .mid_blocks:
+
 		subi.w	#1,cdpcm_cblk(a6)
 		move.w	#SET_PCMBLK,d3
 		move.w	cdpcm_cout(a6),d4
@@ -1817,11 +1841,9 @@ CdSub_PCM_IRQ:
 		bsr	.make_blk_strm
 		move.l	d1,cdpcm_clen(a6)		; Save next wave size
 		move.l	a0,cdpcm_cread(a6)		; Save next wave pos
-; 		tst.l	d1
-; 		beq.s	.next_one
-; 		clr.w	cdpcm_cblk(a6)
-; 		clr.b	cdpcm_status(a6)
-; 		bra.s	.no_strm
+		tst.l	d1
+		bne.s	.next_one
+		bset	#5,cdpcm_status(a6)
 .next_one:
 		add.w	#SET_PCMBLK,cdpcm_cout(a6)
 		andi.w	#$0FFF,cdpcm_cout(a6)
