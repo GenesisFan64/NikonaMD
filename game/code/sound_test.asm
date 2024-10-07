@@ -59,35 +59,26 @@ sizeof_thisbuff		ds.l 0
 		bsr	System_Default
 	; ----------------------------------------------
 	; Load assets
-; 	if MARS|MARSCD
-; 		lea	file_tscrn_mars(pc),a0			; Load DATA BANK for 32X stuff
-; 		bsr	System_SetDataBank
-; 		lea	(PalMars_Test+color_indx(1)),a0
-; 		moveq	#1,d0
-; 		move.w	#192,d1
-; 		moveq	#0,d2
-; 		bsr	Video_MdMars_FadePal
-; 		lea	(PalMars_Haruna),a0
-; 		move.w	#192,d0
-; 		moveq	#16,d1
-; 		moveq	#0,d2
-; 		bsr	Video_MdMars_FadePal
-; 		lea	(PalMars_Sisi),a0
-; 		move.w	#208,d0
-; 		moveq	#16,d1
-; 		moveq	#0,d2
-; 		bsr	Video_MdMars_FadePal
-; 		lea	(ArtMars_Test2D),a0
-; 		move.l	#0,a1
-; 		move.l	#ArtMars_Test2D_e-ArtMars_Test2D,d0
-; 		bsr	Video_MdMars_LoadVram
-; 		lea	(RAM_MdMars_Models).w,a0
-; 		move.l	#MarsObj_test_2,mmdl_data(a0)
-; 		move.l	#12,mmdl_y_pos(a0)
-; ; 		bsr	Camera_Update
-; 		moveq	#2,d0					; 32X 3D mode
-; 		bsr	Video_MdMars_VideoMode
-; 	endif
+	if MARS|MARSCD
+		lea	file_tscrn_mars(pc),a0			; Load DATA BANK for 32X stuff
+		bsr	System_SetDataBank
+
+		lea	(PalMars_STest),a0
+		move.w	#0,d0
+		move.w	#256,d1
+		moveq	#0,d2
+		bsr	Video_MdMars_FadePal
+		clr.w	(RAM_MdMars_PalFd).w
+		lea	(ArtMars_Test2D),a0
+		move.l	#0,a1
+		move.l	#ArtMars_Test2D_e-ArtMars_Test2D,d0
+		bsr	Video_MdMars_LoadVram
+		lea	(RAM_MdMars_Models).w,a0
+		move.l	#MarsObj_test_2,mmdl_data(a0)
+		move.l	#0,mmdl_z_pos(a0)
+		moveq	#2,d0					; 32X 3D mode
+		bsr	Video_MdMars_VideoMode
+	endif
 	; ----------------------------------------------
 	; Load assets
 		lea	file_tscrn_main(pc),a0		; ** LOAD BANK **
@@ -131,7 +122,7 @@ sizeof_thisbuff		ds.l 0
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bsr	Video_PrintW
 		lea	str_TesterInfo(pc),a0
-		moveq	#5,d0
+		moveq	#6,d0
 		moveq	#6,d1
 		move.w	#DEF_PrintVram|$4000,d2
 		bsr	Video_Print
@@ -182,7 +173,11 @@ sizeof_thisbuff		ds.l 0
 		bsr	.gema_view
 		bsr	Object_Run
 		bsr	Video_BuildSprites
-
+	if MARS|MARSCD
+		lea	(RAM_MdMars_Models).w,a0
+		add.l	#1,mmdl_y_rot(a0)
+		add.l	#1,mmdl_x_rot(a0)
+	endif
 
 
 ; 		lea	str_Info(pc),a0
@@ -204,6 +199,8 @@ sizeof_thisbuff		ds.l 0
 		moveq	#1,d0
 		andi.w	#JoyLeft,d7
 		beq.s	.lr_right
+		tst.w	(RAM_GemaSeq).w
+		beq.s	.lr_seq
 		neg.w	d0
 .lr_right:
 		add.w	d0,(RAM_GemaSeq).w
@@ -218,6 +215,8 @@ sizeof_thisbuff		ds.l 0
 ; 		andi.w	#JoyUp,d7
 		andi.w	#JoyUp,d7
 		beq.s	.ud_right
+		tst.w	(RAM_GemaBlk).w
+		beq.s	.ud_seq
 		neg.w	d0
 .ud_right:
 		add.w	d0,(RAM_GemaBlk).w
@@ -231,6 +230,8 @@ sizeof_thisbuff		ds.l 0
 		moveq	#1,d0
 		andi.w	#JoyX,d7
 		beq.s	.xy_right
+		tst.w	(RAM_GemaIndx).w
+		beq.s	.xy_seq
 		neg.w	d0
 .xy_right:
 		add.w	d0,(RAM_GemaIndx).w
@@ -316,6 +317,19 @@ sizeof_thisbuff		ds.l 0
 ; ------------------------------------------------------
 
 .show_me:
+		move.w	(RAM_GemaSeq).w,d0	; External beats
+		move.w	d0,d1
+		add.w	d1,d1
+		lea	.extnal_beats(pc),a0
+		move.w	(a0,d1.w),d0
+		move.w	d0,(RAM_CurrBeats).w
+
+		lea	str_ShowBeats(pc),a0
+		moveq	#13,d0
+		moveq	#11,d1
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
+		bsr	Video_Print
 		lea	str_ShowVars(pc),a0
 		moveq	#7,d0
 		moveq	#8,d1
@@ -754,12 +768,10 @@ obj_Fairy:
 .main:
 		lea	obj_ram(a6),a5
 		lea	(RAM_GemaStatus).w,a4
-
 	; a5
 	; 0 - X base
 	; 2 - Y base
 	; 4 - Tan
-
 		moveq	#0,d3
 		move.b	obj_subid(a6),d3
 		add.w	d3,d3
@@ -874,19 +886,13 @@ ArtList_Stuff:
 		dc.w cell_vram(setVram_Fifi)
 		dc.w cell_vram($30)
 
-; str_Cursor:	dc.b "-->",0
-; 		align 2
-; str_CursorDel:	dc.b "   ",0
-; 		align 2
-
 str_TesterTitle:
-		dc.b "GEMA Sound driver   V1.?-dev",0
+		dc.b "GEMA Sound driver   V1.0-dev",0
 		align 2
 str_TesterInfo:
-; 		dc.b "Sound data: 00000000",$0A
-; 		dc.b $0A
-; 		dc.b $0A
-		dc.b " Seq# Blk# Indx"
+		dc.b "Seq# Blk# Indx",$0A
+		dc.b $0A,$0A,$0A,$0A
+		dc.b "Beats: "
 		dc.b 0
 		align 2
 str_Instruc:
@@ -933,6 +939,11 @@ str_ShowVars:
 		dc.l pstr_mem(0,RAM_GemaIndx+1)
 		dc.b 0
 		align 2
+str_ShowBeats:
+		dc.l pstr_mem(1,RAM_CurrBeats)
+		dc.b 0
+		align 2
+
 str_Info:
 		dc.l pstr_mem(3,RAM_Framecount)
 		dc.b 0

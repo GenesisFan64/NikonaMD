@@ -9,6 +9,7 @@ PalMars_Test:
 MapMars_Test:
 		binclude "game/data/mars/maps/test/map.bin"
 		align 2
+PalMars_STest:
 PalMars_Haruna:
 		binclude "game/data/mars/textures/haruna_pal.bin"
 		align 2

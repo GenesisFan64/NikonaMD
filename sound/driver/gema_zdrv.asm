@@ -2770,6 +2770,8 @@ dtbl_singl:
 		ld	(hl),a
 		pop	de
 		pop	hl
+		ld	a,1
+		ld	(mcdUpd),a
 		ret
 
 ; 0 - ENABLE, 1 - DISABLE
@@ -3116,7 +3118,7 @@ dtbl_singl:
 		ld	c,(iy+ztbl_Chip)
 		add	ix,bc
 		ld	bc,24
-		add	ix,bc	; Move to PWOUTF
+		add	ix,bc		; Move to PWOUTF
 		ld	bc,8
 		ld	(ix),d
 		add	ix,bc
@@ -3128,6 +3130,8 @@ dtbl_singl:
 		pop	bc
 		pop	hl
 		pop	ix
+		ld	a,1
+		ld	(marsUpd),a
 		ret
 
 ; ----------------------------------------
@@ -3273,7 +3277,7 @@ zmars_send:
 		jr	nz,.wait_in
 		ld	c,0C0h
 		ld	(iy),c		; Set our entrance ID
-		ld	b,8
+		ld	b,8		; Retry times
 .make_sure:
 		ld	a,(iy)		; Check if did write
 		cp	c

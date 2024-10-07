@@ -1,12 +1,11 @@
 ; ===========================================================================
 ; -------------------------------------------------------------------
-; GEMA/Nikona PCM instruments for Sega CD and CD32X
+; GEMA/Nikona PCM instruments for SCD's PCM soundchip
 ;
 ; Stored on DISC and loaded to Sub-CPU on boot
 ;
 ; MACRO:
 ; gSmplData Label,"file_path",loop_start
-;
 ; Set loop_start to 0 if not using it.
 ;
 ; BASE C-5 samplerate is 16000hz
@@ -15,7 +14,6 @@
 	align 4
 	;gSmplData Label,"file_path",loop_start
 ; -----------------------------------------------------------
-
 	gSmplData PcmIns_TEST,"sound/instr/smpl/moveme_hit.wav",0
 	gSmplData PcmIns_Trumpet1,"sound/instr/smpl/trumpet1.wav",27625
 	gSmplData PcmIns_BBoxHats,"sound/instr/smpl/hats_bbox.wav",0

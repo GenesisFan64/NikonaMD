@@ -266,8 +266,9 @@ FmIns_Brass_7:
 ; -------------------------------------------------------------------
 
 		align $800
+		;gSmplData Label,"file_path",loop_start
+; -----------------------------------------------------------
 		gSmplData DacIns_trnthem_10,"sound/instr/smpl/trnthem/10.wav",3033
-
 		gSmplData DacIns_Kick,"sound/instr/smpl/kick.wav",0
 		gSmplData DacIns_Snare,"sound/instr/smpl/snare.wav",0
 		gSmplData DacIns_Timpani,"sound/instr/smpl/timpani.wav",0
