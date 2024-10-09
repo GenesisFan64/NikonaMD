@@ -11,7 +11,7 @@
 ; --------------------------------------------------------
 
 ; !! = HARDCODED
-MAX_TRFRPZ	equ 8		; !! Max transferRom packets(bytes) **AFFECTS WAVE QUALITY**
+MAX_TRFRPZ	equ 8		; !! Max readRom packets(bytes) **AFFECTS WAVE QUALITY**
 MAX_TRKCHN	equ 32		; !! Max internal shared tracker channel slots *** LIMTED to 32 ***
 MAX_RCACH	equ 20h		; !! Max storage for ROM pattern data *** 1-BIT SIZES ONLY, MUST BE ALIGNED ***
 MAX_BUFFNTRY	equ 4*2		; !! nikona_BuffList buffer entry size
@@ -20,8 +20,6 @@ MAX_SLOTS	equ 3		; !! Number of buffers
 MAX_TBLSIZE	equ 12h		; Maximum size for chip tables
 MAX_TRKINDX	equ 26		; Max channel indexes per buffer: 4PSG+6FM+8PCM+8PWM
 MAX_ZCMND	equ 10h		; Size of command array ** 1-bit SIZES ONLY ** (68k uses this label too)
-
-DBUG_DAC	equ 0		; *DEBUG* Set to 1 to check the DAC playback quality
 
 ; --------------------------------------------------------
 ; Structs
@@ -608,7 +606,7 @@ drv_loop:
 ; --------------------------------------------------------
 
 upd_track:
-		rst	20h			; Refill wave
+		rst	20h
 		call	get_tick		; Check for tick flag
 	; ** MANUAL BUFF READ **
 		ld	iy,trkBuff_0
@@ -956,7 +954,7 @@ upd_track:
 		rst	8
 		ld	(iy+(trk_RomPattRead+2)),a
 		ld	bc,MAX_RCACH
-		call	transferRom		; *** ROM ACCESS ***
+		call	readRom		; *** ROM ACCESS ***
 		pop	bc
 		pop	hl
 		ret
@@ -1000,7 +998,7 @@ upd_track:
 		add	hl,bc
 		adc	a,0
 		ld	bc,8			; 8 blocks stored
-		call	transferRom		; ** ROM ACCESS **
+		call	readRom		; ** ROM ACCESS **
 .keep_blk:
 		pop	hl
 		pop	bc
@@ -1055,7 +1053,7 @@ upd_track:
 		add	hl,bc
 		adc	a,0
 		ld	bc,4*8			; 8 heads stored
-		call	transferRom		; ** ROM ACCESS **
+		call	readRom		; ** ROM ACCESS **
 .keep_it:
 		pop	bc
 		ld	a,c
@@ -1099,7 +1097,7 @@ upd_track:
 		ld	c,MAX_RCACH
 		ld	(iy+trk_cachHalf),0
 		ld	(iy+trk_rowPause),0
-		jp	transferRom		; ** ROM access **
+		jp	readRom		; ** ROM access **
 
 ; ----------------------------------------
 ; **JUMP ONLY**
@@ -1154,7 +1152,7 @@ upd_track:
 		ld	de,trkInfoCach
 		push	de
 		ld	bc,4
-		call	transferRom		; *** ROM ACCESS ***
+		call	readRom		; *** ROM ACCESS ***
 		pop	hl
 		ld	a,(hl)
 		inc	hl
@@ -1173,7 +1171,7 @@ upd_track:
 		ld	h,c
 		ld	de,headerOut
 		ld	c,0Eh
-		call	transferRom		; ** ROM access **
+		call	readRom		; ** ROM access **
 
 
 	; headerOut:
@@ -1294,7 +1292,6 @@ proc_chips:
 		ld	iy,tblPSG		; PSG Squares
 		call	dtbl_multi
 		call	get_tick
-		rst	8
 		ld	iy,tblFM		; FM/FM3/DAC
 		call	dtbl_multi
 		rst	8
@@ -1309,6 +1306,7 @@ proc_chips:
 ;
 ; iy - Buffer
 tblbuff_read:
+		rst	20h			; Refill wave here
 ; 		ld	l,(iy)
 ; 		ld	h,(iy+1)
 		call	get_tick
@@ -1404,7 +1402,7 @@ tblbuff_read:
 		add	hl,bc
 		adc	a,0
 		ld	bc,8			; 8 bytes
-		call	transferRom		; ** ROM access **
+		call	readRom		; ** ROM access **
 		pop	hl
 		push	hl			; <-- save hl
 		call	.grab_link
@@ -1926,11 +1924,11 @@ dtbl_singl:
 		jp	z,.no_req
 		neg	a
 		ld	e,a
-		ld	c,a
+; 		ld	c,a
 		xor	a
 		ld	(iy+ztbl_PitchBend),a
 		ccf
-		sla	c
+		sla	e
 		sbc	a,a
 		ld	d,a
 		add	hl,de
@@ -2043,8 +2041,8 @@ dtbl_singl:
 		rst	8
 		xor	a			; clear high
 		ccf				; clear carry
-; 		sla	e			; pitchbend << 3
-; 		sla	e
+		sla	e			; pitchbend << 3
+		sla	e
 		sla	e			; << 1
 		sbc	a,a			; get carry MSB
 		ld	d,a
@@ -2380,39 +2378,30 @@ dtbl_singl:
 		push	ix
 		ld	ix,pcmcom
 		add	ix,de
+		ld	e,00001000b
 		rst	8
 		ld	a,b
 		and	0011b			; Note and Ins?
-		jr	z,.pcm_effc
+		jr	z,.mkpcm_wrton
 		ld	a,c
 		cp	-2
 		jp	z,.pcm_cut
 		cp	-1
 		jp	z,.pcm_off
 		jr	.pcm_note
-.pcm_effc:
-		ld	e,00001000b
-		jr	.mkpcm_wrton
 .pcm_note:
-; 		ld	a,b
-; 		and	00110000b		; Read LR bits
-; 		or	a
-; 		jr	nz,.mp_reset
-; 		ld	(ix+32),-1		; Reset PCM panning
-; .mp_reset:
 		ld	e,00000001b		; KeyON request
 .mkpcm_wrton:
 		ld	(ix),e			; Write key-on bit
 		call	.readfreq_pcm
-		push	de
 		ld	de,8			; Go to Pitch
 		add	ix,de
 		ld	(ix),h			; Set pitch
 		add	ix,de
 		ld	(ix),l
-		add	ix,de
+		add	ix,de			; Go to volume
+	; PCM volume
 		ld	c,-1
-
 		ld	a,(iy+ztbl_MasterVol)
 		cp	40h
 		jr	z,.vpcm_siln
@@ -2435,15 +2424,8 @@ dtbl_singl:
 		add	a,c
 .vpcm_zero:
 		ld	(ix),a
-; 		add	ix,de
-; 		pop	de
-; 		ld	a,e
-; 		cpl
-; 		ld	(ix),a
-	if DBUG_DAC=0
 		ld	a,1
 		ld	(mcdUpd),a
-	endif
 		pop	ix
 		ret
 
@@ -2529,10 +2511,8 @@ dtbl_singl:
 		and	11001111b
 		or	e		; Set panning bits
 		ld	(ix),a
-	if DBUG_DAC=0
 		ld	a,1
 		ld	(marsUpd),a
-	endif
 		pop	ix
 		ret
 
@@ -2954,7 +2934,7 @@ dtbl_singl:
 		ld	a,b
 		ld	bc,28h			; <- size
 		push	de
-		call	transferRom		; *** ROM ACCESS ***
+		call	readRom		; *** ROM ACCESS ***
 		pop	hl
 		rst	20h
 		ld	c,(iy+ztbl_Chip)
@@ -3018,7 +2998,7 @@ dtbl_singl:
 		ld	bc,6
 		push	de
 		rst	8
-		call	transferRom	; *** ROM ACCESS ***
+		call	readRom	; *** ROM ACCESS ***
 		pop	hl
 	; hl - temporal header
 		ld	e,(hl)
@@ -3564,7 +3544,7 @@ get_tick:
 		ret
 
 ; --------------------------------------------------------
-; transferRom
+; readRom
 ;
 ; Transfer bytes from ROM to Z80 RAM.
 ; This also tells to 68k that we want to access ROM
@@ -3583,7 +3563,7 @@ get_tick:
 ; sample has enough data before getting busy here.
 ; --------------------------------------------------------
 
-transferRom:
+readRom:
 		push	ix
 		ld	ix,commZRomBlk	; ix - rom read/block flags
 		cp	0FFh		; <-- WORKAROUND FOR $FF0000 area
@@ -3724,16 +3704,19 @@ transferRom:
 		ldir
 		rst	8
 		ret
+
 ; Wait here until Genesis unlocks ROM
 .x68klpwt:
-		nop	; WAVE SYNC
 		nop
-.x68kpwtlp:
+		nop
+		nop
+		nop
 		rst	8
-		nop	; WAVE SYNC
+		nop
+		nop
 		nop
 		bit	0,(ix)		; 68k finished?
-		jr	nz,.x68kpwtlp
+		jr	nz,.x68klpwt
 		ret
 
 ; ====================================================================
@@ -3950,9 +3933,7 @@ chip_env:
 		and	00001111b		; Filter volume value
 		or	c			; and OR with current channel
 		or	90h			; Set volume-set mode
-	if DBUG_DAC=0
 		ld	(ix),a			; *** WRITE volume
-	endif
 		inc	(iy+PTMR)		; Update general timer
 .noupd:
 	; ----------------------------
@@ -4083,7 +4064,7 @@ dac_refill:
 		ld	(dDacFifoMid),a
 		ld	hl,(dDacPntr)
 		ld	a,(dDacPntr+2)
-		call	transferRom	; *** ROM ACCESS ***
+		call	readRom	; *** ROM ACCESS ***
 		ld	hl,(dDacPntr)
 		ld	a,(dDacPntr+2)
 		ld	bc,80h
@@ -4114,7 +4095,7 @@ dac_refill:
 		jr	z,.dacfill_end
 		ld	hl,(dDacPntr)
 		ld	a,(dDacPntr+2)
-		call	transferRom	; *** ROM ACCESS ***
+		call	readRom	; *** ROM ACCESS ***
 		jr	.dacfill_end
 ; loop sample
 .dacfill_loop:
@@ -4150,7 +4131,7 @@ dac_refill:
 		ld	(dDacFifoMid),a
 		ld	hl,(dDacPntr)
 		ld	a,(dDacPntr+2)
-		call	transferRom	; *** ROM ACCESS ***
+		call	readRom	; *** ROM ACCESS ***
 		jr	.dacfill_ret
 .dacfill_end:
 		call	dac_off		; DAC finished
@@ -4165,7 +4146,7 @@ dac_refill:
 ;
 ; Two purposes:
 ; - Set the BANK to the very last part of memory for the
-;   transferRom to read from RAM
+;   readRom to read from RAM
 ; - On 32X this sets the bank out of the ROM-reading areas due
 ;   to a conflict with the PSG according to a Tech Bulletin.
 ;
@@ -4224,11 +4205,11 @@ wavFreq_List:
 ; 	dw 0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h	; x-0
 ; 	dw 0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h	; x-1
 ; 	dw 0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0036h,003Bh	; x-2
-	dw 0040h,0044h,0048h,004Ch,0052h,0056h,005Ah,0060h,0066h,006Ch,0071h,0079h	; x-3 4000 ok
-	dw 0080h,0088h,0090h,009Bh,00A2h,00AEh,00B4h,00C2h,00CCh,00D7h,00E4h,00F0h	; x-4 8000 ok
-	dw 0100h,0110h,0120h,012Eh,0147h,015Bh,016Ch,0181h,0191h,01ACh,01C2h,01E0h	; x-5 16000 ok
-	dw 0200h,0210h,0240h,0260h,0280h,02A0h,02D0h,02F8h,0320h,0350h,0380h,03C0h	; x-6 32000 wip
-; 	dw 0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h	; x-7
+	dw 0040h,0044h,0048h,004Ch,0051h,0056h,005Bh,0060h,0066h,006Ch,0073h,0079h	; x-3 4000 ok
+	dw 0080h,0088h,0090h,0099h,00A2h,00ACh,00B6h,00C1h,00CCh,00D8h,00E5h,00F2h	; x-4 8000 ok
+	dw 0100h,0110h,0120h,0132h,0145h,0158h,016Ch,0182h,0198h,01AEh,01C7h,01E0h	; x-5 16000 ok
+	dw 0200h,0220h,0240h,0260h,0280h,02A0h,02D0h,02F8h,0328h,0352h,0390h,03C8h	; x-6 32000 bad/ok
+	dw 0400h;,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h	; x-7
 ; 	dw 0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h	; x-8
 ; 	dw 0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h,0100h	; x-9
 
@@ -4243,7 +4224,7 @@ wavFreq_CdPcm:
 	dw  01F8h, 0214h, 023Ch, 0258h, 027Ch, 02A0h, 02C8h, 02FCh, 031Ch, 0354h, 037Ch, 03B8h	; x-3  8000 ok
 	dw  03F0h, 0428h, 0468h, 04ACh, 04ECh, 0540h, 0590h, 05E4h, 063Ch, 0698h, 0704h, 0760h	; x-4 16000 ok
 	dw  07DCh, 0848h, 08D4h, 0960h, 09F0h, 0A64h, 0B04h, 0BAAh, 0C60h, 0D18h, 0DE4h, 0EB8h	; x-5 32000 ok
-	dw  0FB0h, 1074h, 1184h, 1280h, 139Ch, 14C8h, 1624h, 174Ch, 18DCh, 1A38h, 1BE0h, 1D94h	; x-6 64000 unstable
+	dw  0FB0h, 1074h, 1184h, 1280h, 139Ch, 14C8h, 1624h, 174Ch, 18DCh, 1A38h, 1BE0h, 1D94h	; x-6 64000 untested
 ; 	dw  1F64h, 20FCh, 2330h, 2524h, 2750h, 29B4h, 2C63h, 2F63h, 31E0h, 347Bh, 377Bh, 3B41h	; x-7 128000 bad
 ; 	dw  3EE8h, 4206h, 4684h, 4A5Ah, 4EB5h, 5379h, 58E1h, 5DE0h, 63C0h, 68FFh, 6EFFh, 783Ch	; x-8 256000 bad
 ; 	dw  7FC2h, 83FCh, 8D14h, 9780h,0AA5Dh,0B1F9h,   -1 ,   -1 ,   -1 ,   -1 ,   -1 ,   -1 	; x-9 bad
@@ -4256,8 +4237,8 @@ wavFreq_CdPcm:
 pcmcom:	db 00h,00h,00h,00h,00h,00h,00h,00h	; 0 - Playback bits: %0000PCOK Pitchbend/keyCut/keyOff/KeyOn
 	db 00h,00h,00h,00h,00h,00h,00h,00h	; 8 - Pitch MSB
 	db 00h,00h,00h,00h,00h,00h,00h,00h	; 16 - Pitch LSB
-	db 00h,00h,00h,00h,00h,00h,00h,00h	; 24 - Volume
-	db 00h,00h,00h,00h,00h,00h,00h,00h	; 32 - CURRENT Panning %RRRRLLLL
+	db -1,-1,-1,-1,-1,-1,-1,-1		; 24 - Volume
+	db -1,-1,-1,-1,-1,-1,-1,-1		; 32 - CURRENT Panning %RRRRLLLL
 	db 00h,00h,00h,00h,00h,00h,00h,00h	; 40 - 24-bit sample location in Sub-CPU area
 	db 00h,00h,00h,00h,00h,00h,00h,00h	; 48
 	db 00h,00h,00h,00h,00h,00h,00h,00h	; 56
@@ -4452,8 +4433,8 @@ trkCach_1	ds MAX_RCACH
 trkCach_2	ds MAX_RCACH
 ; trkCach_3	ds MAX_RCACH
 ; --------------------------------------------------------
-x68ksrclsb	db 0		; transferRom temporal LSB
-x68ksrcmid	db 0		; transferRom temporal MID
+x68ksrclsb	db 0		; readRom temporal LSB
+x68ksrcmid	db 0		; readRom temporal MID
 dDacFifoMid	db 0		; WAVE play halfway refill flag (00h/80h)
 dDacPntr	db 0,0,0	; WAVE play current ROM position
 dDacCntr	db 0,0,0	; WAVE play length counter

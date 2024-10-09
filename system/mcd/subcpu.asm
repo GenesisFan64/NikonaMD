@@ -132,7 +132,7 @@ flags		ds.w 1
 
 SCPU_Init:
 		bclr	#3,(SCPU_reg+$33).w		; Disable Timer interrupt
-; 		move.b	#$30,(SCPU_reg+$31).w		; Set timer value
+		move.b	#$30,(SCPU_reg+$31).w		; Set timer value
 		move.l	#SCPU_Timer,(_LEVEL3+2).l	; Write LEVEL 3 jump
 		move.l	#SCPU_Stamp,(_LEVEL1+2).l	; Write LEVEL 1 jump
 		bsr	spCdda_ResetVolume		; Reset CDDA Volume
@@ -147,7 +147,7 @@ SCPU_Init:
 		move.w	#DRVINIT,d0
 		jsr	_CDBIOS
 		bsr	spInitFS			; Init ISO Filesystem
-		lea	file_subdata(pc),a0		; Search and load the PCM samples
+		lea	.sub_file(pc),a0		; Search and load the PCM samples
 		bsr	spSearchFile
 		lea	(SCPU_DATA),a0
 		bsr	spReadSectorsN
@@ -157,11 +157,9 @@ SCPU_Init:
 
 ; --------------------------------------------------------
 
-.drv_init:
-		dc.b $01,$FF
+.drv_init:	dc.b $01,$FF
 		align 2
-file_subdata:
-		dc.b "NKNA_SUB.BIN",0
+.sub_file:	dc.b "NKNA_SUB.BIN",0
 		align 2
 
 ; =====================================================================
@@ -201,15 +199,7 @@ SCPU_IRQ:
 ; ----------------------------------------------------------------
 
 SCPU_Timer:
-; 		tst.b	(RAM_CdSub_PcmMkNew).w
-; 		bne.s	.not_timr
-; 		st.b	(RAM_CdSub_PcmMkNew).w
-; 		movem.l	d0-a6,-(sp)
-; 		bsr	CdSub_PCM_Stream
-; 		movem.l	(sp)+,d0-a6
-; 		clr.b	(RAM_CdSub_PcmMkNew).w
-; .not_timr
-		rte			; rte
+		rte
 
 ; =====================================================================
 ; ----------------------------------------------------------------
@@ -223,19 +213,18 @@ SCPU_User:
 ; ----------------------------------------------------------------
 ; Main
 ;
-; mcd_comm_m READ ONLY:
-; %Bbsiiiii
-; B - Busy/Lock bit
-; b - Status bit / during IRQ if B=1
+; mcd_comm_m READ ONLY: %BBlpiiii
+; BB | %01 Busy/Lock bit
+;      %11 GEMA driver: table transfer request from Z80
+; l  | If BB == %11: transfer LOCK bit
+; p  | If BB == %11: transfer PASS bit, else: one extra bit for i
+; i  | Current Sub-Task
 ;
-;
-; mcd_comm_s READ/WRITE:
-; %Bbssfeee
-; B - Busy doing a normal (b=0) or IRQ (b=1)
-; b - IRQ flag
-; s - Status output bits
-; f - Stamp finished drawing
-; e - Error flags
+; mcd_comm_s READ/WRITE: %Bbsseeee
+; B | Sub-CPU is busy
+; b | IRQ entrance
+; s | Misc. status bits
+; e | Error flag
 ;
 ; Uses:
 ; ALL
@@ -249,17 +238,13 @@ SCPU_Main:
 		andi.w	#$C0,d1
 		cmpi.b	#$C0,d1				; Middle of IRQ task?
 		beq.s	SCPU_Main
-		andi.w	#%00011111,d0			; <-- current limit
+		andi.w	#%00011111,d0
 		beq.s	SCPU_Main
-		move.b	(SCPU_reg+mcd_comm_s).w,d7
-		bset	#7,d7
-		move.b	d7,(SCPU_reg+mcd_comm_s).w	; Return to MAIN as BUSY/working
+		bset	#7,(SCPU_reg+mcd_comm_s).w	; Tell MAIN we are BUSY
 		add.w	d0,d0				; Task index*2
 		move.w	SCPU_cmdlist(pc,d0.w),d1
 		jsr	SCPU_cmdlist(pc,d1.w)
-		move.b	(SCPU_reg+mcd_comm_s).w,d7
-		bclr	#7,d7
-		move.b	d7,(SCPU_reg+mcd_comm_s).w	; Report that we finished.
+		bclr	#7,(SCPU_reg+mcd_comm_s).w	; Tell MAIN we are done
 		bra	SCPU_Main
 
 ; =====================================================================
@@ -1563,10 +1548,10 @@ CdSub_PCM_Process:
 		bsr	CdSub_PCM_Stream
 		tst.b	(RAM_CdSub_PcmReqUpd).w
 		beq.s	.no_req
-		bsr	CdSub_PCM_Stream
 		bsr	.get_table
 		bsr	CdSub_PCM_Stream
 		bsr	CdSub_PCM_ReadTable
+		bsr	CdSub_PCM_Stream
 		bsr	CdSub_PCM_Stream
 		bsr	CdSub_PCM_Stream
 		move.b	(RAM_CdSub_PcmEnbl).w,(SCPU_pcm+ONREG).l
@@ -1632,6 +1617,7 @@ CdSub_PCM_ReadTable:
 		move.b	(a5),d5
 		bclr	#3,d5				; Update only?
 		beq.s	.no_updset
+		bsr	.get_chnlset
 		bsr	.update_set
 .no_updset:
 		bclr	#2,d5				; Key-cut?
@@ -1667,15 +1653,7 @@ CdSub_PCM_ReadTable:
 
 .cdcom_keyon:
 		bsr	.cdcom_keycut
-		move.l	a5,a0
-		move.b	8(a0),d0		; 8 - Pitch MSB
-		lsl.w	#8,d0
-		move.b	16(a0),d0		; 16 - Pitch LSB
-		move.b	24(a0),d1		; 24 - Volume
-		move.b	32(a0),d2		; 32 - Panning
-		move.w	d0,cdpcm_pitch(a6)
-		move.b	d1,cdpcm_env(a6)
-		move.b	d2,cdpcm_pan(a6)
+		bsr	.get_chnlset
 		moveq	#0,d0
 		move.b	40(a0),d0		; 40
 		move.b	d0,d3
@@ -1759,11 +1737,21 @@ CdSub_PCM_ReadTable:
 		move.b	d0,LSL(a4)
 		lsr.w	#8,d0
 		move.b	d0,LSH(a4)
-
 		move.w	#$1000/SET_PCMBLK,cdpcm_cblk(a6)
 		move.w	#0,cdpcm_cout(a6)
 		move.l	#0,cdpcm_clen(a6)
 		bset	#7,cdpcm_status(a6)
+		rts
+.get_chnlset:
+		move.l	a5,a0
+		move.b	8(a0),d0		; 8 - Pitch MSB
+		lsl.w	#8,d0
+		move.b	16(a0),d0		; 16 - Pitch LSB
+		move.b	24(a0),d1		; 24 - Volume
+		move.b	32(a0),d2		; 32 - Panning
+		move.w	d0,cdpcm_pitch(a6)
+		move.b	d1,cdpcm_env(a6)
+		move.b	d2,cdpcm_pan(a6)
 		rts
 
 ; ------------------------------------------------

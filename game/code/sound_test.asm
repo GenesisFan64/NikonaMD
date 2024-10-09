@@ -44,6 +44,8 @@ RAM_GemaBlk		ds.w 1		; ''
 RAM_GemaStatus		ds.w 4
 RAM_FairyVars		ds.w 1
 RAM_CurrBeats		ds.w 1
+RAM_Copy_fmSpecial	ds.w 1
+RAM_Copy_HasDac		ds.w 1
 
 sizeof_thisbuff		ds.l 0
 			endmemory
@@ -59,26 +61,25 @@ sizeof_thisbuff		ds.l 0
 		bsr	System_Default
 	; ----------------------------------------------
 	; Load assets
-	if MARS|MARSCD
-		lea	file_tscrn_mars(pc),a0			; Load DATA BANK for 32X stuff
-		bsr	System_SetDataBank
-
-		lea	(PalMars_STest),a0
-		move.w	#0,d0
-		move.w	#256,d1
-		moveq	#0,d2
-		bsr	Video_MdMars_FadePal
-		clr.w	(RAM_MdMars_PalFd).w
-		lea	(ArtMars_Test2D),a0
-		move.l	#0,a1
-		move.l	#ArtMars_Test2D_e-ArtMars_Test2D,d0
-		bsr	Video_MdMars_LoadVram
-		lea	(RAM_MdMars_Models).w,a0
-		move.l	#MarsObj_test_2,mmdl_data(a0)
-		move.l	#0,mmdl_z_pos(a0)
-		moveq	#2,d0					; 32X 3D mode
-		bsr	Video_MdMars_VideoMode
-	endif
+; 	if MARS|MARSCD
+; 		lea	file_tscrn_mars(pc),a0			; Load DATA BANK for 32X stuff
+; 		bsr	System_SetDataBank
+; 		lea	(PalMars_STest),a0
+; 		move.w	#0,d0
+; 		move.w	#256,d1
+; 		moveq	#0,d2
+; 		bsr	Video_MdMars_FadePal
+; 		clr.w	(RAM_MdMars_PalFd).w
+; 		lea	(ArtMars_Test2D),a0
+; 		move.l	#0,a1
+; 		move.l	#ArtMars_Test2D_e-ArtMars_Test2D,d0
+; 		bsr	Video_MdMars_LoadVram
+; 		lea	(RAM_MdMars_Models).w,a0
+; 		move.l	#MarsObj_test_2,mmdl_data(a0)
+; 		move.l	#0,mmdl_z_pos(a0)
+; 		moveq	#2,d0					; 32X 3D mode
+; 		bsr	Video_MdMars_VideoMode
+; 	endif
 	; ----------------------------------------------
 	; Load assets
 		lea	file_tscrn_main(pc),a0		; ** LOAD BANK **
@@ -100,20 +101,13 @@ sizeof_thisbuff		ds.l 0
 		move.w	#$0EEE,2(a0)
 		move.w	#$0AAA,4(a0)
 		move.w	#$0888,4(a0)
-
 		lea	(objPal_Dodo+2),a0
 		moveq	#1,d0
 		move.w	#15,d1
 		bsr	Video_FadePal
 		lea	ArtList_Stuff(pc),a0
 		bsr	Video_LoadArt_List
-		move.l	#obj_Fairy,d0
-		moveq	#0,d2
-		bsr	Object_Make
-		addq.w	#1,d2
-		bsr	Object_Make
-		addq.w	#1,d2
-		bsr	Object_Make
+
 	; ----------------------------------------------
 		lea	str_TesterTitle(pc),a0
 		moveq	#6,d0
@@ -128,15 +122,11 @@ sizeof_thisbuff		ds.l 0
 		bsr	Video_Print
 		lea	str_Instruc(pc),a0
 		moveq	#2,d0
-		moveq	#14,d1
+; 		moveq	#14,d1
+		moveq	#19,d1
 		move.w	#DEF_PrintVram|$4000,d2
 		bsr	Video_Print
-		lea	str_VmInfo(pc),a0
-		moveq	#2,d0
-		moveq	#SET_SNDVIEWY,d1
-		move.w	#DEF_PrintVram|DEF_PrintPal,d2
-		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
-		bsr	Video_Print
+		bsr	.gema_viewinit
 ; 		bsr	.show_cursor
 
 	; ----------------------------------------------
@@ -173,11 +163,11 @@ sizeof_thisbuff		ds.l 0
 		bsr	.gema_view
 		bsr	Object_Run
 		bsr	Video_BuildSprites
-	if MARS|MARSCD
-		lea	(RAM_MdMars_Models).w,a0
-		add.l	#1,mmdl_y_rot(a0)
-		add.l	#1,mmdl_x_rot(a0)
-	endif
+; 	if MARS|MARSCD
+; 		lea	(RAM_MdMars_Models).w,a0
+; 		add.l	#1,mmdl_y_rot(a0)
+; 		add.l	#1,mmdl_x_rot(a0)
+; 	endif
 
 
 ; 		lea	str_Info(pc),a0
@@ -254,7 +244,7 @@ sizeof_thisbuff		ds.l 0
 		move.w	(RAM_GemaSeq).w,d0	; External beats
 		move.w	d0,d1
 		add.w	d1,d1
-		lea	.extnal_beats(pc),a0
+		lea	exgema_beats(pc),a0
 		move.w	(a0,d1.w),d0
 		move.w	d0,(RAM_CurrBeats).w
 		bsr	gemaSetBeats
@@ -320,7 +310,7 @@ sizeof_thisbuff		ds.l 0
 		move.w	(RAM_GemaSeq).w,d0	; External beats
 		move.w	d0,d1
 		add.w	d1,d1
-		lea	.extnal_beats(pc),a0
+		lea	exgema_beats(pc),a0
 		move.w	(a0,d1.w),d0
 		move.w	d0,(RAM_CurrBeats).w
 
@@ -508,52 +498,39 @@ sizeof_thisbuff		ds.l 0
 ; 		rts
 
 ; ------------------------------------------------------
-; EXTERNAL BEATS FOR EACH TRACK
-; ------------------------------------------------------
 
-.extnal_beats:
-	dc.w 215
-	dc.w 215
-	dc.w 192
-	dc.w 192
-	dc.w 215
-	dc.w $00B8
-	dc.w 192
-	dc.w 192
-	dc.w 215
-	dc.w 215
-	dc.w 215
-	dc.w 215
-	dc.w 215
-	dc.w 215
-	dc.w 215
-	dc.w 215
-	dc.w 215
-	dc.w 215
-	dc.w 215
-	dc.w 215
-	dc.w 215
-	dc.w 215
-	dc.w 215
-
-; ------------------------------------------------------
-
+.gema_viewinit:
+		move.l	#obj_Fairy,d0
+		moveq	#0,d2
+		bsr	Object_Make
+		addq.w	#1,d2
+		bsr	Object_Make
+		addq.w	#1,d2
+		bsr	Object_Make
+; 		lea	str_VmInfo(pc),a0
+; 		moveq	#2,d0
+; 		moveq	#SET_SNDVIEWY,d1
+; 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
+; 		bsr	Video_Print
 .gema_view:
+		move.w	#$0100,(z80_bus).l
 		lea	(RAM_GemaStatus),a1
 		moveq	#0,d0
-		bsr	sndLockZ80
+		moveq	#0,d1
+		moveq	#0,d2
+.wait:		btst	#0,(z80_bus).l
+		bne.s	.wait
 		move.b	(z80_cpu+trkBuff_0),d0
+		move.b	(z80_cpu+trkBuff_1),d1
+		move.b	(z80_cpu+trkBuff_2),d2
 		bsr	sndUnlockZ80
 		move.w	d0,(a1)+
-		bsr	sndLockZ80
-		move.b	(z80_cpu+trkBuff_1),d0
-		bsr	sndUnlockZ80
-		move.w	d0,(a1)+
-		bsr	sndLockZ80
-		move.b	(z80_cpu+trkBuff_2),d0
-		bsr	sndUnlockZ80
-		move.w	d0,(a1)+
+		move.w	d1,(a1)+
+		move.w	d2,(a1)+
+		rts
 
+		bsr	sndLockZ80
 		lea	(z80_cpu+tblPSG),a0
 		lea	(RAM_GemaCache_PSG),a1
 		moveq	#3-1,d7
@@ -574,6 +551,12 @@ sizeof_thisbuff		ds.l 0
 		lea	(RAM_GemaCache_PWM),a1
 		moveq	#8-1,d7
 		bsr	.copy_me
+		moveq	#0,d7
+		move.b	(z80_cpu+fmSpecial),d7
+		move.w	d7,(RAM_Copy_fmSpecial).w
+		move.b	(z80_cpu+8),d7
+		move.w	d7,(RAM_Copy_HasDac).w
+		bsr	sndUnlockZ80
 
 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
@@ -595,9 +578,7 @@ sizeof_thisbuff		ds.l 0
 		lea	(RAM_GemaCache_FM3),a3
 		moveq	#7+16,d0
 		moveq	#SET_SNDVIEWY+1,d1
-		bsr	sndLockZ80
-		move.b	(z80_cpu+fmSpecial),d7
-		bsr	sndUnlockZ80
+		move.w	(RAM_Copy_fmSpecial).w,d7
 		tst.b	d7
 		beq.s	.no_spec
 		lea	(strL_FmOnly),a0
@@ -614,9 +595,7 @@ sizeof_thisbuff		ds.l 0
 
 		moveq	#7+20,d0
 		moveq	#SET_SNDVIEWY+1,d1
-		bsr	sndLockZ80
-		move.b	(z80_cpu+8),d7
-		bsr	sndUnlockZ80
+		move.w	(RAM_Copy_HasDac).w,d7
 		cmp.b	#$D9,d7
 		bne.s	.no_sampl
 		lea	(str_Sampl),a0
@@ -627,7 +606,6 @@ sizeof_thisbuff		ds.l 0
 		moveq	#1-1,d7
 		bsr	.show_table_fm
 .c_sampl:
-
 		lea	(RAM_GemaCache_PCM),a3
 		moveq	#7,d0
 		moveq	#SET_SNDVIEWY+2,d1
@@ -637,17 +615,18 @@ sizeof_thisbuff		ds.l 0
 		moveq	#7,d0
 		moveq	#SET_SNDVIEWY+3,d1
 		moveq	#8-1,d7
-		bra	.show_table
+		bsr	.show_table
+		rts
 
 ; ----------------------------------------------
 
 .copy_me:
 		moveq	#0,d1
-		bsr	sndLockZ80
+; 		bsr	sndLockZ80
 		move.b	ztbl_FreqIndx(a0),d1
 		move.b	ztbl_Link+1(a0),d2
 		move.b	ztbl_Link(a0),d0
-		bsr	sndUnlockZ80
+; 		bsr	sndUnlockZ80
 		or.b	d2,d0
 		bne.s	.link_ok
 		moveq	#-1,d1
@@ -671,7 +650,7 @@ sizeof_thisbuff		ds.l 0
 .is_fmgood:
 		move.w	d6,d5
 		adda	#4,a0
-		andi.w	#%11111,d6
+		andi.w	#%00011111,d6
 		lsl.w	#1,d6
 		adda	d6,a0
 		bsr	Video_Print
@@ -874,6 +853,33 @@ obj_Fairy:
 ; Small data section
 ; ------------------------------------------------------
 
+; EXTERNAL BEATS FOR EACH TRACK
+exgema_beats:
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 192
+	dc.w 192
+	dc.w 214
+	dc.w $00B8
+	dc.w 192
+	dc.w 192
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 214
+	dc.w 214
+
 ArtList_Stuff:
 		dc.w 3
 		dc.l Art_FairyDodo
@@ -928,8 +934,8 @@ strL_FmOnly:	dc.b "---",0
 		dc.b "C- ",0,"C# ",0,"D- ",0,"D# ",0,"E- ",0,"F- ",0,"F# ",0,"G- ",0,"G# ",0,"A- ",0,"A# ",0,"B- ",0
 strL_LazyVal:	dc.b "0",0,"1",0,"2",0,"3",0,"4",0,"5",0,"6",0,"7",0,"8",0,"9",0
 
-str_Speci:	dc.b "fm3",0
-str_Sampl:	dc.b "dac",0
+str_Speci:	dc.b "FM3",0
+str_Sampl:	dc.b "DAC",0
 
 str_ShowVars:
 		dc.l pstr_mem(0,RAM_GemaSeq+1)

@@ -140,11 +140,9 @@ sizeof_SaveInfo	ds.l 0
 		jsr	(System_Init).l				; Init System
 		move.w	#SET_INITMODE,(RAM_ScreenMode).w	; Reset screen mode
 		jmp	(Md_ReadModes).l			; Go to SCREEN LOAD section
-filen_z80file:
-		dc.b "GEMA_Z80.BIN",0
+filen_z80file:	dc.b "GEMA_Z80.BIN",0
 		align 2
-filen_marscode:
-		dc.b "NKNAMARS.BIN",0
+filen_marscode:	dc.b "NKNAMARS.BIN",0
 		align 2
 
 ; ---------------------------------------------

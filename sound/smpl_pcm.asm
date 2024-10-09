@@ -14,7 +14,7 @@
 	align 4
 	;gSmplData Label,"file_path",loop_start
 ; -----------------------------------------------------------
-	gSmplData PcmIns_TEST,"sound/instr/smpl/moveme_hit.wav",0
+	gSmplData PcmIns_TEST,"sound/instr/smpl/inga.wav",0
 	gSmplData PcmIns_Trumpet1,"sound/instr/smpl/trumpet1.wav",27625
 	gSmplData PcmIns_BBoxHats,"sound/instr/smpl/hats_bbox.wav",0
 	gSmplData PcmIns_Kick,"sound/instr/smpl/wegot_kick.wav",0
