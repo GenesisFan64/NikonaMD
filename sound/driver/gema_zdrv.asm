@@ -2390,6 +2390,7 @@ dtbl_singl:
 		jp	z,.pcm_off
 		jr	.pcm_note
 .pcm_note:
+; 		ld	(ix+32),-1
 		ld	e,00000001b		; KeyON request
 .mkpcm_wrton:
 		ld	(ix),e			; Write key-on bit
@@ -3709,11 +3710,16 @@ readRom:
 .x68klpwt:
 		nop
 		nop
+	if EMU=0
 		nop
 		nop
+	endif
 		rst	8
+	if EMU=0
 		nop
 		nop
+		nop
+	endif
 		nop
 		bit	0,(ix)		; 68k finished?
 		jr	nz,.x68klpwt

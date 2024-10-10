@@ -21,6 +21,10 @@
 	gSmplData PwmIns_PKick,"sound/instr/smpl/wegot_kick.wav",0
 	gSmplData PwmIns_PTom,"sound/instr/smpl/sauron_tom.wav",0
 
+	gSmplData PwmIns_sxbeats,"sound/instr/smpl/sxbeats.wav",0
+	gSmplData PwmIns_sxbeats2,"sound/instr/smpl/sxbeats2.wav",0
+	gSmplData PwmIns_drumsetA,"sound/instr/smpl/drumsetA.wav",0
+
  	gSmplData PwmIns_sauron_01,"sound/instr/smpl/sauron/01.wav",0
  	gSmplData PwmIns_sauron_02,"sound/instr/smpl/sauron/02.wav",0
   	gSmplData PwmIns_sauron_03,"sound/instr/smpl/sauron/03.wav",0

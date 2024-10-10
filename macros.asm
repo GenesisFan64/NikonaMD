@@ -227,10 +227,12 @@ GLBL_MDATA_ST := *
 data_dend macro endlbl
 GLBL_MDATA_RP := *-GLBL_MDATA_ST	; save size for _dend
 
+	if MCD|MARSCD
 	if MOMPASS>2
 		if GLBL_MDATA_RP > SET_WRAMSIZE
 			warning "SCD/CD32X: THIS BANK SIZE IS TOO LARGE for WORD-RAM"
 		endif
+	endif
 	endif
 
 	if MARS

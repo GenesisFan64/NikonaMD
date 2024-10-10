@@ -11,21 +11,32 @@ MainGemaSeqList:
 
 ; ----------------------------------------------------
 gtrk_Test0:
-	gemaHead .blk,.pat,.ins,4
-.blk:	binclude "sound/tracks/test_blk.bin"
-.pat:	binclude "sound/tracks/test_patt.bin"
-.ins:
-	gInsPcm -12,PcmIns_TEST,1
-
-; 	gemaHead .blk,.pat,.ins,10
-; .blk:	binclude "sound/tracks/test_2_blk.bin"
-; .pat:	binclude "sound/tracks/test_2_patt.bin"
+; 	gemaHead .blk,.pat,.ins,4
+; .blk:	binclude "sound/tracks/test_blk.bin"
+; .pat:	binclude "sound/tracks/test_patt.bin"
 ; .ins:
-; 	gInsDac 0,DacIns_sxbeats,0
-; 	gInsDac 0,DacIns_sxbeats2,0
-; 	gInsDac 0,DacIns_drumsetA,0
-; 	gInsFm +24,FmIns_Hats_1
-; 	gInsFm3 0,FmSpIns_cowbell_l
+; 	gInsPcm -12,PcmIns_TEST,1
+
+	gemaHead .blk,.pat,.ins,10
+.blk:	binclude "sound/tracks/test_2_blk.bin"
+.pat:	binclude "sound/tracks/test_2_patt.bin"
+.ins:
+
+ if MARS
+	gInsPwm 0,PwmIns_sxbeats,0
+	gInsPwm 0,PwmIns_sxbeats2,0
+	gInsPwm 0,PwmIns_drumsetA,0
+ elseif MCD|MARSCD
+	gInsPcm 0,PcmIns_sxbeats,0
+	gInsPcm 0,PcmIns_sxbeats2,0
+	gInsPcm 0,PcmIns_drumsetA,0
+ else
+	gInsDac 0,DacIns_sxbeats,0
+	gInsDac 0,DacIns_sxbeats2,0
+	gInsDac 0,DacIns_drumsetA,0
+ endif
+	gInsFm +24,FmIns_Hats_1
+	gInsFm3 0,FmSpIns_cowbell_l
 
 ; ----------------------------------------------------
 gtrk_Test1:
@@ -265,10 +276,11 @@ FmIns_Brass_7:
 		align $800
 		;gSmplData Label,"file_path",loop_start
 ; -----------------------------------------------------------
-; 		gSmplData DacIns_sxbeats,"sound/instr/smpl/sxbeats.wav",0
-; 		gSmplData DacIns_sxbeats2,"sound/instr/smpl/sxbeats2.wav",0
-; 		gSmplData DacIns_drumsetA,"sound/instr/smpl/drumsetA.wav",0
-
+	if MCD|MARS|MARSCD=0
+		gSmplData DacIns_sxbeats,"sound/instr/smpl/sxbeats.wav",0
+		gSmplData DacIns_sxbeats2,"sound/instr/smpl/sxbeats2.wav",0
+		gSmplData DacIns_drumsetA,"sound/instr/smpl/drumsetA.wav",0
+	endif
 ; 		gSmplData DacIns_trnthem_10,"sound/instr/smpl/trnthem/10.wav",3033
 ; 		gSmplData DacIns_trnthem_20,"sound/instr/smpl/trnthem/20.wav",14309
 ; 		gSmplData DacIns_Kick,"sound/instr/smpl/kick.wav",0

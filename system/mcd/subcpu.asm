@@ -1802,18 +1802,6 @@ CdSub_PCM_Stream:
 		and.w	d2,d1
 		eor.w	d0,d1					; Check if halfs changed
 		beq.s	.no_strm
-		btst	#5,cdpcm_status(a6)			; Sample is floating?
-		beq.s	.not_end
-		clr.b	cdpcm_status(a6)			; Exit here
-		move.b	d6,d0					; PCM chip control mode
-		or.b	#$C0,d0
-		move.b	d0,CTREG(a5)
-		nop
-		move.b	#$80,ST(a5)				; Set ST to $80xx
-		bset	d6,(RAM_CdSub_PcmEnbl).w
-		move.b	(RAM_CdSub_PcmEnbl).w,ONREG(a5)		; Turn channel OFF
-		bra.s	.no_strm
-.not_end
 		move.w	#($1000/SET_PCMBLK)/2,cdpcm_cblk(a6)	; Make new blocks, half.
 .mid_blocks:
 		subi.w	#1,cdpcm_cblk(a6)			; Count 1 block
