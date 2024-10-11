@@ -8,6 +8,28 @@ MainGemaSeqList:
 	gemaTrk 1,6,gtrk_Test1
 	gemaTrk 1,3,gtrk_Test2
 	gemaTrk 1,3,gtrk_Test3
+	gemaTrk 1,6,gtrk_Test0
+	gemaTrk 1,6,gtrk_Test0
+	gemaTrk 1,6,gtrk_Test0
+	gemaTrk 1,6,gtrk_Test0
+	gemaTrk 1,6,gtrk_Test0	; $08
+	gemaTrk 1,6,gtrk_Test0
+	gemaTrk 1,6,gtrk_Test0
+	gemaTrk 1,6,gtrk_Test0
+	gemaTrk 1,6,gtrk_Test0
+	gemaTrk 1,6,gtrk_Test0
+	gemaTrk 1,6,gtrk_Test0
+	gemaTrk 0,6,gtrk_SfxAll	; $0F
+
+; ----------------------------------------------------
+
+gtrk_SfxAll:
+	gemaHead .blk,.pat,.ins,4
+.blk:	binclude "sound/tracks/sfxall_blk.bin"
+.pat:	binclude "sound/tracks/sfxall_patt.bin"
+.ins:
+	gInsFm -36,FmIns_sfx_punch
+	gInsFm -24,FmIns_sfx_alien1
 
 ; ----------------------------------------------------
 gtrk_Test0:
@@ -37,6 +59,8 @@ gtrk_Test0:
  endif
 	gInsFm +24,FmIns_Hats_1
 	gInsFm3 0,FmSpIns_cowbell_l
+	gInsPsgN 0,$20,$20,$20,$00,$0C,$00,%101
+	gInsPsgN 0,$40,$40,$40,$00,$10,$00,%100
 
 ; ----------------------------------------------------
 gtrk_Test1:
@@ -233,6 +257,19 @@ FmSpIns_sfx_knock_l:
 		binclude "sound/instr/fm/bin/fm3_sfx_knock_l.bin"
 FmSpIns_sfx_laser:
 		binclude "sound/instr/fm/bin/fm3_sfx_laser.bin"
+
+; -----------------------------------------------------------
+; FM sound effects
+; -----------------------------------------------------------
+
+FmIns_sfx_punch:
+		binclude "sound/instr/fm/bin/sfx_punch.bin"
+FmIns_sfx_slash:
+		binclude "sound/instr/fm/bin/sfx_slash.bin"
+FmIns_sfx_alien1:
+		binclude "sound/instr/fm/bin/sfx_alien_83.bin"
+FmIns_sfx_alien2:
+		binclude "sound/instr/fm/bin/sfx_alien_84.bin"
 
 ; ====================================================================
 

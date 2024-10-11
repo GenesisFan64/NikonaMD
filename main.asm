@@ -11,7 +11,7 @@
 ; NIKONA SETTINGS
 ; ----------------------------------------------------------------
 
-SET_INITMODE	equ 7		; Starting screen mode number on boot
+SET_INITMODE	equ 1		; Starting screen mode number on boot
 
 ; ====================================================================
 ; ----------------------------------------------------------------

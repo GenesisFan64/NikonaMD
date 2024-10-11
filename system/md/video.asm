@@ -151,6 +151,8 @@ RAM_PaletteFade		ds.w 64				; Target MD palette for FadeIn/Out
 ; RAM_VidPrntList		ds.w 3*24			; Video_Print list: Address, Type
 RAM_VdpDmaIndx		ds.w 1				; Current index in DMA BLAST list
 RAM_VdpDmaMod		ds.w 1				; Mid-write flag
+RAM_SprOffsetX		ds.w 1				; X spriteset position
+RAM_SprOffsetY		ds.w 1				; Y spriteset position
 RAM_MdVidClr_e		ds.l 0				; <-- END POINT for Video_Clear
 
 	; *** Variables NOT cleared DURING SCREEN CHANGES:
@@ -486,6 +488,8 @@ Video_BuildSprites:
 		swap	d6
 		add.w	$0A(a5),d0		; Add Y pos
 		add.w	$08(a5),d3		; Add X pos
+		add.w	(RAM_SprOffsetY).w,d0
+		sub.w	(RAM_SprOffsetX).w,d3
 		cmp.w	#320,d3			; X/Y wrap
 		bge.s	.no_pz
 		move.w	d1,d4

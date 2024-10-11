@@ -57,7 +57,7 @@ zDrvRamLen	equ cdRamLen		; RAM-read length and flag
 ; Labels
 ; --------------------------------------------------------
 
-RAM_ZCdFlag_D	equ RAM_SoundBuff	; transferRom flag (ALSO for Z80)
+RAM_ZCdFlag_D	equ RAM_SoundBuff	; transferRom flag (shared with Z80)
 
 ; ====================================================================
 ; --------------------------------------------------------
@@ -214,13 +214,14 @@ sndUnlockZ80:
 ; ------------------------------------------------
 
 sndReq_Enter:
-		ori.w	#$0700,sr			; Disable interrupts
 	if PICO=0
 		move.w	#$0100,(z80_bus).l		; Request Z80 Stop
 	endif
 		suba	#4,sp				; Extra jump return
 		movem.l	d6-d7/a5-a6,-(sp)		; Save these regs to the stack
-		adda	#(4*4)+4,sp			; Go back to the RTS jump
+		move.w	sr,-(sp)
+		ori.w	#$0700,sr			; Disable interrupts
+		adda	#(4*4)+2+4,sp			; Go back to the RTS jump
 		lea	(z80_cpu+zDrvFWrt).l,a5		; a5 - commZWrite
 		lea	(z80_cpu+zDrvFifo).l,a6		; a6 - fifo command list
 .wait:
@@ -236,7 +237,8 @@ sndReq_Exit:
 	if PICO=0
 		move.w	#0,(z80_bus).l
 	endif
-		suba	#8+(4*4),sp
+		suba	#8+2+(4*4),sp
+		move.w	(sp)+,sr
 		movem.l	(sp)+,d6-d7/a5-a6		; And pop those back
 		adda	#8,sp
 		andi.w	#$F8FF,sr			; Enable interrupts
@@ -348,21 +350,15 @@ gemaTest:
 ; a0 | 68k pointer
 ;
 ; Notes:
-; - STOP ALL TRACKS WITH gemaStopAll BEFORE
-;   CALLING THIS.
+; - ALL TRACKS MUST BE STOPPED, CALL gemaStopAll FIRST
 ;
 ; * RAM data (SCD/CD32X when using Stamps):
 ;   Requires calling Sound_Update manually as a
 ;   workaround for the Z80's limitation of not being
 ;   able to read from RAM
-;   (BUT it can WRITE into as normal)
 ; * Word-RAM (SCD/CD32X):
-;   Make sure the Word-RAM permission is set to MAIN-CPU.
-;
-; MUST USE THE MACROS TO PROPERLY SETUP THE TRACK LIST:
-; 	gemaList Tracklist_Pointer
-; 	gemaTrk 0,2,gtrk_Test
-; 	; other tracks go here
+;   Make sure the Word-RAM permission is set to MAIN-CPU
+;   all the time.
 ; --------------------------------------------------------
 
 gemaSetMasterList:
@@ -376,24 +372,46 @@ gemaSetMasterList:
 ; --------------------------------------------------------
 ; gemaPlaySeq
 ;
-; Play a sequence with arguments
+; Play a sequence
 ;
 ; Input:
-; d0.b | Playback slot number
+; d0.b | Sequence number
+; d1.b | Starting block
+; d2.b | Playback slot number
 ;        If -1: Auto-search free slot
-; d1.b | Sequence number
-; d2.b | Starting block
 ; --------------------------------------------------------
 
 gemaPlaySeq:
 		bsr	sndReq_Enter
 		move.w	#$02,d7		; Command $02
 		bsr	sndReq_scmd
-		move.b	d1,d7		; d1.b Seq number
+		move.b	d0,d7		; d0.b Seq number
 		bsr	sndReq_sbyte
-		move.b	d2,d7		; d2.b Block <--
+		move.b	d1,d7		; d1.b Block <--
 		bsr	sndReq_sbyte
-		move.b	d0,d7		; d0.b Slot
+		move.b	d2,d7		; d2.b Slot
+		bsr	sndReq_sbyte
+		bra 	sndReq_Exit
+
+; --------------------------------------------------------
+; gemaPlaySeqAuto
+;
+; Play a sequence into any free slot
+;
+; Input:
+; d0.b | Sequence number
+; d1.b | Starting block
+; --------------------------------------------------------
+
+gemaPlaySeqAuto:
+		bsr	sndReq_Enter
+		move.w	#$02,d7		; Command $02
+		bsr	sndReq_scmd
+		move.b	d0,d7		; d0.b Seq number
+		bsr	sndReq_sbyte
+		move.b	d1,d7		; d1.b Block <--
+		bsr	sndReq_sbyte
+		moveq	#-1,d7		; d2.b Slot
 		bsr	sndReq_sbyte
 		bra 	sndReq_Exit
 
@@ -403,19 +421,19 @@ gemaPlaySeq:
 ; Stops tracks with the same sequence number
 ;
 ; Input:
-; d0.b | Playback slot number
-;        If -1: Stop all slots
-; d1.b | Sequence number to search for
+; d0.b | Sequence number to search for
 ;        If -1: Stop tracks with any sequence
+; d1.b | Playback slot number
+;        If -1: Stop all slots
 ; --------------------------------------------------------
 
 gemaStopSeq:
 		bsr	sndReq_Enter
 		move.w	#$03,d7		; Command $03
 		bsr	sndReq_scmd
-		move.b	d1,d7		; d0.b Seq number
+		move.b	d0,d7		; d0.b Seq number
 		bsr	sndReq_sbyte
-		move.b	d0,d7		; d1.b Slot
+		move.b	d1,d7		; d1.b Slot
 		bsr	sndReq_sbyte
 		bra 	sndReq_Exit
 
@@ -441,9 +459,9 @@ gemaStopAll:
 ; Set Master volume to a track slot.
 ;
 ; Input:
-; d0.b | Playback slot number
+; d0.b | Target volume
+; d1.b | Playback slot number
 ;        If -1: Apply to all slots
-; d1.b | Target volume
 ;
 ; Notes:
 ; - DO NOT MIX THIS WITH gemaSetTrackVol
@@ -454,9 +472,9 @@ gemaFadeSeq:
 		bsr	sndReq_Enter
 		move.w	#$05,d7		; Command $05
 		bsr	sndReq_scmd
-		move.b	d1,d7		; d0.b Target volume
+		move.b	d0,d7		; d0.b Target volume
 		bsr	sndReq_sbyte
-		move.b	d0,d7		; d1.b Slot
+		move.b	d1,d7		; d1.b Slot
 		bsr	sndReq_sbyte
 		bra 	sndReq_Exit
 
@@ -466,10 +484,10 @@ gemaFadeSeq:
 ; Set Master volume to a Seq slot.
 ;
 ; Input:
-; d0.b | Playback slot number
-;        If -1: Set to all slots
-; d1.b | Master volume:
+; d0.b | Master volume:
 ;        $00-max $40-min
+; d1.b | Playback slot number
+;        If -1: Set to all slots
 ;
 ; Notes:
 ; - DO NOT MIX THIS WITH gemaFadeSeq
@@ -481,9 +499,9 @@ gemaSetSeqVol:
 		bsr	sndReq_Enter
 		move.w	#$06,d7		; Command $06
 		bsr	sndReq_scmd
-		move.b	d1,d7		; d1.b Volume data <--
+		move.b	d0,d7		; d1.b Volume data <--
 		bsr	sndReq_sbyte
-		move.b	d0,d7		; d0.b Slot
+		move.b	d1,d7		; d0.b Slot
 		bsr	sndReq_sbyte
 		bra 	sndReq_Exit
 

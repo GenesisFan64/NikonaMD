@@ -148,60 +148,6 @@ sizeof_thisbuff0	ds.l 0
 		bsr	Video_BuildSprites
 		bsr	System_Render
 
-		bsr	System_Render
-		bsr	Video_RunFade
-		lea	str_Title(pc),a0
-		move.l	#locate(0,1,1),d0
-		bsr	Video_Print
-;
-	; Visual updates go here
-		bsr	Emilie_MkSprite
-		bsr	Board_SwapPos
-
-; 		move.l	#$7C000003,(vdp_ctrl).l
-; 		move.l	(RAM_Xpos).l,d0
-; 		move.l	d0,(vdp_data).l
-
-		lea	(RAM_VerScroll),a0
-		move.w	(RAM_ShakeMe).w,d3
-		move.w	d3,d4
-		lsr.w	#3,d3
-		btst	#1,d4
-		bne.s	.midshk
-		neg.w	d3
-.midshk:
-		move.w	d3,(a0)
-
-
-	; Main loop is back
-		move.w	(RAM_CurrType).w,d0
-		and.w	#%11111,d0
-		add.w	d0,d0
-		add.w	d0,d0
-		jsr	.list(pc,d0.w)
-		bra	.loop
-
-; ====================================================================
-; ------------------------------------------------------
-; Mode sections
-; ------------------------------------------------------
-
-.list:
-		bra.w	.mode0
-		bra.w	.mode0
-		bra.w	.mode0
-
-; --------------------------------------------------
-; Mode 0
-; --------------------------------------------------
-
-.mode0:
-		tst.w	(RAM_CurrType).w
-		bmi	.mode0_loop
-		or.w	#$8000,(RAM_CurrType).w
-		move.w	#0,(RAM_EmiHide).w
-		move.w	#1,(RAM_EmiUpd).w
-
 ; Mode 0 mainloop
 .mode0_loop:
 		move.w	(Controller_1+on_press),d7
@@ -236,76 +182,6 @@ sizeof_thisbuff0	ds.l 0
 		bne.s	.no_shake
 		bsr	Board_Reset
 .no_shake:
-; 		bset	#0,(RAM_BoardUpd).w
-
-	; Emilie player input
-		move.b	(RAM_EmiFlags).w,d7
-		bsr	Emilie_Move
-		btst	#7,(RAM_EmiFlags).w
-		bne	.lockcontrl
-		btst	#7,d7
-		beq.s	.after
-		lea	(RAM_BoardBlocks),a6
-		move.w	(RAM_EmiBlockX).w,d7
-		or.w	(RAM_EmiBlockY).w,d7
-		bmi.s	.after
-		move.w	(RAM_EmiBlockX).w,d0
-		cmp.w	#6,d0
-		bge.s	.after
-		move.w	(RAM_EmiBlockY).w,d1
-		cmp.w	#6,d1
-		bge.s	.after
-		mulu.w	#6,d1
-		add.w	d1,d0
-		adda	d0,a6
-		bchg	#0,(a6)
-		bset	#0,(RAM_BoardUpd).w
-		moveq	#1,d1
-		bsr	PlayThisSfx
-		bsr	Board_CheckMatch
-.after:
-
-	; UDLR
-		move.w	#0,d4
-		move.w	(Controller_1+on_press),d7
-		btst	#bitJoyDown,d7
-		beq.s	.noz_down
-		add.w	#$18,(RAM_EmiMoveY).w
-		add.w	#1,(RAM_EmiBlockY).w
-		move.w	d4,(RAM_EmiChar).w
-		move.l	#-$20000,(RAM_EmiJumpSpd).l
-.noz_down:
-		move.w	#4,d4
-		move.w	(Controller_1+on_press),d7
-		btst	#bitJoyUp,d7
-		beq.s	.noz_up
-		add.w	#-$18,(RAM_EmiMoveY).w
-		sub.w	#1,(RAM_EmiBlockY).w
-		move.w	d4,(RAM_EmiChar).w
-		move.l	#-$20000,(RAM_EmiJumpSpd).l
-.noz_up:
-		move.w	#8,d4
-		move.w	(Controller_1+on_press),d7
-		btst	#bitJoyRight,d7
-		beq.s	.noz_r
-		add.w	#$20,(RAM_EmiMoveX).w
-		add.w	#1,(RAM_EmiBlockX).w
-		move.w	d4,(RAM_EmiChar).w
-		move.l	#-$20000,(RAM_EmiJumpSpd).l
-.noz_r:
-		move.w	#$C,d4
-		move.w	(Controller_1+on_press),d7
-		btst	#bitJoyLeft,d7
-		beq.s	.noz_l
-		add.w	#-$20,(RAM_EmiMoveX).w
-		sub.w	#1,(RAM_EmiBlockX).w
-		move.w	d4,(RAM_EmiChar).w
-		move.l	#-$20000,(RAM_EmiJumpSpd).l
-.noz_l:
-		rts
-
-.lockcontrl:
-; 		add.w	#6,(RAM_EmiJumpTan).w
 		rts
 
 ; ====================================================================
@@ -327,7 +203,7 @@ PlayThisSfx:
 
 Board_CheckMatch:
 	; horizontal
-		lea	(RAM_BoardBlocks),a6
+		lea	(RAM_BoardBlocks).w,a6
 		moveq	#0,d3
 		move	#6-1,d6
 .x_chk_n:
@@ -343,7 +219,7 @@ Board_CheckMatch:
 .x_off:
 		dbf	d6,.x_chk_n
 	; vertical
-		lea	(RAM_BoardBlocks),a6
+		lea	(RAM_BoardBlocks).w,a6
 		move	#6-1,d6
 .y_chk_n:
 		move.l	a6,a5
@@ -369,7 +245,7 @@ Board_CheckMatch:
 
 Board_Reset:
 	; horizontal
-		lea	(RAM_BoardBlocks),a6
+		lea	(RAM_BoardBlocks).w,a6
 		moveq	#0,d3
 		move	#6-1,d6
 .x_chk_n:
@@ -392,7 +268,7 @@ Board_Reset:
 		adda	#6,a6
 		dbf	d6,.x_chk_n
 	; vertical
-		lea	(RAM_BoardBlocks),a6
+		lea	(RAM_BoardBlocks).w,a6
 		move	#6-1,d6
 .y_chk_n:
 		move.l	a6,a5
@@ -417,7 +293,7 @@ Board_Reset:
 		dbf	d6,.y_chk_n
 
 	; clearall req
-		lea	(RAM_BoardBlocks),a6
+		lea	(RAM_BoardBlocks).w,a6
 		moveq	#(6*6)-1,d7
 .nxtclr:
 		btst	#2,(a6)
@@ -438,7 +314,7 @@ Board_SwapPos:
 
 ; draw all
 .draw_all:
-		lea	(RAM_BoardBlocks),a6
+		lea	(RAM_BoardBlocks).w,a6
 		move.w	#$4000|(8*$02)|(7*$80),d7
 		swap	d7
 		move.w	#3,d7
@@ -486,7 +362,7 @@ Board_SwapPos:
 ; 		cmp.w	#6,(RAM_EmiBlockY).w
 ; 		bge	.dont_upd
 ;
-; 		lea	(RAM_BoardBlocks),a6
+; 		lea	(RAM_BoardBlocks).w,a6
 ; 		moveq	#0,d7
 ; 		move.w	(RAM_EmiBlockX).w,d7
 ; 		adda	d7,a6
@@ -726,67 +602,6 @@ Emilie_MkSprite:
 ;
 ; Small stuff goes here
 ; ------------------------------------------------------
-
-		align 2
-str_Title:
-; 	if MARS
-		dc.b "\\l \\w \\w",$A,$A
-		dc.b "\\w \\w \\w \\w MARS",$A
-		dc.b "\\w \\w \\w \\w",$A
-		dc.b $A
-		dc.b "\\b \\b",$A,$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b $A
-
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b "\\w",$A
-		dc.b 0
-
-		dc.l RAM_Framecount
-		dc.l Controller_1+on_hold
-		dc.l Controller_2+on_hold
-
-		dc.l sysmars_reg+comm0
-		dc.l sysmars_reg+comm2
-		dc.l sysmars_reg+comm4
-		dc.l sysmars_reg+comm6
-		dc.l sysmars_reg+comm8
-		dc.l sysmars_reg+comm10
-		dc.l sysmars_reg+comm12
-		dc.l sysmars_reg+comm14
-
-		dc.l sysmcd_reg+mcd_comm_m
-		dc.l sysmcd_reg+mcd_comm_s
-
-		dc.l sysmcd_reg+mcd_dcomm_m
-		dc.l sysmcd_reg+mcd_dcomm_m+2
-		dc.l sysmcd_reg+mcd_dcomm_m+4
-		dc.l sysmcd_reg+mcd_dcomm_m+6
-		dc.l sysmcd_reg+mcd_dcomm_m+8
-		dc.l sysmcd_reg+mcd_dcomm_m+10
-		dc.l sysmcd_reg+mcd_dcomm_m+12
-		dc.l sysmcd_reg+mcd_dcomm_m+14
-		dc.l sysmcd_reg+mcd_dcomm_s
-		dc.l sysmcd_reg+mcd_dcomm_s+2
-		dc.l sysmcd_reg+mcd_dcomm_s+4
-		dc.l sysmcd_reg+mcd_dcomm_s+6
-		dc.l sysmcd_reg+mcd_dcomm_s+8
-		dc.l sysmcd_reg+mcd_dcomm_s+10
-		dc.l sysmcd_reg+mcd_dcomm_s+12
-		dc.l sysmcd_reg+mcd_dcomm_s+14
 
 		align 2
 

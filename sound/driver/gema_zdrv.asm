@@ -19,7 +19,7 @@ MAX_SLOTS	equ 3		; !! Number of buffers
 
 MAX_TBLSIZE	equ 12h		; Maximum size for chip tables
 MAX_TRKINDX	equ 26		; Max channel indexes per buffer: 4PSG+6FM+8PCM+8PWM
-MAX_ZCMND	equ 10h		; Size of command array ** 1-bit SIZES ONLY ** (68k uses this label too)
+MAX_ZCMND	equ 20h		; Size of command array ** 1-bit SIZES ONLY ** (68k uses this label too)
 
 ; --------------------------------------------------------
 ; Structs
@@ -430,9 +430,7 @@ drv_loop:
 		call	.grab_arg			; d0: Slot index
 		ld	iy,nikona_BuffList		; iy - Slot buffer list
 		or	a
-		jp	m,.srch_del
-; 		cp	-1				; if -1, search for all with same ID
-; 		jr	z,.srch_del
+		jp	m,.srch_del			; if -1, search for all with same ID
 		cp	MAX_SLOTS			; If maxed out slots
 		jp	nc,.next_cmd
 		rst	8
@@ -476,9 +474,7 @@ drv_loop:
 		call	.grab_arg		; d0: Slot index
 		ld	iy,nikona_BuffList	; iy - Slot buffer list
 		or	a
-		jp	m,.srch_fvol
-; 		cp	-1			; if -1, search for all with same ID
-; 		jr	z,.srch_fvol
+		jp	m,.srch_fvol		; if -1, search for all with same ID
 		cp	MAX_SLOTS		; If maxed out slots
 		jp	nc,.next_cmd
 		rst	8
@@ -516,9 +512,7 @@ drv_loop:
 		call	.grab_arg		; d0: Slot index
 		ld	iy,nikona_BuffList	; iy - Slot buffer list
 		or	a
-		jp	m,.srch_vol
-; 		cp	-1			; if -1, search for all with same ID
-; 		jr	z,.srch_vol
+		jp	m,.srch_vol		; if -1, search for all with same ID
 		cp	MAX_SLOTS		; If maxed out slots
 		jp	nc,.next_cmd
 		rst	8
@@ -1272,7 +1266,6 @@ track_out:
 ; --------------------------------------------------------
 
 set_chips:
-		rst	20h
 		call	get_tick
 	; ** MANUAL BUFF READ **
 		ld	iy,trkBuff_0
@@ -1434,10 +1427,10 @@ tblbuff_read:
 ; hl - Intrument data
 ;
 ; Returns:
-; hl - Channel table to use
-;  a - Return value:
-;       0 - Found
-;      -1 - Not found
+; hl | Channel table to use
+;  a | Return value:
+;       0 | Found
+;      -1 | Not found
 ; ----------------------------------------
 
 .grab_link:
@@ -3455,8 +3448,8 @@ gema_init:
 		call	gema_lastbank		; Set last bank slot, solves bus problem with 32X
 		call	dac_off
 		xor	a
-; 		ld	(marsUpd),a
-; 		ld	(mcdUpd),a
+		ld	(marsUpd),a
+		ld	(mcdUpd),a
 		ld	(cdRamLen),a
 		ld	iy,nikona_BuffList
 		ld	c,1			; Start at this priority
@@ -3489,7 +3482,7 @@ gema_init:
 
 		ld	de,2208h|03h	; Set Default LFO
 		call	fm_send_1
-		ld	de,2700h	; CH3 special and timers off
+		ld	de,2700h	; CH3 special/timers OFF
 		call	fm_send_1
 ; 		ld	de,2800h
 		inc	d		; FM KEYS off
@@ -3716,7 +3709,6 @@ readRom:
 	endif
 		rst	8
 	if EMU=0
-		nop
 		nop
 		nop
 	endif

@@ -128,19 +128,11 @@ sizeof_thisbuff		ds.l 0
 		bsr	Video_Print
 		bsr	.gema_viewinit
 ; 		bsr	.show_cursor
-
 	; ----------------------------------------------
 		bsr	gemaReset				; Load default GEMA sound data
-; 		move.w	#215,(RAM_GemaArg6).w
-; 		move.w	#215,d0
-; 		bsr	gemaSetBeats
-; 		moveq	#1,d0
-; 		bsr	gemaPlaySeq
-
 ; 		moveq	#1,d0
 ; 		moveq	#%10,d1
 ; 		bsr	Video_Resolution
-
 	; ----------------------------------------------
 		bsr	.show_me
 		bsr	.gema_view
@@ -233,14 +225,16 @@ sizeof_thisbuff		ds.l 0
 		andi.w	#JoyC+JoyZ,d7
 		beq.s	.c_press
 		lea	(RAM_GemaIndx).w,a5
-		move.w	(a5)+,d0
+
+		move.w	(a5)+,d2
 		andi.w	#JoyZ,d7
 		beq.s	.not_auto
-		moveq	#-1,d0
+		moveq	#-1,d2
 .not_auto:
+		move.w	(a5)+,d0
 		move.w	(a5)+,d1
-		move.w	(a5)+,d2
 		bsr	gemaPlaySeq
+
 		move.w	(RAM_GemaSeq).w,d0	; External beats
 		move.w	d0,d1
 		add.w	d1,d1
@@ -254,8 +248,8 @@ sizeof_thisbuff		ds.l 0
 		andi.w	#JoyB,d7
 		beq.s	.b_press
 		lea	(RAM_GemaIndx).w,a5
-		move.w	(a5)+,d0
 		move.w	(a5)+,d1
+		move.w	(a5)+,d0
 		bsr	gemaStopSeq
 .b_press:
 		move.w	on_press(a6),d7
