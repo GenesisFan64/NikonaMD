@@ -2034,9 +2034,8 @@ dtbl_singl:
 		rst	8
 		xor	a			; clear high
 		ccf				; clear carry
-		sla	e			; pitchbend << 3
+		sla	e			; pitchbend << 2
 		sla	e
-		sla	e			; << 1
 		sbc	a,a			; get carry MSB
 		ld	d,a
 		add	hl,de			; Pitchbend the freq
@@ -3229,6 +3228,7 @@ zmars_send:
 	; ----------------------------------------
 	; Send PCM table
 	if MCD|MARSCD
+		rst	8
 		ld	a,(mcdBlock)	; Enable MARS requests?
 		or	a
 		jp	nz,.mcdt_blocked
@@ -3303,27 +3303,23 @@ zmars_send:
 		inc	hl
 		djnz	.clr_pcm
 .mcdt_noupd:
-	endif
-	if MCD
 		rst	8
 		ld	b,2		; ** wave sync for MCD only
 		djnz	$
-		nop
-		nop
+		rst	8
+		ld	b,1
+		djnz	$
 	endif
 	; ----------------------------------------
 	; Send PWM table
 	if MARS|MARSCD
+		rst	8
 		ld	a,(marsBlock)	; Enable MARS requests?
 		or	a
 		jp	nz,.blocked_m
-		rst	8
-		nop
-		nop
-		nop
 		ld	a,(marsUpd)	; NEW transfer?
 		or	a
-		jr	z,.pwm_exit
+		jr	z,.blocked_m
 		xor	a
 		ld	(marsUpd),a
 		rst	20h
@@ -3331,8 +3327,7 @@ zmars_send:
 		ld	iy,8000h|5100h	; iy - mars sysreg
 		ld	ix,pwmcom
 .wait_enter:
-		nop
-		nop
+		rst	8
 		ld	a,(iy+comm14)	; check if 68k got first.
 		bit	7,a
 		jr	nz,.wait_enter
@@ -3345,17 +3340,7 @@ zmars_send:
 		jr	nz,.wait_enter	; If not, retry
 		set	7,(iy+comm14)	; LOCK bit
 		set	1,(iy+standby)	; Request Slave CMD
-		nop	; ** wave sync AND wait using nops
-		nop
-		nop
-		nop
-		nop
 		rst	8
-		nop
-		nop
-		nop
-		nop
-		nop
 ; .wait_cmd:
 ; 		bit	1,(iy+standby)	; <-- unstable on HW
 ; 		jr	nz,.wait_cmd
@@ -3387,6 +3372,7 @@ zmars_send:
 		jr	nz,.w_pass2
 		dec	c
 		jr	nz,.next_packet
+		rst	8
 		res	7,(iy+comm14)	; Break transfer loop
 		res	6,(iy+comm14)	; Clear PASS
 ; Reset comm ports
@@ -3399,20 +3385,13 @@ zmars_send:
 		inc	hl
 		djnz	.clr_pwm
 .pwm_exit:
+		rst	8
+		ld	b,2		; ** wave sync for MCD only
+		djnz	$
+		rst	8
 	if MARSCD
-		rst	8
-		ld	b,5		; ** wave sync for MARSCD only
+		ld	b,1
 		djnz	$
-		nop
-		nop
-	endif
-
-	if EMU=0		; <-- non-EMU wave sync
-		rst	8
-		ld	b,3
-		djnz	$
-		nop
-		nop
 	endif
 	endif
 		ret
