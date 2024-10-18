@@ -18,13 +18,12 @@
 ; ----------------------------------------------
 
 			memory 2		; Cell $0002
-vramLoc_Backgrnd	ds.b $3F7
-			endmemory
-
-			memory $580
-vramLoc_Haruna		ds.b $24
+vramLoc_Haruna		ds.b $30
+vramLoc_Emily		ds.b $30
 vramLoc_Sisi		ds.b $2C
-vramLoc_PushBlk		ds.b $20
+vramLoc_PushBlk		ds.b $100
+
+vramLoc_Backgrnd	ds.b $3F7
 			endmemory
 
 ; ====================================================================
@@ -34,7 +33,8 @@ vramLoc_PushBlk		ds.b $20
 
 			memory RAM_ScrnBuff
 RAM_Cam_Xpos		ds.w 1
-RAM_BlocksBuff		ds.b $10*$C
+RAM_DoRedraw		ds.w 1
+RAM_BlocksBuff		ds.b 8*8
 .sizeof_this		ds.l 0
 			endmemory
 			erreport "This screen",.sizeof_this-RAM_ScrnBuff,MAX_ScrnBuff
@@ -76,7 +76,7 @@ RAM_BlocksBuff		ds.b $10*$C
 		bsr	Video_FadePal
 		lea	(Pal_BlkPuzzl+$02),a0
 		moveq	#1,d0
-		moveq	#7,d1
+		moveq	#8,d1
 		bsr	Video_FadePal
 		lea	ArtList_scrn1(pc),a0
 		bsr	Video_LoadArt_List
@@ -107,7 +107,13 @@ RAM_BlocksBuff		ds.b $10*$C
 		bsr	Object_Run
 		bsr	Video_BuildSprites
 		bsr	System_Render
+		tst.w	(RAM_DoRedraw).w
+		beq.s	.dont_redrw
+		clr.w	(RAM_DoRedraw).w
+		bsr	Scrn0_DrawMapAll
+.dont_redrw:
 
+		bsr	.show_counter
 		move.w	(Controller_1+on_press).w,d7
 		andi.w	#JoyX,d7
 		beq.s	.not_x
@@ -140,8 +146,6 @@ RAM_BlocksBuff		ds.b $10*$C
 		move.w	d7,(RAM_SprOffsetX).w
 		neg.w	d7
 		move.w	d7,(RAM_HorScroll).w
-; 		asr.w	#2,d7
-; 		move.w	d7,(RAM_HorScroll+2).w
 
 	; Check START button
 		move.w	(Controller_1+on_press).w,d7
@@ -162,6 +166,12 @@ RAM_BlocksBuff		ds.b $10*$C
 
 .show_counter:
 		rts
+; 		lea	str_NewCountr0(pc),a0
+; 		moveq	#0,d0
+; 		moveq	#0,d1
+; 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
+; 		bra	Video_Print
 
 ; ====================================================================
 ; ------------------------------------------------------
@@ -211,85 +221,88 @@ obj_Player:
 		move.w	#$0202,obj_size_x(a6)
 		move.w	#$0303,obj_size_y(a6)
 		move.w	#$0101,obj_size_z(a6)
-		move.w	#$30,obj_x(a6)	; Set Object's X/Y position
-		move.w	#224/2,obj_y(a6)
+		move.w	#0,obj_x(a6)		; Set Object's X/Y position
+		move.w	#0,obj_y(a6)
+		lea	obj_ram(a6),a5
+		clr.l	(a5)+
+		clr.l	(a5)+
+		clr.w	(a5)+
+		move.w	#0,4(a5)
+		move.w	#0,6(a5)
 
 ; ----------------------------------------------
 .main:
-		lea	(Controller_1).w,a0	; a0 - Input 1 buffer
-		move.w	on_hold(a0),d7		; d7 - Read HOLDING buttons on Port 1
-		moveq	#0,d0			; d0 - Reset X increment
-		moveq	#0,d1			; d1 - Reset Y increment
-		moveq	#0,d2
-		moveq	#0,d3
-		btst	#bitJoyRight,d7
-		beq.s	.not_right
-		move.w	obj_x(a6),d6
-		cmp.w	#$200-$10,d6
-		bge.s	.not_right
-		moveq	#1,d0			; X right
-; 		bset	#0,obj_attr(a6)		; Set X flip
-		moveq	#2,d2
-		addq.w	#1,d3
-.not_right:
-		btst	#bitJoyLeft,d7
-		beq.s	.not_left
-		move.w	obj_x(a6),d6
-		sub.w	#$10,d6
-		bmi.s	.not_left
-		moveq	#-1,d0			; X left
-		moveq	#3,d2
-		addq.w	#1,d3
-.not_left:
-		btst	#bitJoyDown,d7
-		beq.s	.not_down
-		move.w	obj_y(a6),d6
-		cmp.w	#224-$10,d6
-		bge.s	.not_down
-		moveq	#1,d1			; Y down
-		moveq	#0,d2
-		addq.w	#1,d3
-.not_down:
-		btst	#bitJoyUp,d7
-		beq.s	.not_up
-		move.w	obj_y(a6),d6
-		sub.w	#$10,d6
-		bmi.s	.not_up
-		moveq	#-1,d1			; Y up
-		moveq	#1,d2
-		addq.w	#1,d3
-.not_up:
-		btst	#bitJoyB,d7
-		beq.s	.not_fast
-		lsl.w	#1,d0
-		lsl.w	#1,d1
-.not_fast:
+		lea	obj_ram(a6),a5
+		lea	(Controller_1).w,a4
 
+		tst.w	8(a5)
+		bne.s	.on_timer
+		move.w	on_hold(a4),d7
+		btst	#bitJoyRight,d7
+		beq.s	.n_rtmr
+		move.w	#1,(a5)
+		move.w	#0,2(a5)
+		addq.w	#1,4(a5)
+		move.w	#$20,8(a5)
+.n_rtmr:	btst	#bitJoyLeft,d7
+		beq.s	.n_ltmr
+		move.w	#-1,(a5)
+		move.w	#0,2(a5)
+		subq.w	#1,4(a5)
+		move.w	#$20,8(a5)
+.n_ltmr:	btst	#bitJoyDown,d7
+		beq.s	.d_rtmr
+		move.w	#0,(a5)
+		move.w	#1,2(a5)
+		addq.w	#1,6(a5)
+		move.w	#$18,8(a5)
+.d_rtmr:	btst	#bitJoyUp,d7
+		beq.s	.u_ltmr
+		move.w	#0,(a5)
+		move.w	#-1,2(a5)
+		subq.w	#1,6(a5)
+		move.w	#$18,8(a5)
+.u_ltmr:
+		bra.s	.no_timer
+
+.on_timer:
+		move.w	(a5),d0
+		move.w	2(a5),d1
 		add.w	d0,obj_x(a6)
 		add.w	d1,obj_y(a6)
-		move.w	d2,obj_anim_num(a6)
+		subq.w	#1,8(a5)
+		bne.s	.no_timer
 
-		moveq	#0,d4
+		moveq	#0,d0
 		move.w	obj_x(a6),d0
-		move.w	#512-320,d5
-		sub.w	#320/2,d0
-		bmi.s	.left_x
-		move.w	d0,d4
-.left_x:
-		cmp.w	d5,d0
-		blt.s	.right_x
-		move.w	d5,d4
-.right_x:
-		move.w	d4,(RAM_Cam_Xpos).w
+		beq.s	.no_timer
+		asr.w	#5,d0
+		subq.w	#1,d0
+		cmp.w	#5,d0
+		bge.s	.no_timer
+		move.w	obj_y(a6),d1
+		beq.s	.no_tmry
+		divu.w	#$18,d1
+		subq.w	#1,d1
+		cmp.w	#5,d1
+		bge.s	.no_tmry
+		lsl.w	#3,d1
+		add.w	d1,d0
+.no_tmry
+		lea	(RAM_BlocksBuff),a0
+		adda	d0,a0
+		move.b	#$02,(a0)
+		st.b	(RAM_DoRedraw).w
+.no_timer:
 
 ; ----------------------------------------------
 ; Show the object...
 
-		tst.w	d3
-		beq.s	.no_anim
-		lea	.anim_data(pc),a0	; Do animation
-		bsr	object_Animate
-.no_anim:
+; 		tst.w	d3
+; 		beq.s	.no_anim
+; 		lea	.anim_data(pc),a0	; Do animation
+; 		bsr	object_Animate
+; .no_anim:
 ; 		clr.l	(RAM_TestTouch).w
 ; 		bsr	object_Touch
 ; 		tst.l	d0
@@ -303,6 +316,8 @@ obj_Player:
 		moveq	#0,d2
 		move.w	obj_x(a6),d0
 		move.w	obj_y(a6),d1
+		addi.w	#16+$30,d0
+		addi.w	#$20-4,d1
 		move.b	obj_attr(a6),d2			; <-- Quick attribute bits
 		lsl.w	#8,d2
 		lsl.w	#3,d2				; %000vh000 00000000
@@ -402,7 +417,7 @@ obj_Ball:
 		beq.s	.y_double
 		add.w	d1,d1
 .y_double:
-		move.w	#512,d0
+		move.w	#320,d0
 		move.w	obj_x(a6),d2
 		tst.w	d2
 		bpl.s	.x_back
@@ -494,7 +509,7 @@ Screen0_PickBackgrnd:
 Scrn0_LoadMap:
 		lea	layout_PushBlk(pc),a0
 		lea	(RAM_BlocksBuff).w,a1
-		move.w	#($10*$C)-1,d0
+		move.w	#(8*8)-1,d0
 .copy_base:
 		move.b	(a0)+,(a1)+
 		dbf	d0,.copy_base
@@ -505,21 +520,25 @@ Scrn0_DrawMapAll:
 		move.l	#splitw(32/8,32/8),d1			; d1 - Width and Height
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d2	; d2 - Layer width / Layer output
 		move.w	#vramLoc_PushBlk,d3			; d3 - Starting cell
-		moveq	#$C-1,d7
+		moveq	#8-1,d7
+		move.l	#$000A0008,d6
 .y_read:
 		swap	d7
 		move.l	d6,d0
-		move.w	#$10-1,d7
+		move.w	#8-1,d7
 .x_read:
 		lea	map_PushBlk(pc),a0			; a0 - Map data
 		moveq	#0,d5
 		move.b	(a1)+,d5
+		beq.s	.not_blk
+		subq.w	#1,d5
 		lsl.l	#5,d5
 		adda	d5,a0
 		bsr	Video_LoadMap
+.not_blk
 		add.l	#$00040000,d0
 		dbf	d7,.x_read
-		add.l	#$00000004,d6
+		add.l	#$00000003,d6
 		swap	d7
 		dbf	d7,.y_read
 		rts
@@ -547,15 +566,13 @@ Scrn0_DrawMapAll:
 ; 		dc.b "GEMA testing"
 ; 		dc.b 0
 ; 		align 2
-str_NewCountr0:
-		dc.l pstr_mem(3,RAM_Framecount)
-		dc.b 0
-		align 2
+; str_NewCountr0:
+; 		dc.l pstr_mem(1,RAM_Objects+obj_x)
+; 		dc.b " "
+; 		dc.l pstr_mem(1,RAM_Objects+obj_y)
+; 		dc.b 0
+; 		align 2
 map_PushBlk:
-		dc.w $FFFF,$FFFF,$FFFF,$FFFF
-		dc.w $FFFF,$FFFF,$FFFF,$FFFF
-		dc.w $FFFF,$FFFF,$FFFF,$FFFF
-		dc.w $FFFF,$FFFF,$FFFF,$FFFF
 		dc.w $0000,$0001,$0002,$0003
 		dc.w $0004,$0005,$0006,$0007
 		dc.w $0008,$0009,$000A,$000B
@@ -566,18 +583,14 @@ map_PushBlk:
 		dc.w $001C,$001D,$001E,$001F
 		align 2
 layout_PushBlk:
-		dc.b $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-		dc.b $00,$01,$01,$01,$00,$01,$01,$00,$01,$01,$01,$00,$01,$01,$01,$00
-		dc.b $00,$00,$01,$00,$00,$01,$00,$00,$01,$00,$00,$00,$00,$01,$00,$00
-		dc.b $00,$00,$01,$00,$00,$01,$01,$00,$01,$01,$01,$00,$00,$01,$00,$00
-		dc.b $00,$00,$01,$00,$00,$01,$00,$00,$00,$00,$01,$00,$00,$01,$00,$00
-		dc.b $00,$00,$01,$00,$00,$01,$01,$00,$01,$01,$01,$00,$00,$01,$00,$00
-		dc.b $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-		dc.b $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-		dc.b $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-		dc.b $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-		dc.b $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-		dc.b $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+		dc.b $01,$01,$01,$01,$01,$00,$00,$00
+		dc.b $01,$01,$01,$01,$01,$00,$00,$00
+		dc.b $01,$01,$01,$01,$01,$00,$00,$00
+		dc.b $01,$01,$01,$01,$01,$00,$00,$00
+		dc.b $01,$01,$01,$01,$01,$00,$00,$00
+		dc.b $00,$00,$00,$00,$00,$00,$00,$00
+		dc.b $00,$00,$00,$00,$00,$00,$00,$00
+		dc.b $00,$00,$00,$00,$00,$00,$00,$00
 		align 2
 
 ; ====================================================================

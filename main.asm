@@ -11,7 +11,7 @@
 ; NIKONA SETTINGS
 ; ----------------------------------------------------------------
 
-SET_INITMODE	equ 0		; Starting screen mode number on boot
+SET_INITMODE	equ 1		; Starting screen mode number on boot
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -66,7 +66,7 @@ sizeof_MdGlbl	ds.l 0
 	if (sizeof_MdGlbl&1 == 1)
 		error "GLOBALS ARE MISALIGNED"
 	endif
-		erreport "USER Globals",(sizeof_MdGlbl-RAM_MdGlobal),MAX_Globals	; Report error if ran out
+; 		erreport "USER Globals",(sizeof_MdGlbl-RAM_MdGlobal),MAX_Globals	; Report error if ran out
 		endmemory
 
 ; ====================================================================
@@ -82,7 +82,7 @@ sizeof_SaveInfo	ds.l 0
 	if (sizeof_MdGlbl&1 == 1)
 		error "SAVE STRUCT IS MISALIGNED"
 	endif
-		erreport "USER Globals",(sizeof_SaveInfo-RAM_SaveData),SET_SRAMSIZE	; Report error if ran out
+; 		erreport "USER Globals",(sizeof_SaveInfo-RAM_SaveData),SET_SRAMSIZE	; Report error if ran out
 		endmemory
 
 ; ====================================================================
