@@ -188,8 +188,8 @@ Md_SysCode:
 	endif
 ; ---------------------------------------------
 
-		include	"sound/driver/gema_macros.asm"
-		include	"sound/driver/gema.asm"
+		include	"sound/drv/gema_macros.asm"
+		include	"sound/drv/gema.asm"
 		include	"system/md/video.asm"
 		include	"system/md/system.asm"
 
@@ -310,7 +310,7 @@ Z80_CODE:
 	if MARS
 		dephase
 	endif
-		include "sound/driver/gema_zdrv.asm"
+		include "sound/drv/gema_zdrv.asm"
 	if MARS
 		phase $880000+*
 	endif

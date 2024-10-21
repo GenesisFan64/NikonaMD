@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 1 - 10/18/2024 03:14:10 AM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 1 - 10/21/2024 05:44:37 AM
 
 
        1/       0 :                     ; ===========================================================================
@@ -3420,7 +3420,7 @@
      187/FFFFFFFFFFFF0000 :                     		phase RAM_SystemCode
      189/FFFFFFFFFFFF0000 :                     ; ---------------------------------------------
      190/FFFFFFFFFFFF0000 :                     
-     191/FFFFFFFFFFFF0000 :                     		include	"sound/driver/gema_macros.asm"
+     191/FFFFFFFFFFFF0000 :                     		include	"sound/drv/gema_macros.asm"
 (1)    1/FFFFFFFFFFFF0000 :                     ; ------------------------------------------------------------
 (1)    2/FFFFFFFFFFFF0000 :                     ; GEMA MACROS
 (1)    3/FFFFFFFFFFFF0000 :                     ; ------------------------------------------------------------
@@ -3620,7 +3620,7 @@
 (1)  197/FFFFFFFFFFFF0000 :                      endif
 (1)  198/FFFFFFFFFFFF0000 :                     	endm
 (1)  199/FFFFFFFFFFFF0000 :                     
-     192/FFFFFFFFFFFF0000 :                     		include	"sound/driver/gema.asm"
+     192/FFFFFFFFFFFF0000 :                     		include	"sound/drv/gema.asm"
 (1)    1/FFFFFFFFFFFF0000 :                     ; ===========================================================================
 (1)    2/FFFFFFFFFFFF0000 :                     ; -------------------------------------------------------------------
 (1)    3/FFFFFFFFFFFF0000 :                     ; GEMA/Nikona Sound Driver v1.0
@@ -9585,7 +9585,7 @@
      304/    C000 :                     Z80_CODE_FILE:
      305/  200000 :                     		phase sysmcd_wram
      309/  200000 :                     Z80_CODE:
-     313/  200000 :                     		include "sound/driver/gema_zdrv.asm"
+     313/  200000 :                     		include "sound/drv/gema_zdrv.asm"
 (1)    1/  200000 :                     ; ===========================================================================
 (1)    2/  200000 :                     ; -------------------------------------------------------------------
 (1)    3/  200000 :                     ; GEMA Z80 code
@@ -13997,197 +13997,197 @@
 (1)   14/   20000 :                     	align 4
 (1)   15/   20000 :                     	;gSmplData Label,"file_path",loop_start
 (1)   16/   20000 :                     ; -----------------------------------------------------------
-(1)   17/   20000 : (MACRO)              	gSmplData PcmIns_sxbeats,"sound/instr/smpl/sxbeats.wav",0
+(1)   17/   20000 : (MACRO)              	gSmplData PcmIns_sxbeats,"sound/ins/smpl/sxbeats.wav",0
 (1)   17/   20000 : =$20000              PCMINS_SXBEATS    label *
 (1)   17/   20000 : 743C 00                     dc.b ((PCMINS_SXBEATS_e-PCMINS_SXBEATS_s)&$FF),(((PCMINS_SXBEATS_e-PCMINS_SXBEATS_s)>>8)&$FF),(((PCMINS_SXBEATS_e-PCMINS_SXBEATS_s)>>16)&$FF)
 (1)   17/   20003 : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   17/   20006 :                     PCMINS_SXBEATS_s:
-(1)   17/   20006 :                             binclude "sound/instr/smpl/sxbeats.wav",$2C
+(1)   17/   20006 :                             binclude "sound/ins/smpl/sxbeats.wav",$2C
 (1)   17/   23C7A :                     PCMINS_SXBEATS_e:
-(1)   18/   23C7A : (MACRO)              	gSmplData PcmIns_sxbeats2,"sound/instr/smpl/sxbeats2.wav",0
+(1)   18/   23C7A : (MACRO)              	gSmplData PcmIns_sxbeats2,"sound/ins/smpl/sxbeats2.wav",0
 (1)   18/   23C7A : =$23C7A              PCMINS_SXBEATS2    label *
 (1)   18/   23C7A : 1A79 00                     dc.b ((PCMINS_SXBEATS2_e-PCMINS_SXBEATS2_s)&$FF),(((PCMINS_SXBEATS2_e-PCMINS_SXBEATS2_s)>>8)&$FF),(((PCMINS_SXBEATS2_e-PCMINS_SXBEATS2_s)>>16)&$FF)
 (1)   18/   23C7D : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   18/   23C80 :                     PCMINS_SXBEATS2_s:
-(1)   18/   23C80 :                             binclude "sound/instr/smpl/sxbeats2.wav",$2C
+(1)   18/   23C80 :                             binclude "sound/ins/smpl/sxbeats2.wav",$2C
 (1)   18/   2B59A :                     PCMINS_SXBEATS2_e:
-(1)   19/   2B59A : (MACRO)              	gSmplData PcmIns_drumsetA,"sound/instr/smpl/drumsetA.wav",0
+(1)   19/   2B59A : (MACRO)              	gSmplData PcmIns_drumsetA,"sound/ins/smpl/drumsetA.wav",0
 (1)   19/   2B59A : =$2B59A              PCMINS_DRUMSETA    label *
 (1)   19/   2B59A : A476 00                     dc.b ((PCMINS_DRUMSETA_e-PCMINS_DRUMSETA_s)&$FF),(((PCMINS_DRUMSETA_e-PCMINS_DRUMSETA_s)>>8)&$FF),(((PCMINS_DRUMSETA_e-PCMINS_DRUMSETA_s)>>16)&$FF)
 (1)   19/   2B59D : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   19/   2B5A0 :                     PCMINS_DRUMSETA_s:
-(1)   19/   2B5A0 :                             binclude "sound/instr/smpl/drumsetA.wav",$2C
+(1)   19/   2B5A0 :                             binclude "sound/ins/smpl/drumsetA.wav",$2C
 (1)   19/   32C44 :                     PCMINS_DRUMSETA_e:
 (1)   20/   32C44 :                     
-(1)   21/   32C44 : (MACRO)              	gSmplData PcmIns_Trumpet1,"sound/instr/smpl/trumpet1.wav",27625
+(1)   21/   32C44 : (MACRO)              	gSmplData PcmIns_Trumpet1,"sound/ins/smpl/trumpet1.wav",27625
 (1)   21/   32C44 : =$32C44              PCMINS_TRUMPET1    label *
 (1)   21/   32C44 : 65A0 00                     dc.b ((PCMINS_TRUMPET1_e-PCMINS_TRUMPET1_s)&$FF),(((PCMINS_TRUMPET1_e-PCMINS_TRUMPET1_s)>>8)&$FF),(((PCMINS_TRUMPET1_e-PCMINS_TRUMPET1_s)>>16)&$FF)
 (1)   21/   32C47 : E96B 00                     dc.b ((27625)&$FF),(((27625)>>8)&$FF),(((27625)>>16)&$FF)
 (1)   21/   32C4A :                     PCMINS_TRUMPET1_s:
-(1)   21/   32C4A :                             binclude "sound/instr/smpl/trumpet1.wav",$2C
+(1)   21/   32C4A :                             binclude "sound/ins/smpl/trumpet1.wav",$2C
 (1)   21/   3CCAF :                     PCMINS_TRUMPET1_e:
-(1)   22/   3CCAF : (MACRO)              	gSmplData PcmIns_BBoxHats,"sound/instr/smpl/hats_bbox.wav",0
+(1)   22/   3CCAF : (MACRO)              	gSmplData PcmIns_BBoxHats,"sound/ins/smpl/hats_bbox.wav",0
 (1)   22/   3CCAF : =$3CCAF              PCMINS_BBOXHATS    label *
 (1)   22/   3CCAF : 2408 00                     dc.b ((PCMINS_BBOXHATS_e-PCMINS_BBOXHATS_s)&$FF),(((PCMINS_BBOXHATS_e-PCMINS_BBOXHATS_s)>>8)&$FF),(((PCMINS_BBOXHATS_e-PCMINS_BBOXHATS_s)>>16)&$FF)
 (1)   22/   3CCB2 : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   22/   3CCB5 :                     PCMINS_BBOXHATS_s:
-(1)   22/   3CCB5 :                             binclude "sound/instr/smpl/hats_bbox.wav",$2C
+(1)   22/   3CCB5 :                             binclude "sound/ins/smpl/hats_bbox.wav",$2C
 (1)   22/   3D4D9 :                     PCMINS_BBOXHATS_e:
-(1)   23/   3D4D9 : (MACRO)              	gSmplData PcmIns_Kick,"sound/instr/smpl/wegot_kick.wav",0
+(1)   23/   3D4D9 : (MACRO)              	gSmplData PcmIns_Kick,"sound/ins/smpl/wegot_kick.wav",0
 (1)   23/   3D4D9 : =$3D4D9              PCMINS_KICK    label *
 (1)   23/   3D4D9 : 7407 00                     dc.b ((PCMINS_KICK_e-PCMINS_KICK_s)&$FF),(((PCMINS_KICK_e-PCMINS_KICK_s)>>8)&$FF),(((PCMINS_KICK_e-PCMINS_KICK_s)>>16)&$FF)
 (1)   23/   3D4DC : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   23/   3D4DF :                     PCMINS_KICK_s:
-(1)   23/   3D4DF :                             binclude "sound/instr/smpl/wegot_kick.wav",$2C
+(1)   23/   3D4DF :                             binclude "sound/ins/smpl/wegot_kick.wav",$2C
 (1)   23/   3DC53 :                     PCMINS_KICK_e:
-(1)   24/   3DC53 : (MACRO)              	gSmplData PcmIns_BBoxSnare,"sound/instr/smpl/snare_bbox.wav",0
+(1)   24/   3DC53 : (MACRO)              	gSmplData PcmIns_BBoxSnare,"sound/ins/smpl/snare_bbox.wav",0
 (1)   24/   3DC53 : =$3DC53              PCMINS_BBOXSNARE    label *
 (1)   24/   3DC53 : C408 00                     dc.b ((PCMINS_BBOXSNARE_e-PCMINS_BBOXSNARE_s)&$FF),(((PCMINS_BBOXSNARE_e-PCMINS_BBOXSNARE_s)>>8)&$FF),(((PCMINS_BBOXSNARE_e-PCMINS_BBOXSNARE_s)>>16)&$FF)
 (1)   24/   3DC56 : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   24/   3DC59 :                     PCMINS_BBOXSNARE_s:
-(1)   24/   3DC59 :                             binclude "sound/instr/smpl/snare_bbox.wav",$2C
+(1)   24/   3DC59 :                             binclude "sound/ins/smpl/snare_bbox.wav",$2C
 (1)   24/   3E51D :                     PCMINS_BBOXSNARE_e:
 (1)   25/   3E51D :                     
-(1)   26/   3E51D : (MACRO)               	gSmplData PcmIns_sauron_01,"sound/instr/smpl/sauron/01.wav",0
+(1)   26/   3E51D : (MACRO)               	gSmplData PcmIns_sauron_01,"sound/ins/smpl/sauron/01.wav",0
 (1)   26/   3E51D : =$3E51D              PCMINS_SAURON_01    label *
 (1)   26/   3E51D : 040F 00                     dc.b ((PCMINS_SAURON_01_e-PCMINS_SAURON_01_s)&$FF),(((PCMINS_SAURON_01_e-PCMINS_SAURON_01_s)>>8)&$FF),(((PCMINS_SAURON_01_e-PCMINS_SAURON_01_s)>>16)&$FF)
 (1)   26/   3E520 : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   26/   3E523 :                     PCMINS_SAURON_01_s:
-(1)   26/   3E523 :                             binclude "sound/instr/smpl/sauron/01.wav",$2C
+(1)   26/   3E523 :                             binclude "sound/ins/smpl/sauron/01.wav",$2C
 (1)   26/   3F427 :                     PCMINS_SAURON_01_e:
-(1)   27/   3F427 : (MACRO)               	gSmplData PcmIns_sauron_02,"sound/instr/smpl/sauron/02.wav",0
+(1)   27/   3F427 : (MACRO)               	gSmplData PcmIns_sauron_02,"sound/ins/smpl/sauron/02.wav",0
 (1)   27/   3F427 : =$3F427              PCMINS_SAURON_02    label *
 (1)   27/   3F427 : 6E0C 00                     dc.b ((PCMINS_SAURON_02_e-PCMINS_SAURON_02_s)&$FF),(((PCMINS_SAURON_02_e-PCMINS_SAURON_02_s)>>8)&$FF),(((PCMINS_SAURON_02_e-PCMINS_SAURON_02_s)>>16)&$FF)
 (1)   27/   3F42A : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   27/   3F42D :                     PCMINS_SAURON_02_s:
-(1)   27/   3F42D :                             binclude "sound/instr/smpl/sauron/02.wav",$2C
+(1)   27/   3F42D :                             binclude "sound/ins/smpl/sauron/02.wav",$2C
 (1)   27/   4009B :                     PCMINS_SAURON_02_e:
-(1)   28/   4009B : (MACRO)                	gSmplData PcmIns_sauron_03,"sound/instr/smpl/sauron/03.wav",0
+(1)   28/   4009B : (MACRO)                	gSmplData PcmIns_sauron_03,"sound/ins/smpl/sauron/03.wav",0
 (1)   28/   4009B : =$4009B              PCMINS_SAURON_03    label *
 (1)   28/   4009B : C80C 00                     dc.b ((PCMINS_SAURON_03_e-PCMINS_SAURON_03_s)&$FF),(((PCMINS_SAURON_03_e-PCMINS_SAURON_03_s)>>8)&$FF),(((PCMINS_SAURON_03_e-PCMINS_SAURON_03_s)>>16)&$FF)
 (1)   28/   4009E : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   28/   400A1 :                     PCMINS_SAURON_03_s:
-(1)   28/   400A1 :                             binclude "sound/instr/smpl/sauron/03.wav",$2C
+(1)   28/   400A1 :                             binclude "sound/ins/smpl/sauron/03.wav",$2C
 (1)   28/   40D69 :                     PCMINS_SAURON_03_e:
-(1)   29/   40D69 : (MACRO)                	gSmplData PcmIns_sauron_04,"sound/instr/smpl/sauron/04.wav",0
+(1)   29/   40D69 : (MACRO)                	gSmplData PcmIns_sauron_04,"sound/ins/smpl/sauron/04.wav",0
 (1)   29/   40D69 : =$40D69              PCMINS_SAURON_04    label *
 (1)   29/   40D69 : DE23 00                     dc.b ((PCMINS_SAURON_04_e-PCMINS_SAURON_04_s)&$FF),(((PCMINS_SAURON_04_e-PCMINS_SAURON_04_s)>>8)&$FF),(((PCMINS_SAURON_04_e-PCMINS_SAURON_04_s)>>16)&$FF)
 (1)   29/   40D6C : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   29/   40D6F :                     PCMINS_SAURON_04_s:
-(1)   29/   40D6F :                             binclude "sound/instr/smpl/sauron/04.wav",$2C
+(1)   29/   40D6F :                             binclude "sound/ins/smpl/sauron/04.wav",$2C
 (1)   29/   4314D :                     PCMINS_SAURON_04_e:
-(1)   30/   4314D : (MACRO)               	gSmplData PcmIns_sauron_05,"sound/instr/smpl/sauron/05.wav",13988
+(1)   30/   4314D : (MACRO)               	gSmplData PcmIns_sauron_05,"sound/ins/smpl/sauron/05.wav",13988
 (1)   30/   4314D : =$4314D              PCMINS_SAURON_05    label *
 (1)   30/   4314D : B24D 00                     dc.b ((PCMINS_SAURON_05_e-PCMINS_SAURON_05_s)&$FF),(((PCMINS_SAURON_05_e-PCMINS_SAURON_05_s)>>8)&$FF),(((PCMINS_SAURON_05_e-PCMINS_SAURON_05_s)>>16)&$FF)
 (1)   30/   43150 : A436 00                     dc.b ((13988)&$FF),(((13988)>>8)&$FF),(((13988)>>16)&$FF)
 (1)   30/   43153 :                     PCMINS_SAURON_05_s:
-(1)   30/   43153 :                             binclude "sound/instr/smpl/sauron/05.wav",$2C
+(1)   30/   43153 :                             binclude "sound/ins/smpl/sauron/05.wav",$2C
 (1)   30/   47F05 :                     PCMINS_SAURON_05_e:
-(1)   31/   47F05 : (MACRO)                	gSmplData PcmIns_sauron_06,"sound/instr/smpl/sauron/06.wav",0
+(1)   31/   47F05 : (MACRO)                	gSmplData PcmIns_sauron_06,"sound/ins/smpl/sauron/06.wav",0
 (1)   31/   47F05 : =$47F05              PCMINS_SAURON_06    label *
 (1)   31/   47F05 : 8825 00                     dc.b ((PCMINS_SAURON_06_e-PCMINS_SAURON_06_s)&$FF),(((PCMINS_SAURON_06_e-PCMINS_SAURON_06_s)>>8)&$FF),(((PCMINS_SAURON_06_e-PCMINS_SAURON_06_s)>>16)&$FF)
 (1)   31/   47F08 : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   31/   47F0B :                     PCMINS_SAURON_06_s:
-(1)   31/   47F0B :                             binclude "sound/instr/smpl/sauron/06.wav",$2C
+(1)   31/   47F0B :                             binclude "sound/ins/smpl/sauron/06.wav",$2C
 (1)   31/   4A493 :                     PCMINS_SAURON_06_e:
-(1)   32/   4A493 : (MACRO)               	gSmplData PcmIns_sauron_07,"sound/instr/smpl/sauron/07.wav",0
+(1)   32/   4A493 : (MACRO)               	gSmplData PcmIns_sauron_07,"sound/ins/smpl/sauron/07.wav",0
 (1)   32/   4A493 : =$4A493              PCMINS_SAURON_07    label *
 (1)   32/   4A493 : 9233 00                     dc.b ((PCMINS_SAURON_07_e-PCMINS_SAURON_07_s)&$FF),(((PCMINS_SAURON_07_e-PCMINS_SAURON_07_s)>>8)&$FF),(((PCMINS_SAURON_07_e-PCMINS_SAURON_07_s)>>16)&$FF)
 (1)   32/   4A496 : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   32/   4A499 :                     PCMINS_SAURON_07_s:
-(1)   32/   4A499 :                             binclude "sound/instr/smpl/sauron/07.wav",$2C
+(1)   32/   4A499 :                             binclude "sound/ins/smpl/sauron/07.wav",$2C
 (1)   32/   4D82B :                     PCMINS_SAURON_07_e:
-(1)   33/   4D82B : (MACRO)                	gSmplData PcmIns_sauron_08,"sound/instr/smpl/sauron/08.wav",0
+(1)   33/   4D82B : (MACRO)                	gSmplData PcmIns_sauron_08,"sound/ins/smpl/sauron/08.wav",0
 (1)   33/   4D82B : =$4D82B              PCMINS_SAURON_08    label *
 (1)   33/   4D82B : 0E1D 00                     dc.b ((PCMINS_SAURON_08_e-PCMINS_SAURON_08_s)&$FF),(((PCMINS_SAURON_08_e-PCMINS_SAURON_08_s)>>8)&$FF),(((PCMINS_SAURON_08_e-PCMINS_SAURON_08_s)>>16)&$FF)
 (1)   33/   4D82E : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   33/   4D831 :                     PCMINS_SAURON_08_s:
-(1)   33/   4D831 :                             binclude "sound/instr/smpl/sauron/08.wav",$2C
+(1)   33/   4D831 :                             binclude "sound/ins/smpl/sauron/08.wav",$2C
 (1)   33/   4F53F :                     PCMINS_SAURON_08_e:
-(1)   34/   4F53F : (MACRO)               	gSmplData PcmIns_sauron_09,"sound/instr/smpl/sauron/09.wav",0
+(1)   34/   4F53F : (MACRO)               	gSmplData PcmIns_sauron_09,"sound/ins/smpl/sauron/09.wav",0
 (1)   34/   4F53F : =$4F53F              PCMINS_SAURON_09    label *
 (1)   34/   4F53F : C41E 00                     dc.b ((PCMINS_SAURON_09_e-PCMINS_SAURON_09_s)&$FF),(((PCMINS_SAURON_09_e-PCMINS_SAURON_09_s)>>8)&$FF),(((PCMINS_SAURON_09_e-PCMINS_SAURON_09_s)>>16)&$FF)
 (1)   34/   4F542 : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   34/   4F545 :                     PCMINS_SAURON_09_s:
-(1)   34/   4F545 :                             binclude "sound/instr/smpl/sauron/09.wav",$2C
+(1)   34/   4F545 :                             binclude "sound/ins/smpl/sauron/09.wav",$2C
 (1)   34/   51409 :                     PCMINS_SAURON_09_e:
-(1)   35/   51409 : (MACRO)                	gSmplData PcmIns_sauron_10,"sound/instr/smpl/sauron/10.wav",0
+(1)   35/   51409 : (MACRO)                	gSmplData PcmIns_sauron_10,"sound/ins/smpl/sauron/10.wav",0
 (1)   35/   51409 : =$51409              PCMINS_SAURON_10    label *
 (1)   35/   51409 : 4238 00                     dc.b ((PCMINS_SAURON_10_e-PCMINS_SAURON_10_s)&$FF),(((PCMINS_SAURON_10_e-PCMINS_SAURON_10_s)>>8)&$FF),(((PCMINS_SAURON_10_e-PCMINS_SAURON_10_s)>>16)&$FF)
 (1)   35/   5140C : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   35/   5140F :                     PCMINS_SAURON_10_s:
-(1)   35/   5140F :                             binclude "sound/instr/smpl/sauron/10.wav",$2C
+(1)   35/   5140F :                             binclude "sound/ins/smpl/sauron/10.wav",$2C
 (1)   35/   54C51 :                     PCMINS_SAURON_10_e:
-(1)   36/   54C51 : (MACRO)               	gSmplData PcmIns_sauron_11,"sound/instr/smpl/sauron/11.wav",0
+(1)   36/   54C51 : (MACRO)               	gSmplData PcmIns_sauron_11,"sound/ins/smpl/sauron/11.wav",0
 (1)   36/   54C51 : =$54C51              PCMINS_SAURON_11    label *
 (1)   36/   54C51 : 743D 00                     dc.b ((PCMINS_SAURON_11_e-PCMINS_SAURON_11_s)&$FF),(((PCMINS_SAURON_11_e-PCMINS_SAURON_11_s)>>8)&$FF),(((PCMINS_SAURON_11_e-PCMINS_SAURON_11_s)>>16)&$FF)
 (1)   36/   54C54 : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   36/   54C57 :                     PCMINS_SAURON_11_s:
-(1)   36/   54C57 :                             binclude "sound/instr/smpl/sauron/11.wav",$2C
+(1)   36/   54C57 :                             binclude "sound/ins/smpl/sauron/11.wav",$2C
 (1)   36/   589CB :                     PCMINS_SAURON_11_e:
-(1)   37/   589CB : (MACRO)               	gSmplData PcmIns_sauron_12,"sound/instr/smpl/sauron/12.wav",0
+(1)   37/   589CB : (MACRO)               	gSmplData PcmIns_sauron_12,"sound/ins/smpl/sauron/12.wav",0
 (1)   37/   589CB : =$589CB              PCMINS_SAURON_12    label *
 (1)   37/   589CB : F217 00                     dc.b ((PCMINS_SAURON_12_e-PCMINS_SAURON_12_s)&$FF),(((PCMINS_SAURON_12_e-PCMINS_SAURON_12_s)>>8)&$FF),(((PCMINS_SAURON_12_e-PCMINS_SAURON_12_s)>>16)&$FF)
 (1)   37/   589CE : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   37/   589D1 :                     PCMINS_SAURON_12_s:
-(1)   37/   589D1 :                             binclude "sound/instr/smpl/sauron/12.wav",$2C
+(1)   37/   589D1 :                             binclude "sound/ins/smpl/sauron/12.wav",$2C
 (1)   37/   5A1C3 :                     PCMINS_SAURON_12_e:
 (1)   38/   5A1C3 :                     
-(1)   39/   5A1C3 : (MACRO)              	gSmplData PcmIns_trnthem_02,"sound/instr/smpl/trnthem/02.wav",0
+(1)   39/   5A1C3 : (MACRO)              	gSmplData PcmIns_trnthem_02,"sound/ins/smpl/trnthem/02.wav",0
 (1)   39/   5A1C3 : =$5A1C3              PCMINS_TRNTHEM_02    label *
 (1)   39/   5A1C3 : A60A 00                     dc.b ((PCMINS_TRNTHEM_02_e-PCMINS_TRNTHEM_02_s)&$FF),(((PCMINS_TRNTHEM_02_e-PCMINS_TRNTHEM_02_s)>>8)&$FF),(((PCMINS_TRNTHEM_02_e-PCMINS_TRNTHEM_02_s)>>16)&$FF)
 (1)   39/   5A1C6 : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   39/   5A1C9 :                     PCMINS_TRNTHEM_02_s:
-(1)   39/   5A1C9 :                             binclude "sound/instr/smpl/trnthem/02.wav",$2C
+(1)   39/   5A1C9 :                             binclude "sound/ins/smpl/trnthem/02.wav",$2C
 (1)   39/   5AC6F :                     PCMINS_TRNTHEM_02_e:
-(1)   40/   5AC6F : (MACRO)              	gSmplData PcmIns_trnthem_03,"sound/instr/smpl/trnthem/03.wav",0
+(1)   40/   5AC6F : (MACRO)              	gSmplData PcmIns_trnthem_03,"sound/ins/smpl/trnthem/03.wav",0
 (1)   40/   5AC6F : =$5AC6F              PCMINS_TRNTHEM_03    label *
 (1)   40/   5AC6F : F11E 00                     dc.b ((PCMINS_TRNTHEM_03_e-PCMINS_TRNTHEM_03_s)&$FF),(((PCMINS_TRNTHEM_03_e-PCMINS_TRNTHEM_03_s)>>8)&$FF),(((PCMINS_TRNTHEM_03_e-PCMINS_TRNTHEM_03_s)>>16)&$FF)
 (1)   40/   5AC72 : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   40/   5AC75 :                     PCMINS_TRNTHEM_03_s:
-(1)   40/   5AC75 :                             binclude "sound/instr/smpl/trnthem/03.wav",$2C
+(1)   40/   5AC75 :                             binclude "sound/ins/smpl/trnthem/03.wav",$2C
 (1)   40/   5CB66 :                     PCMINS_TRNTHEM_03_e:
-(1)   41/   5CB66 : (MACRO)              	gSmplData PcmIns_trnthem_04,"sound/instr/smpl/trnthem/04.wav",19996
+(1)   41/   5CB66 : (MACRO)              	gSmplData PcmIns_trnthem_04,"sound/ins/smpl/trnthem/04.wav",19996
 (1)   41/   5CB66 : =$5CB66              PCMINS_TRNTHEM_04    label *
 (1)   41/   5CB66 : A89A 00                     dc.b ((PCMINS_TRNTHEM_04_e-PCMINS_TRNTHEM_04_s)&$FF),(((PCMINS_TRNTHEM_04_e-PCMINS_TRNTHEM_04_s)>>8)&$FF),(((PCMINS_TRNTHEM_04_e-PCMINS_TRNTHEM_04_s)>>16)&$FF)
 (1)   41/   5CB69 : 1C4E 00                     dc.b ((19996)&$FF),(((19996)>>8)&$FF),(((19996)>>16)&$FF)
 (1)   41/   5CB6C :                     PCMINS_TRNTHEM_04_s:
-(1)   41/   5CB6C :                             binclude "sound/instr/smpl/trnthem/04.wav",$2C
+(1)   41/   5CB6C :                             binclude "sound/ins/smpl/trnthem/04.wav",$2C
 (1)   41/   66614 :                     PCMINS_TRNTHEM_04_e:
-(1)   42/   66614 : (MACRO)              	gSmplData PcmIns_trnthem_05,"sound/instr/smpl/trnthem/05.wav",0
+(1)   42/   66614 : (MACRO)              	gSmplData PcmIns_trnthem_05,"sound/ins/smpl/trnthem/05.wav",0
 (1)   42/   66614 : =$66614              PCMINS_TRNTHEM_05    label *
 (1)   42/   66614 : E729 00                     dc.b ((PCMINS_TRNTHEM_05_e-PCMINS_TRNTHEM_05_s)&$FF),(((PCMINS_TRNTHEM_05_e-PCMINS_TRNTHEM_05_s)>>8)&$FF),(((PCMINS_TRNTHEM_05_e-PCMINS_TRNTHEM_05_s)>>16)&$FF)
 (1)   42/   66617 : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   42/   6661A :                     PCMINS_TRNTHEM_05_s:
-(1)   42/   6661A :                             binclude "sound/instr/smpl/trnthem/05.wav",$2C
+(1)   42/   6661A :                             binclude "sound/ins/smpl/trnthem/05.wav",$2C
 (1)   42/   69001 :                     PCMINS_TRNTHEM_05_e:
-(1)   43/   69001 : (MACRO)              	gSmplData PcmIns_trnthem_06,"sound/instr/smpl/trnthem/06.wav",0
+(1)   43/   69001 : (MACRO)              	gSmplData PcmIns_trnthem_06,"sound/ins/smpl/trnthem/06.wav",0
 (1)   43/   69001 : =$69001              PCMINS_TRNTHEM_06    label *
 (1)   43/   69001 : 1913 00                     dc.b ((PCMINS_TRNTHEM_06_e-PCMINS_TRNTHEM_06_s)&$FF),(((PCMINS_TRNTHEM_06_e-PCMINS_TRNTHEM_06_s)>>8)&$FF),(((PCMINS_TRNTHEM_06_e-PCMINS_TRNTHEM_06_s)>>16)&$FF)
 (1)   43/   69004 : 0000 00                     dc.b ((0)&$FF),(((0)>>8)&$FF),(((0)>>16)&$FF)
 (1)   43/   69007 :                     PCMINS_TRNTHEM_06_s:
-(1)   43/   69007 :                             binclude "sound/instr/smpl/trnthem/06.wav",$2C
+(1)   43/   69007 :                             binclude "sound/ins/smpl/trnthem/06.wav",$2C
 (1)   43/   6A320 :                     PCMINS_TRNTHEM_06_e:
-(1)   44/   6A320 : (MACRO)              	gSmplData PcmIns_trnthem_07,"sound/instr/smpl/trnthem/07.wav",2938
+(1)   44/   6A320 : (MACRO)              	gSmplData PcmIns_trnthem_07,"sound/ins/smpl/trnthem/07.wav",2938
 (1)   44/   6A320 : =$6A320              PCMINS_TRNTHEM_07    label *
 (1)   44/   6A320 : F815 00                     dc.b ((PCMINS_TRNTHEM_07_e-PCMINS_TRNTHEM_07_s)&$FF),(((PCMINS_TRNTHEM_07_e-PCMINS_TRNTHEM_07_s)>>8)&$FF),(((PCMINS_TRNTHEM_07_e-PCMINS_TRNTHEM_07_s)>>16)&$FF)
 (1)   44/   6A323 : 7A0B 00                     dc.b ((2938)&$FF),(((2938)>>8)&$FF),(((2938)>>16)&$FF)
 (1)   44/   6A326 :                     PCMINS_TRNTHEM_07_s:
-(1)   44/   6A326 :                             binclude "sound/instr/smpl/trnthem/07.wav",$2C
+(1)   44/   6A326 :                             binclude "sound/ins/smpl/trnthem/07.wav",$2C
 (1)   44/   6B91E :                     PCMINS_TRNTHEM_07_e:
-(1)   45/   6B91E : (MACRO)              	gSmplData PcmIns_trnthem_10,"sound/instr/smpl/trnthem/10.wav",3033
+(1)   45/   6B91E : (MACRO)              	gSmplData PcmIns_trnthem_10,"sound/ins/smpl/trnthem/10.wav",3033
 (1)   45/   6B91E : =$6B91E              PCMINS_TRNTHEM_10    label *
 (1)   45/   6B91E : 6C29 00                     dc.b ((PCMINS_TRNTHEM_10_e-PCMINS_TRNTHEM_10_s)&$FF),(((PCMINS_TRNTHEM_10_e-PCMINS_TRNTHEM_10_s)>>8)&$FF),(((PCMINS_TRNTHEM_10_e-PCMINS_TRNTHEM_10_s)>>16)&$FF)
 (1)   45/   6B921 : D90B 00                     dc.b ((3033)&$FF),(((3033)>>8)&$FF),(((3033)>>16)&$FF)
 (1)   45/   6B924 :                     PCMINS_TRNTHEM_10_s:
-(1)   45/   6B924 :                             binclude "sound/instr/smpl/trnthem/10.wav",$2C
+(1)   45/   6B924 :                             binclude "sound/ins/smpl/trnthem/10.wav",$2C
 (1)   45/   6E290 :                     PCMINS_TRNTHEM_10_e:
-(1)   46/   6E290 : (MACRO)              	gSmplData PcmIns_trnthem_20,"sound/instr/smpl/trnthem/20.wav",14309
+(1)   46/   6E290 : (MACRO)              	gSmplData PcmIns_trnthem_20,"sound/ins/smpl/trnthem/20.wav",14309
 (1)   46/   6E290 : =$6E290              PCMINS_TRNTHEM_20    label *
 (1)   46/   6E290 : 2442 00                     dc.b ((PCMINS_TRNTHEM_20_e-PCMINS_TRNTHEM_20_s)&$FF),(((PCMINS_TRNTHEM_20_e-PCMINS_TRNTHEM_20_s)>>8)&$FF),(((PCMINS_TRNTHEM_20_e-PCMINS_TRNTHEM_20_s)>>16)&$FF)
 (1)   46/   6E293 : E537 00                     dc.b ((14309)&$FF),(((14309)>>8)&$FF),(((14309)>>16)&$FF)
 (1)   46/   6E296 :                     PCMINS_TRNTHEM_20_s:
-(1)   46/   6E296 :                             binclude "sound/instr/smpl/trnthem/20.wav",$2C
+(1)   46/   6E296 :                             binclude "sound/ins/smpl/trnthem/20.wav",$2C
 (1)   46/   724BA :                     PCMINS_TRNTHEM_20_e:
 (1)   47/   724BA :                     
      337/   724BA :                     	; ------------------------------------------------
@@ -14461,7 +14461,7 @@
          FFFFFFFFFFFF2D46 : 6D65 6E75 2020 
          FFFFFFFFFFFF2D4C : 2020 2020 2052 
          FFFFFFFFFFFF2D52 : 4F4D 3A20 3130 
-         FFFFFFFFFFFF2D58 : 2F31 382F 3230 
+         FFFFFFFFFFFF2D58 : 2F32 312F 3230 
          FFFFFFFFFFFF2D5E : 3234 0A          
 (2)  208/FFFFFFFFFFFF2D61 : 0A                  		dc.b $0A
 (2)  209/FFFFFFFFFFFF2D62 : 2020 2020 4765      		dc.b "    Genesis VDP",$0A
@@ -14579,7 +14579,7 @@
 (2)   51/FFFFFFFFFFFF2C0E : 7200                		moveq	#%00,d1
 (2)   52/FFFFFFFFFFFF2C10 : 6100 DB66           		bsr	Video_Resolution
 (2)   53/FFFFFFFFFFFF2C14 :                     	; ----------------------------------------------
-(2)   54/FFFFFFFFFFFF2C14 : 41FA 0136           		lea	file_scrn1_main(pc),a0			; Load MAIN DATA bank
+(2)   54/FFFFFFFFFFFF2C14 : 41FA 012A           		lea	file_scrn1_main(pc),a0			; Load MAIN DATA bank
 (2)   55/FFFFFFFFFFFF2C18 : 6100 F3D4           		bsr	System_SetDataBank
 (2)   56/FFFFFFFFFFFF2C1C : 6100 EE60           		bsr	System_SramInit
 (2)   57/FFFFFFFFFFFF2C20 : 52B8 DC1C           		addq.l	#1,(RAM_Save_Counter).w			; Temporal counter
@@ -14606,16 +14606,16 @@
 (2)   78/FFFFFFFFFFFF2C6A : 7001                		moveq	#1,d0
 (2)   79/FFFFFFFFFFFF2C6C : 7208                		moveq	#8,d1
 (2)   80/FFFFFFFFFFFF2C6E : 6100 E296           		bsr	Video_FadePal
-(2)   81/FFFFFFFFFFFF2C72 : 41FA 00EA           		lea	ArtList_scrn1(pc),a0
+(2)   81/FFFFFFFFFFFF2C72 : 41FA 00DE           		lea	ArtList_scrn1(pc),a0
 (2)   82/FFFFFFFFFFFF2C76 : 6100 DD3C           		bsr	Video_LoadArt_List
-(2)   83/FFFFFFFFFFFF2C7A : 203C FFFF 2D72      		move.l	#obj_Player,d0
+(2)   83/FFFFFFFFFFFF2C7A : 203C FFFF 2D66      		move.l	#obj_Player,d0
 (2)   84/FFFFFFFFFFFF2C80 : 6100 F3B8           		bsr	Object_Make
 (2)   85/FFFFFFFFFFFF2C84 :                     	; ----------------------------------------------
-(2)   86/FFFFFFFFFFFF2C84 : 6100 00C4           		bsr	.show_counter				; Draw counter
+(2)   86/FFFFFFFFFFFF2C84 : 6100 00B8           		bsr	.show_counter				; Draw counter
 (2)   87/FFFFFFFFFFFF2C88 : 6100 DA60           		bsr	Video_DisplayOn
-(2)   88/FFFFFFFFFFFF2C8C : 6100 03BE           		bsr	Screen0_PickBackgrnd
-(2)   89/FFFFFFFFFFFF2C90 : 6100 0406           		bsr	Scrn0_LoadMap
-(2)   90/FFFFFFFFFFFF2C94 : 6100 0416           		bsr	Scrn0_DrawMapAll
+(2)   88/FFFFFFFFFFFF2C8C : 6100 0454           		bsr	Screen0_PickBackgrnd
+(2)   89/FFFFFFFFFFFF2C90 : 6100 049C           		bsr	Scrn0_LoadMap
+(2)   90/FFFFFFFFFFFF2C94 : 6100 04AC           		bsr	Scrn0_DrawMapAll
 (2)   91/FFFFFFFFFFFF2C98 :                     	; ----------------------------------------------
 (2)   92/FFFFFFFFFFFF2C98 :                     
 (2)   93/FFFFFFFFFFFF2C98 :                     	; ----------------------------------------------
@@ -14636,523 +14636,584 @@
 (2)  108/FFFFFFFFFFFF2CB0 : 6100 D7DC           		bsr	Video_BuildSprites
 (2)  109/FFFFFFFFFFFF2CB4 : 6100 EB8A           		bsr	System_Render
 (2)  110/FFFFFFFFFFFF2CB8 : 4A78 B802           		tst.w	(RAM_DoRedraw).w
-(2)  111/FFFFFFFFFFFF2CBC : 6708                		beq.s	.dont_redrw
+(2)  111/FFFFFFFFFFFF2CBC : 6712                		beq.s	.dont_redrw
 (2)  112/FFFFFFFFFFFF2CBE : 4278 B802           		clr.w	(RAM_DoRedraw).w
-(2)  113/FFFFFFFFFFFF2CC2 : 6100 03E8           		bsr	Scrn0_DrawMapAll
-(2)  114/FFFFFFFFFFFF2CC6 :                     .dont_redrw:
-(2)  115/FFFFFFFFFFFF2CC6 :                     
-(2)  116/FFFFFFFFFFFF2CC6 : 6100 0082           		bsr	.show_counter
-(2)  117/FFFFFFFFFFFF2CCA : 3E38 DD1C           		move.w	(Controller_1+on_press).w,d7
-(2)  118/FFFFFFFFFFFF2CCE : 0247 0400           		andi.w	#JoyX,d7
-(2)  119/FFFFFFFFFFFF2CD2 : 670A                		beq.s	.not_x
-(2)  120/FFFFFFFFFFFF2CD4 : 203C FFFF 2F06      		move.l	#obj_Ball,d0
-(2)  121/FFFFFFFFFFFF2CDA : 6100 F35E           		bsr	Object_Make
-(2)  122/FFFFFFFFFFFF2CDE :                     .not_x:
-(2)  123/FFFFFFFFFFFF2CDE : 3E38 DD1C           		move.w	(Controller_1+on_press).w,d7
-(2)  124/FFFFFFFFFFFF2CE2 : 0247 0200           		andi.w	#JoyY,d7
-(2)  125/FFFFFFFFFFFF2CE6 : 6716                		beq.s	.not_y
-(2)  126/FFFFFFFFFFFF2CE8 : 41F8 DD58           		lea	(RAM_Objects),a0
-(2)  127/FFFFFFFFFFFF2CEC : 7000                		moveq	#0,d0
-(2)  128/FFFFFFFFFFFF2CEE : 7201                		moveq	#1,d1
-(2)  129/FFFFFFFFFFFF2CF0 : 3E3C 0026           		move.w	#(MAX_MDOBJ-1)-1,d7
-(2)  130/FFFFFFFFFFFF2CF4 :                     .del_from:
-(2)  131/FFFFFFFFFFFF2CF4 : 6100 F330           		bsr	Object_Set
-(2)  132/FFFFFFFFFFFF2CF8 : 5241                		addq.w	#1,d1
-(2)  133/FFFFFFFFFFFF2CFA : 51CF FFF8           		dbf	d7,.del_from
-(2)  134/FFFFFFFFFFFF2CFE :                     .not_y:
-(2)  135/FFFFFFFFFFFF2CFE : 3E38 DD1C           		move.w	(Controller_1+on_press).w,d7
-(2)  136/FFFFFFFFFFFF2D02 : 0247 0100           		andi.w	#JoyZ,d7
-(2)  137/FFFFFFFFFFFF2D06 : 670A                		beq.s	.not_z
-(2)  138/FFFFFFFFFFFF2D08 : 700F                		moveq	#$0F,d0
-(2)  139/FFFFFFFFFFFF2D0A : 7201                		moveq	#1,d1
-(2)  140/FFFFFFFFFFFF2D0C : 7402                		moveq	#2,d2
-(2)  141/FFFFFFFFFFFF2D0E : 6100 D4C0           		bsr	gemaPlaySeq
-(2)  142/FFFFFFFFFFFF2D12 :                     .not_z:
-(2)  143/FFFFFFFFFFFF2D12 :                     
-(2)  144/FFFFFFFFFFFF2D12 :                     	; Copy variables
-(2)  145/FFFFFFFFFFFF2D12 : 3E38 B800           		move.w	(RAM_Cam_Xpos).w,d7
-(2)  146/FFFFFFFFFFFF2D16 : 31C7 DA72           		move.w	d7,(RAM_SprOffsetX).w
-(2)  147/FFFFFFFFFFFF2D1A : 4447                		neg.w	d7
-(2)  148/FFFFFFFFFFFF2D1C : 31C7 D05E           		move.w	d7,(RAM_HorScroll).w
-(2)  149/FFFFFFFFFFFF2D20 :                     
-(2)  150/FFFFFFFFFFFF2D20 :                     	; Check START button
-(2)  151/FFFFFFFFFFFF2D20 : 3E38 DD1C           		move.w	(Controller_1+on_press).w,d7
-(2)  152/FFFFFFFFFFFF2D24 : 0247 0080           		andi.w	#JoyStart,d7
-(2)  153/FFFFFFFFFFFF2D28 : 6782                		beq	.loop
-(2)  154/FFFFFFFFFFFF2D2A : 6100 E188           		bsr	Video_FadeOut_Full
-(2)  155/FFFFFFFFFFFF2D2E :                     	; Stop ALL sequences
-(2)  156/FFFFFFFFFFFF2D2E : 6100 D4FC           		bsr	gemaStopAll
-(2)  157/FFFFFFFFFFFF2D32 :                     	rept 4
-(2)  158/FFFFFFFFFFFF2D32 :                     		bsr	System_Render		; Wait 4 frames...
-(2)  159/FFFFFFFFFFFF2D32 :                     	endm
-(2)  158/FFFFFFFFFFFF2D32 : 6100 EB0C           		bsr	System_Render		; Wait 4 frames...
-(2)  158/FFFFFFFFFFFF2D36 : 6100 EB08           		bsr	System_Render		; Wait 4 frames...
-(2)  158/FFFFFFFFFFFF2D3A : 6100 EB04           		bsr	System_Render		; Wait 4 frames...
-(2)  158/FFFFFFFFFFFF2D3E : 6100 EB00           		bsr	System_Render		; Wait 4 frames...
-(2)  160/FFFFFFFFFFFF2D42 : 31FC 0000 EDB4      		move.w	#0,(RAM_ScreenMode).w	; Set Screen Mode $07
-(2)  161/FFFFFFFFFFFF2D48 : 4E75                		rts				; <-- RTS
-(2)  162/FFFFFFFFFFFF2D4A :                     
-(2)  163/FFFFFFFFFFFF2D4A :                     ; ------------------------------------------------------
-(2)  164/FFFFFFFFFFFF2D4A :                     ; Show framecounter and input
-(2)  165/FFFFFFFFFFFF2D4A :                     ; ------------------------------------------------------
-(2)  166/FFFFFFFFFFFF2D4A :                     
-(2)  167/FFFFFFFFFFFF2D4A :                     .show_counter:
-(2)  168/FFFFFFFFFFFF2D4A : 4E75                		rts
-(2)  169/FFFFFFFFFFFF2D4C :                     ; 		lea	str_NewCountr0(pc),a0
-(2)  170/FFFFFFFFFFFF2D4C :                     ; 		moveq	#0,d0
-(2)  171/FFFFFFFFFFFF2D4C :                     ; 		moveq	#0,d1
-(2)  172/FFFFFFFFFFFF2D4C :                     ; 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
-(2)  173/FFFFFFFFFFFF2D4C :                     ; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
-(2)  174/FFFFFFFFFFFF2D4C :                     ; 		bra	Video_Print
-(2)  175/FFFFFFFFFFFF2D4C :                     
-(2)  176/FFFFFFFFFFFF2D4C :                     ; ====================================================================
-(2)  177/FFFFFFFFFFFF2D4C :                     ; ------------------------------------------------------
-(2)  178/FFFFFFFFFFFF2D4C :                     ; DATA asset locations
-(2)  179/FFFFFFFFFFFF2D4C :                     ; ------------------------------------------------------
-(2)  180/FFFFFFFFFFFF2D4C :                     
-(2)  181/FFFFFFFFFFFF2D4C :                     file_scrn1_main:
-(2)  182/FFFFFFFFFFFF2D4C : 0006 6000           		dc.l DATA_BANK0
-(2)  183/FFFFFFFFFFFF2D50 : 424E 4B5F 4D41      		dc.b "BNK_MAIN.BIN",0
-         FFFFFFFFFFFF2D56 : 494E 2E42 494E 00 
-(2)  184/FFFFFFFFFFFF2D5D :                     		align 2
-(2)  185/FFFFFFFFFFFF2D5E :                     ; file_scrn1_mars:
-(2)  186/FFFFFFFFFFFF2D5E :                     ; 		dc.l DATA_BANK1
-(2)  187/FFFFFFFFFFFF2D5E :                     ; 		dc.b "BNK_MARS.BIN",0
-(2)  188/FFFFFFFFFFFF2D5E :                     ; 		align 2
-(2)  189/FFFFFFFFFFFF2D5E :                     
-(2)  190/FFFFFFFFFFFF2D5E :                     
-(2)  191/FFFFFFFFFFFF2D5E :                     ArtList_scrn1:
-(2)  192/FFFFFFFFFFFF2D5E : 0002                		dc.w 2
-(2)  193/FFFFFFFFFFFF2D60 : 0022 2C00           		dc.l Art_Sisi
-(2)  194/FFFFFFFFFFFF2D64 : 0C40 0580           		dc.w cell_vram(vramLoc_Sisi),Art_Sisi_e-Art_Sisi
-(2)  195/FFFFFFFFFFFF2D68 : 0021 8400           		dc.l Art_BlkPuzzl
-(2)  196/FFFFFFFFFFFF2D6C : 11C0 0400           		dc.w cell_vram(vramLoc_PushBlk),cell_vram($20)
-(2)  197/FFFFFFFFFFFF2D70 :                     		align 2
-(2)  198/FFFFFFFFFFFF2D72 :                     
-(2)  199/FFFFFFFFFFFF2D72 :                     ; ====================================================================
-(2)  200/FFFFFFFFFFFF2D72 :                     ; ------------------------------------------------------
-(2)  201/FFFFFFFFFFFF2D72 :                     ; Objects
-(2)  202/FFFFFFFFFFFF2D72 :                     ; ------------------------------------------------------
-(2)  203/FFFFFFFFFFFF2D72 :                     
-(2)  204/FFFFFFFFFFFF2D72 :                     ; --------------------------------------------------
-(2)  205/FFFFFFFFFFFF2D72 :                     ; Test object
-(2)  206/FFFFFFFFFFFF2D72 :                     ; --------------------------------------------------
-(2)  207/FFFFFFFFFFFF2D72 :                     
-(2)  208/FFFFFFFFFFFF2D72 :                     obj_Player:
-(2)  209/FFFFFFFFFFFF2D72 : 7000                		moveq	#0,d0
-(2)  210/FFFFFFFFFFFF2D74 : 102E 001C           		move.b	obj_index(a6),d0
-(2)  211/FFFFFFFFFFFF2D78 : D040                		add.w	d0,d0
-(2)  212/FFFFFFFFFFFF2D7A : 323B 0006           		move.w	.list(pc,d0.w),d1
-(2)  213/FFFFFFFFFFFF2D7E : 4EFB 1002           		jmp	.list(pc,d1.w)
-(2)  214/FFFFFFFFFFFF2D82 :                     ; ----------------------------------------------
-(2)  215/FFFFFFFFFFFF2D82 : 0004                .list:		dc.w .init-.list
-(2)  216/FFFFFFFFFFFF2D84 : 0040                		dc.w .main-.list
-(2)  217/FFFFFFFFFFFF2D86 :                     ; ----------------------------------------------
-(2)  218/FFFFFFFFFFFF2D86 :                     .init:
-(2)  219/FFFFFFFFFFFF2D86 : 522E 001C           		addq.b	#1,obj_index(a6)
-(2)  220/FFFFFFFFFFFF2D8A : 6100 F318           		bsr	object_ResetAnim	; Init/Reset animation
-(2)  221/FFFFFFFFFFFF2D8E : 3D7C 0202 0010      		move.w	#$0202,obj_size_x(a6)
-(2)  222/FFFFFFFFFFFF2D94 : 3D7C 0303 0012      		move.w	#$0303,obj_size_y(a6)
-(2)  223/FFFFFFFFFFFF2D9A : 3D7C 0101 0014      		move.w	#$0101,obj_size_z(a6)
-(2)  224/FFFFFFFFFFFF2DA0 : 3D7C 0000 0004      		move.w	#0,obj_x(a6)		; Set Object's X/Y position
-(2)  225/FFFFFFFFFFFF2DA6 : 3D7C 0000 0008      		move.w	#0,obj_y(a6)
-(2)  226/FFFFFFFFFFFF2DAC : 4BEE 0028           		lea	obj_ram(a6),a5
-(2)  227/FFFFFFFFFFFF2DB0 : 429D                		clr.l	(a5)+
-(2)  228/FFFFFFFFFFFF2DB2 : 429D                		clr.l	(a5)+
-(2)  229/FFFFFFFFFFFF2DB4 : 425D                		clr.w	(a5)+
-(2)  230/FFFFFFFFFFFF2DB6 : 3B7C 0000 0004      		move.w	#0,4(a5)
-(2)  231/FFFFFFFFFFFF2DBC : 3B7C 0000 0006      		move.w	#0,6(a5)
-(2)  232/FFFFFFFFFFFF2DC2 :                     
-(2)  233/FFFFFFFFFFFF2DC2 :                     ; ----------------------------------------------
-(2)  234/FFFFFFFFFFFF2DC2 :                     .main:
-(2)  235/FFFFFFFFFFFF2DC2 : 4BEE 0028           		lea	obj_ram(a6),a5
-(2)  236/FFFFFFFFFFFF2DC6 : 49F8 DD18           		lea	(Controller_1).w,a4
-(2)  237/FFFFFFFFFFFF2DCA :                     
-(2)  238/FFFFFFFFFFFF2DCA : 4A6D 0008           		tst.w	8(a5)
-(2)  239/FFFFFFFFFFFF2DCE : 666E                		bne.s	.on_timer
-(2)  240/FFFFFFFFFFFF2DD0 : 3E2C 0002           		move.w	on_hold(a4),d7
-(2)  241/FFFFFFFFFFFF2DD4 : 0807 0003           		btst	#bitJoyRight,d7
-(2)  242/FFFFFFFFFFFF2DD8 : 6714                		beq.s	.n_rtmr
-(2)  243/FFFFFFFFFFFF2DDA : 3ABC 0001           		move.w	#1,(a5)
-(2)  244/FFFFFFFFFFFF2DDE : 3B7C 0000 0002      		move.w	#0,2(a5)
-(2)  245/FFFFFFFFFFFF2DE4 : 526D 0004           		addq.w	#1,4(a5)
-(2)  246/FFFFFFFFFFFF2DE8 : 3B7C 0020 0008      		move.w	#$20,8(a5)
-(2)  247/FFFFFFFFFFFF2DEE : 0807 0002           .n_rtmr:	btst	#bitJoyLeft,d7
-(2)  248/FFFFFFFFFFFF2DF2 : 6714                		beq.s	.n_ltmr
-(2)  249/FFFFFFFFFFFF2DF4 : 3ABC FFFF           		move.w	#-1,(a5)
-(2)  250/FFFFFFFFFFFF2DF8 : 3B7C 0000 0002      		move.w	#0,2(a5)
-(2)  251/FFFFFFFFFFFF2DFE : 536D 0004           		subq.w	#1,4(a5)
-(2)  252/FFFFFFFFFFFF2E02 : 3B7C 0020 0008      		move.w	#$20,8(a5)
-(2)  253/FFFFFFFFFFFF2E08 : 0807 0001           .n_ltmr:	btst	#bitJoyDown,d7
-(2)  254/FFFFFFFFFFFF2E0C : 6714                		beq.s	.d_rtmr
-(2)  255/FFFFFFFFFFFF2E0E : 3ABC 0000           		move.w	#0,(a5)
-(2)  256/FFFFFFFFFFFF2E12 : 3B7C 0001 0002      		move.w	#1,2(a5)
-(2)  257/FFFFFFFFFFFF2E18 : 526D 0006           		addq.w	#1,6(a5)
-(2)  258/FFFFFFFFFFFF2E1C : 3B7C 0018 0008      		move.w	#$18,8(a5)
-(2)  259/FFFFFFFFFFFF2E22 : 0807 0000           .d_rtmr:	btst	#bitJoyUp,d7
-(2)  260/FFFFFFFFFFFF2E26 : 6714                		beq.s	.u_ltmr
-(2)  261/FFFFFFFFFFFF2E28 : 3ABC 0000           		move.w	#0,(a5)
-(2)  262/FFFFFFFFFFFF2E2C : 3B7C FFFF 0002      		move.w	#-1,2(a5)
-(2)  263/FFFFFFFFFFFF2E32 : 536D 0006           		subq.w	#1,6(a5)
-(2)  264/FFFFFFFFFFFF2E36 : 3B7C 0018 0008      		move.w	#$18,8(a5)
-(2)  265/FFFFFFFFFFFF2E3C :                     .u_ltmr:
-(2)  266/FFFFFFFFFFFF2E3C : 604A                		bra.s	.no_timer
-(2)  267/FFFFFFFFFFFF2E3E :                     
-(2)  268/FFFFFFFFFFFF2E3E :                     .on_timer:
-(2)  269/FFFFFFFFFFFF2E3E : 3015                		move.w	(a5),d0
-(2)  270/FFFFFFFFFFFF2E40 : 322D 0002           		move.w	2(a5),d1
-(2)  271/FFFFFFFFFFFF2E44 : D16E 0004           		add.w	d0,obj_x(a6)
-(2)  272/FFFFFFFFFFFF2E48 : D36E 0008           		add.w	d1,obj_y(a6)
-(2)  273/FFFFFFFFFFFF2E4C : 536D 0008           		subq.w	#1,8(a5)
-(2)  274/FFFFFFFFFFFF2E50 : 6636                		bne.s	.no_timer
-(2)  275/FFFFFFFFFFFF2E52 :                     
-(2)  276/FFFFFFFFFFFF2E52 : 7000                		moveq	#0,d0
-(2)  277/FFFFFFFFFFFF2E54 : 302E 0004           		move.w	obj_x(a6),d0
-(2)  278/FFFFFFFFFFFF2E58 : 672E                		beq.s	.no_timer
-(2)  279/FFFFFFFFFFFF2E5A : EA40                		asr.w	#5,d0
-(2)  280/FFFFFFFFFFFF2E5C : 5340                		subq.w	#1,d0
-(2)  281/FFFFFFFFFFFF2E5E : B07C 0005           		cmp.w	#5,d0
-(2)  282/FFFFFFFFFFFF2E62 : 6C24                		bge.s	.no_timer
-(2)  283/FFFFFFFFFFFF2E64 : 322E 0008           		move.w	obj_y(a6),d1
-(2)  284/FFFFFFFFFFFF2E68 : 6710                		beq.s	.no_tmry
-(2)  285/FFFFFFFFFFFF2E6A : 82FC 0018           		divu.w	#$18,d1
-(2)  286/FFFFFFFFFFFF2E6E : 5341                		subq.w	#1,d1
-(2)  287/FFFFFFFFFFFF2E70 : B27C 0005           		cmp.w	#5,d1
-(2)  288/FFFFFFFFFFFF2E74 : 6C04                		bge.s	.no_tmry
-(2)  289/FFFFFFFFFFFF2E76 : E749                		lsl.w	#3,d1
-(2)  290/FFFFFFFFFFFF2E78 : D041                		add.w	d1,d0
-(2)  291/FFFFFFFFFFFF2E7A :                     .no_tmry
-(2)  292/FFFFFFFFFFFF2E7A : 41F8 B804           		lea	(RAM_BlocksBuff),a0
-(2)  293/FFFFFFFFFFFF2E7E : D0C0                		adda	d0,a0
-(2)  294/FFFFFFFFFFFF2E80 : 10BC 0002           		move.b	#$02,(a0)
-(2)  295/FFFFFFFFFFFF2E84 : 50F8 B802           		st.b	(RAM_DoRedraw).w
-(2)  296/FFFFFFFFFFFF2E88 :                     .no_timer:
-(2)  297/FFFFFFFFFFFF2E88 :                     
-(2)  298/FFFFFFFFFFFF2E88 :                     ; ----------------------------------------------
-(2)  299/FFFFFFFFFFFF2E88 :                     ; Show the object...
-(2)  300/FFFFFFFFFFFF2E88 :                     
-(2)  301/FFFFFFFFFFFF2E88 :                     ; 		tst.w	d3
-(2)  302/FFFFFFFFFFFF2E88 :                     ; 		beq.s	.no_anim
-(2)  303/FFFFFFFFFFFF2E88 :                     ; 		lea	.anim_data(pc),a0	; Do animation
-(2)  304/FFFFFFFFFFFF2E88 :                     ; 		bsr	object_Animate
-(2)  305/FFFFFFFFFFFF2E88 :                     ; .no_anim:
-(2)  306/FFFFFFFFFFFF2E88 :                     ; 		clr.l	(RAM_TestTouch).w
-(2)  307/FFFFFFFFFFFF2E88 :                     ; 		bsr	object_Touch
-(2)  308/FFFFFFFFFFFF2E88 :                     ; 		tst.l	d0
-(2)  309/FFFFFFFFFFFF2E88 :                     ; 		beq.s	.lel
-(2)  310/FFFFFFFFFFFF2E88 :                     ; 		move.l	d0,(RAM_TestTouch).w
-(2)  311/FFFFFFFFFFFF2E88 :                     ; .lel:
-(2)  312/FFFFFFFFFFFF2E88 : 207C 0000 0000      		move.l	#0,a0
-(2)  313/FFFFFFFFFFFF2E8E : 43F9 0022 4334      		lea	(Map_Haruna),a1
-(2)  314/FFFFFFFFFFFF2E94 : 45F9 0022 44E4      		lea	(Plc_Haruna),a2
-(2)  315/FFFFFFFFFFFF2E9A : 47F9 0022 06C0      		lea	(Art_Haruna),a3
-(2)  316/FFFFFFFFFFFF2EA0 : 7400                		moveq	#0,d2
-(2)  317/FFFFFFFFFFFF2EA2 : 302E 0004           		move.w	obj_x(a6),d0
-(2)  318/FFFFFFFFFFFF2EA6 : 322E 0008           		move.w	obj_y(a6),d1
-(2)  319/FFFFFFFFFFFF2EAA : 0640 0040           		addi.w	#16+$30,d0
-(2)  320/FFFFFFFFFFFF2EAE : 0641 001C           		addi.w	#$20-4,d1
-(2)  321/FFFFFFFFFFFF2EB2 : 142E 001F           		move.b	obj_attr(a6),d2			; <-- Quick attribute bits
-(2)  322/FFFFFFFFFFFF2EB6 : E14A                		lsl.w	#8,d2
-(2)  323/FFFFFFFFFFFF2EB8 : E74A                		lsl.w	#3,d2				; %000vh000 00000000
-(2)  324/FFFFFFFFFFFF2EBA : D47C 6002           		add.w	#vramLoc_Haruna|$6000,d2 	; +VRAM+$2000(use second palette line)
-(2)  325/FFFFFFFFFFFF2EBE : 362E 0020           		move.w	obj_frame(a6),d3		; Current frame set by _Animate
-(2)  326/FFFFFFFFFFFF2EC2 : 6000 E446           		bra	Video_MakeSprMap_DMA
-(2)  327/FFFFFFFFFFFF2EC6 :                     
-(2)  328/FFFFFFFFFFFF2EC6 :                     ; ----------------------------------------------
-(2)  329/FFFFFFFFFFFF2EC6 :                     
-(2)  330/FFFFFFFFFFFF2EC6 :                     .anim_data:
-(2)  331/FFFFFFFFFFFF2EC6 : 0008                		dc.w .anim_down-.anim_data
-(2)  332/FFFFFFFFFFFF2EC8 : 0016                		dc.w .anim_up-.anim_data
-(2)  333/FFFFFFFFFFFF2ECA : 0024                		dc.w .anim_right-.anim_data
-(2)  334/FFFFFFFFFFFF2ECC : 0032                		dc.w .anim_left-.anim_data
-(2)  335/FFFFFFFFFFFF2ECE :                     
-(2)  336/FFFFFFFFFFFF2ECE :                     .anim_down:
-(2)  337/FFFFFFFFFFFF2ECE : 0008                		dc.w 8
-(2)  338/FFFFFFFFFFFF2ED0 : 0000 0001 0000      		dc.w 0,1,0,2
-         FFFFFFFFFFFF2ED6 : 0002             
-(2)  339/FFFFFFFFFFFF2ED8 : FFFE                		dc.w -2
-(2)  340/FFFFFFFFFFFF2EDA :                     		align 2
-(2)  341/FFFFFFFFFFFF2EDC :                     .anim_up:
-(2)  342/FFFFFFFFFFFF2EDC : 0008                		dc.w 8
-(2)  343/FFFFFFFFFFFF2EDE : 0003 0004 0003      		dc.w 3,4,3,5
-         FFFFFFFFFFFF2EE4 : 0005             
-(2)  344/FFFFFFFFFFFF2EE6 : FFFE                		dc.w -2
-(2)  345/FFFFFFFFFFFF2EE8 :                     		align 2
-(2)  346/FFFFFFFFFFFF2EEA :                     .anim_right:
-(2)  347/FFFFFFFFFFFF2EEA : 0008                		dc.w 8
-(2)  348/FFFFFFFFFFFF2EEC : 0006 0007 0006      		dc.w 6,7,6,8
-         FFFFFFFFFFFF2EF2 : 0008             
-(2)  349/FFFFFFFFFFFF2EF4 : FFFE                		dc.w -2
-(2)  350/FFFFFFFFFFFF2EF6 :                     		align 2
-(2)  351/FFFFFFFFFFFF2EF8 :                     .anim_left:
-(2)  352/FFFFFFFFFFFF2EF8 : 0008                		dc.w 8
-(2)  353/FFFFFFFFFFFF2EFA : 0009 000A 0009      		dc.w 9,10,9,11
-         FFFFFFFFFFFF2F00 : 000B             
-(2)  354/FFFFFFFFFFFF2F02 : FFFE                		dc.w -2
-(2)  355/FFFFFFFFFFFF2F04 :                     		align 2
-(2)  356/FFFFFFFFFFFF2F06 :                     
-(2)  357/FFFFFFFFFFFF2F06 :                     ; --------------------------------------------------
-(2)  358/FFFFFFFFFFFF2F06 :                     ; Test object
-(2)  359/FFFFFFFFFFFF2F06 :                     ; --------------------------------------------------
-(2)  360/FFFFFFFFFFFF2F06 :                     
-(2)  361/FFFFFFFFFFFF2F06 :                     obj_Ball:
-(2)  362/FFFFFFFFFFFF2F06 : 7000                		moveq	#0,d0
-(2)  363/FFFFFFFFFFFF2F08 : 102E 001C           		move.b	obj_index(a6),d0
-(2)  364/FFFFFFFFFFFF2F0C : D040                		add.w	d0,d0
-(2)  365/FFFFFFFFFFFF2F0E : 323B 0006           		move.w	.list(pc,d0.w),d1
-(2)  366/FFFFFFFFFFFF2F12 : 4EFB 1002           		jmp	.list(pc,d1.w)
-(2)  367/FFFFFFFFFFFF2F16 :                     ; ----------------------------------------------
-(2)  368/FFFFFFFFFFFF2F16 : 0004                .list:		dc.w .init-.list
-(2)  369/FFFFFFFFFFFF2F18 : 0072                		dc.w .main-.list
-(2)  370/FFFFFFFFFFFF2F1A :                     ; ----------------------------------------------
-(2)  371/FFFFFFFFFFFF2F1A :                     .init:
-(2)  372/FFFFFFFFFFFF2F1A : 522E 001C           		addq.b	#1,obj_index(a6)
-(2)  373/FFFFFFFFFFFF2F1E : 6100 F184           		bsr	object_ResetAnim	; Init/Reset animation
-(2)  374/FFFFFFFFFFFF2F22 : 3D7C 0202 0010      		move.w	#$0202,obj_size_x(a6)
-(2)  375/FFFFFFFFFFFF2F28 : 3D7C 0303 0012      		move.w	#$0303,obj_size_y(a6)
-(2)  376/FFFFFFFFFFFF2F2E : 3D7C 0101 0014      		move.w	#$0101,obj_size_z(a6)
-(2)  377/FFFFFFFFFFFF2F34 : 3D7C 0000 0022      		move.w	#0,obj_anim_num(a6)
-(2)  378/FFFFFFFFFFFF2F3A :                     
-(2)  379/FFFFFFFFFFFF2F3A : 3D7C 0020 0004      		move.w	#$20,obj_x(a6)		; Set Object's X/Y position
-(2)  380/FFFFFFFFFFFF2F40 : 3D7C 0010 0008      		move.w	#$10,obj_y(a6)
-(2)  381/FFFFFFFFFFFF2F46 : 303C 0049           		move.w	#$48+1,d0
-(2)  382/FFFFFFFFFFFF2F4A : 6100 ECAA           		bsr	System_DiceRoll
-(2)  383/FFFFFFFFFFFF2F4E : E348                		lsl.w	#1,d0
-(2)  384/FFFFFFFFFFFF2F50 : D16E 0004           		add.w	d0,obj_x(a6)
-(2)  385/FFFFFFFFFFFF2F54 : D16E 0008           		add.w	d0,obj_y(a6)
-(2)  386/FFFFFFFFFFFF2F58 : E948                		lsl.w	#4,d0
-(2)  387/FFFFFFFFFFFF2F5A : 3D40 0016           		move.w	d0,obj_x_spd(a6)
-(2)  388/FFFFFFFFFFFF2F5E : 3D40 0018           		move.w	d0,obj_y_spd(a6)
-(2)  389/FFFFFFFFFFFF2F62 :                     
-(2)  390/FFFFFFFFFFFF2F62 : 08EE 0000 001F      		bset	#0,obj_attr(a6)
-(2)  391/FFFFFFFFFFFF2F68 : 6100 EC32           		bsr	System_Random
-(2)  392/FFFFFFFFFFFF2F6C : 2E38 ED9C           		move.l	(RAM_SysRandom).w,d7
-(2)  393/FFFFFFFFFFFF2F70 : E24F                		lsr.w	#1,d7
-(2)  394/FFFFFFFFFFFF2F72 : 640A                		bcc.s	.x_random
-(2)  395/FFFFFFFFFFFF2F74 : 446E 0016           		neg.w	obj_x_spd(a6)
-(2)  396/FFFFFFFFFFFF2F78 : 086E 0000 001F      		bchg	#0,obj_attr(a6)
-(2)  397/FFFFFFFFFFFF2F7E :                     .x_random:
-(2)  398/FFFFFFFFFFFF2F7E : E24F                		lsr.w	#1,d7
-(2)  399/FFFFFFFFFFFF2F80 : 6404                		bcc.s	.y_random
-(2)  400/FFFFFFFFFFFF2F82 : 446E 0018           		neg.w	obj_y_spd(a6)
-(2)  401/FFFFFFFFFFFF2F86 :                     .y_random:
-(2)  402/FFFFFFFFFFFF2F86 : 4E75                		rts
-(2)  403/FFFFFFFFFFFF2F88 :                     
-(2)  404/FFFFFFFFFFFF2F88 :                     ; ----------------------------------------------
-(2)  405/FFFFFFFFFFFF2F88 :                     .main:
-(2)  406/FFFFFFFFFFFF2F88 : 3438 DC16           		move.w	(RAM_VdpRegSetC).w,d2
-(2)  407/FFFFFFFFFFFF2F8C : 0802 0002           		btst	#2,d2
-(2)  408/FFFFFFFFFFFF2F90 : 660E                		bne.s	.y_fix
-(2)  409/FFFFFFFFFFFF2F92 : 0C6E 00F0 0008      		cmpi.w	#240,obj_y(a6)
-(2)  410/FFFFFFFFFFFF2F98 : 6D06                		blt.s	.y_fix
-(2)  411/FFFFFFFFFFFF2F9A : 046E 00F0 0008      		sub.w	#240,obj_y(a6)
-(2)  412/FFFFFFFFFFFF2FA0 :                     .y_fix:
-(2)  413/FFFFFFFFFFFF2FA0 :                     
-(2)  414/FFFFFFFFFFFF2FA0 : 323C 00E0           		move.w	#224,d1
-(2)  415/FFFFFFFFFFFF2FA4 : 3438 DC16           		move.w	(RAM_VdpRegSetC).w,d2
-(2)  416/FFFFFFFFFFFF2FA8 : 0802 0002           		btst	#2,d2
-(2)  417/FFFFFFFFFFFF2FAC : 6702                		beq.s	.y_double
-(2)  418/FFFFFFFFFFFF2FAE : D241                		add.w	d1,d1
-(2)  419/FFFFFFFFFFFF2FB0 :                     .y_double:
-(2)  420/FFFFFFFFFFFF2FB0 : 303C 0140           		move.w	#320,d0
-(2)  421/FFFFFFFFFFFF2FB4 : 342E 0004           		move.w	obj_x(a6),d2
-(2)  422/FFFFFFFFFFFF2FB8 : 4A42                		tst.w	d2
-(2)  423/FFFFFFFFFFFF2FBA : 6A0C                		bpl.s	.x_back
-(2)  424/FFFFFFFFFFFF2FBC : 446E 0016           		neg.w	obj_x_spd(a6)
-(2)  425/FFFFFFFFFFFF2FC0 : 6166                		bsr.s	.play_bump
-(2)  426/FFFFFFFFFFFF2FC2 : 086E 0000 001F      		bchg	#0,obj_attr(a6)
-(2)  427/FFFFFFFFFFFF2FC8 :                     .x_back:
-(2)  428/FFFFFFFFFFFF2FC8 : B440                		cmp.w	d0,d2
-(2)  429/FFFFFFFFFFFF2FCA : 6D0C                		blt.s	.x_foward
-(2)  430/FFFFFFFFFFFF2FCC : 446E 0016           		neg.w	obj_x_spd(a6)
-(2)  431/FFFFFFFFFFFF2FD0 : 086E 0000 001F      		bchg	#0,obj_attr(a6)
-(2)  432/FFFFFFFFFFFF2FD6 : 6150                		bsr.s	.play_bump
-(2)  433/FFFFFFFFFFFF2FD8 :                     .x_foward:
-(2)  434/FFFFFFFFFFFF2FD8 : 3D42 0004           		move.w	d2,obj_x(a6)
-(2)  435/FFFFFFFFFFFF2FDC :                     
-(2)  436/FFFFFFFFFFFF2FDC : 342E 0008           		move.w	obj_y(a6),d2
-(2)  437/FFFFFFFFFFFF2FE0 : 4A42                		tst.w	d2
-(2)  438/FFFFFFFFFFFF2FE2 : 6A06                		bpl.s	.y_back
-(2)  439/FFFFFFFFFFFF2FE4 : 6142                		bsr.s	.play_bump
-(2)  440/FFFFFFFFFFFF2FE6 : 446E 0018           		neg.w	obj_y_spd(a6)
-(2)  441/FFFFFFFFFFFF2FEA :                     .y_back:
-(2)  442/FFFFFFFFFFFF2FEA : B441                		cmp.w	d1,d2
-(2)  443/FFFFFFFFFFFF2FEC : 6D06                		blt.s	.y_foward
-(2)  444/FFFFFFFFFFFF2FEE : 6138                		bsr.s	.play_bump
-(2)  445/FFFFFFFFFFFF2FF0 : 446E 0018           		neg.w	obj_y_spd(a6)
-(2)  446/FFFFFFFFFFFF2FF4 :                     .y_foward:
-(2)  447/FFFFFFFFFFFF2FF4 : 3D42 0008           		move.w	d2,obj_y(a6)
-(2)  448/FFFFFFFFFFFF2FF8 : 6100 F0B2           		bsr	object_Speed
-(2)  449/FFFFFFFFFFFF2FFC :                     
-(2)  450/FFFFFFFFFFFF2FFC :                     ; ----------------------------------------------
-(2)  451/FFFFFFFFFFFF2FFC :                     ; Show the object...
-(2)  452/FFFFFFFFFFFF2FFC :                     
-(2)  453/FFFFFFFFFFFF2FFC : 41FA 003E           		lea	.anim_data(pc),a0	; Do animation
-(2)  454/FFFFFFFFFFFF3000 : 6100 F0DA           		bsr	object_Animate
-(2)  455/FFFFFFFFFFFF3004 : 43F9 0022 4594      		lea	(Map_Sisi),a1
-(2)  456/FFFFFFFFFFFF300A : 7400                		moveq	#0,d2
-(2)  457/FFFFFFFFFFFF300C : 302E 0004           		move.w	obj_x(a6),d0
-(2)  458/FFFFFFFFFFFF3010 : 322E 0008           		move.w	obj_y(a6),d1
-(2)  459/FFFFFFFFFFFF3014 : 142E 001F           		move.b	obj_attr(a6),d2			; <-- Quick attribute bits
-(2)  460/FFFFFFFFFFFF3018 : E14A                		lsl.w	#8,d2
-(2)  461/FFFFFFFFFFFF301A : E74A                		lsl.w	#3,d2				; %000vh000 00000000
-(2)  462/FFFFFFFFFFFF301C : D47C 4062           		add.w	#vramLoc_Sisi|$4000,d2 		; +VRAM+$2000(use second palette line)
-(2)  463/FFFFFFFFFFFF3020 : 362E 0020           		move.w	obj_frame(a6),d3		; Current frame set by _Animate
-(2)  464/FFFFFFFFFFFF3024 : 6000 E2FC           		bra	Video_MakeSprMap
-(2)  465/FFFFFFFFFFFF3028 :                     
-(2)  466/FFFFFFFFFFFF3028 :                     .play_bump:
-(2)  467/FFFFFFFFFFFF3028 : 48E7 E000           		movem.l	d0-d2,-(sp)
-(2)  468/FFFFFFFFFFFF302C : 700F                		moveq	#$0F,d0
-(2)  469/FFFFFFFFFFFF302E : 7200                		moveq	#$00,d1
-(2)  470/FFFFFFFFFFFF3030 : 7401                		moveq	#1,d2
-(2)  471/FFFFFFFFFFFF3032 : 6100 D19C           		bsr	gemaPlaySeq
-(2)  472/FFFFFFFFFFFF3036 : 4CDF 0007           		movem.l	(sp)+,d0-d2
-(2)  473/FFFFFFFFFFFF303A : 4E75                		rts
-(2)  474/FFFFFFFFFFFF303C :                     
-(2)  475/FFFFFFFFFFFF303C :                     ; ----------------------------------------------
-(2)  476/FFFFFFFFFFFF303C :                     
-(2)  477/FFFFFFFFFFFF303C :                     .anim_data:
-(2)  478/FFFFFFFFFFFF303C : 0002                		dc.w .maind-.anim_data
-(2)  479/FFFFFFFFFFFF303E :                     .maind:
-(2)  480/FFFFFFFFFFFF303E : 0007                		dc.w 7
-(2)  481/FFFFFFFFFFFF3040 : 0000 0001 0002      		dc.w 0,1,2,1
-         FFFFFFFFFFFF3046 : 0001             
-(2)  482/FFFFFFFFFFFF3048 : FFFE                		dc.w -2
-(2)  483/FFFFFFFFFFFF304A :                     		align 2
-(2)  484/FFFFFFFFFFFF304C :                     
-(2)  485/FFFFFFFFFFFF304C :                     ; ====================================================================
-(2)  486/FFFFFFFFFFFF304C :                     ; ------------------------------------------------------
-(2)  487/FFFFFFFFFFFF304C :                     ; Subroutines
-(2)  488/FFFFFFFFFFFF304C :                     ; ------------------------------------------------------
-(2)  489/FFFFFFFFFFFF304C :                     
-(2)  490/FFFFFFFFFFFF304C :                     Screen0_PickBackgrnd:
-(2)  491/FFFFFFFFFFFF304C : 41F9 0022 45D8      		lea	(Pal_TESTBG),a0				; a0 - Load palette (+2 skips first color)
-(2)  492/FFFFFFFFFFFF3052 : 7010                		moveq	#16,d0					; d0 - Start at $01
-(2)  493/FFFFFFFFFFFF3054 : 720F                		moveq	#15,d1					; d1 - 15 colors
-(2)  494/FFFFFFFFFFFF3056 : 6100 DEAE           		bsr	Video_FadePal				; Load palette to FADE buffer
-(2)  495/FFFFFFFFFFFF305A : 4278 D96E           		clr.w	(RAM_Palette).w
-(2)  496/FFFFFFFFFFFF305E : 4278 D9EE           		clr.w	(RAM_PaletteFade).w
-(2)  497/FFFFFFFFFFFF3062 : 203C 0021 8800      		move.l	#Art_TESTBG,d0				; d0 - Graphics pointer (NOT a0 here)
-(2)  498/FFFFFFFFFFFF3068 : 323C 31C0           		move.w	#cell_vram(vramLoc_Backgrnd),d1		; d1 - output VRAM location
-(2)  499/FFFFFFFFFFFF306C : 343C 7EC0           		move.w	#Art_TESTBG_e-Art_TESTBG,d2		; d2 - Size: end-start
-(2)  500/FFFFFFFFFFFF3070 : 6100 D80C           		bsr	Video_LoadArt
-(2)  501/FFFFFFFFFFFF3074 : 41F9 0022 45F6      		lea	(Map_TESTBG),a0				; a0 - Map data
-(2)  502/FFFFFFFFFFFF307A : 203C 0000 0000      		move.l	#splitw(0,0),d0				; d0 - X/Y Positions 0,0
-(2)  503/FFFFFFFFFFFF3080 : 223C 0028 001C      		move.l	#splitw(320/8,224/8),d1			; d1 - Width and Height
-(2)  504/FFFFFFFFFFFF3086 : 243C 0080 E000      		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_BG),d2	; d2 - Layer width / Layer output
-(2)  505/FFFFFFFFFFFF308C : 363C 218E           		move.w	#vramLoc_Backgrnd|$2000,d3		; d3 - Starting cell
-(2)  506/FFFFFFFFFFFF3090 : 6100 DB1C           		bsr	Video_LoadMap
-(2)  507/FFFFFFFFFFFF3094 : 6000 D654           		bra	Video_DisplayOn
-(2)  508/FFFFFFFFFFFF3098 :                     
-(2)  509/FFFFFFFFFFFF3098 :                     Scrn0_LoadMap:
-(2)  510/FFFFFFFFFFFF3098 : 41FA 00A4           		lea	layout_PushBlk(pc),a0
-(2)  511/FFFFFFFFFFFF309C : 43F8 B804           		lea	(RAM_BlocksBuff).w,a1
-(2)  512/FFFFFFFFFFFF30A0 : 303C 003F           		move.w	#(8*8)-1,d0
-(2)  513/FFFFFFFFFFFF30A4 :                     .copy_base:
-(2)  514/FFFFFFFFFFFF30A4 : 12D8                		move.b	(a0)+,(a1)+
-(2)  515/FFFFFFFFFFFF30A6 : 51C8 FFFC           		dbf	d0,.copy_base
-(2)  516/FFFFFFFFFFFF30AA : 4E75                		rts
-(2)  517/FFFFFFFFFFFF30AC :                     
-(2)  518/FFFFFFFFFFFF30AC :                     Scrn0_DrawMapAll:
-(2)  519/FFFFFFFFFFFF30AC : 43F8 B804           		lea	(RAM_BlocksBuff).w,a1
-(2)  520/FFFFFFFFFFFF30B0 : 223C 0004 0004      		move.l	#splitw(32/8,32/8),d1			; d1 - Width and Height
-(2)  521/FFFFFFFFFFFF30B6 : 243C 0080 C000      		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d2	; d2 - Layer width / Layer output
-(2)  522/FFFFFFFFFFFF30BC : 363C 008E           		move.w	#vramLoc_PushBlk,d3			; d3 - Starting cell
-(2)  523/FFFFFFFFFFFF30C0 : 7E07                		moveq	#8-1,d7
-(2)  524/FFFFFFFFFFFF30C2 : 2C3C 000A 0008      		move.l	#$000A0008,d6
-(2)  525/FFFFFFFFFFFF30C8 :                     .y_read:
-(2)  526/FFFFFFFFFFFF30C8 : 4847                		swap	d7
-(2)  527/FFFFFFFFFFFF30CA : 2006                		move.l	d6,d0
-(2)  528/FFFFFFFFFFFF30CC : 3E3C 0007           		move.w	#8-1,d7
-(2)  529/FFFFFFFFFFFF30D0 :                     .x_read:
-(2)  530/FFFFFFFFFFFF30D0 : 41FA 002A           		lea	map_PushBlk(pc),a0			; a0 - Map data
-(2)  531/FFFFFFFFFFFF30D4 : 7A00                		moveq	#0,d5
-(2)  532/FFFFFFFFFFFF30D6 : 1A19                		move.b	(a1)+,d5
-(2)  533/FFFFFFFFFFFF30D8 : 670A                		beq.s	.not_blk
-(2)  534/FFFFFFFFFFFF30DA : 5345                		subq.w	#1,d5
-(2)  535/FFFFFFFFFFFF30DC : EB8D                		lsl.l	#5,d5
-(2)  536/FFFFFFFFFFFF30DE : D0C5                		adda	d5,a0
-(2)  537/FFFFFFFFFFFF30E0 : 6100 DACC           		bsr	Video_LoadMap
-(2)  538/FFFFFFFFFFFF30E4 :                     .not_blk
-(2)  539/FFFFFFFFFFFF30E4 : D0BC 0004 0000      		add.l	#$00040000,d0
-(2)  540/FFFFFFFFFFFF30EA : 51CF FFE4           		dbf	d7,.x_read
-(2)  541/FFFFFFFFFFFF30EE : DCBC 0000 0003      		add.l	#$00000003,d6
-(2)  542/FFFFFFFFFFFF30F4 : 4847                		swap	d7
-(2)  543/FFFFFFFFFFFF30F6 : 51CF FFD0           		dbf	d7,.y_read
-(2)  544/FFFFFFFFFFFF30FA : 4E75                		rts
-(2)  545/FFFFFFFFFFFF30FC :                     
-(2)  546/FFFFFFFFFFFF30FC :                     ; ====================================================================
-(2)  547/FFFFFFFFFFFF30FC :                     ; ------------------------------------------------------
-(2)  548/FFFFFFFFFFFF30FC :                     ; Custom VBlank
-(2)  549/FFFFFFFFFFFF30FC :                     ; ------------------------------------------------------
-(2)  550/FFFFFFFFFFFF30FC :                     
-(2)  551/FFFFFFFFFFFF30FC :                     ; ------------------------------------------------------
-(2)  552/FFFFFFFFFFFF30FC :                     ; Custom HBlank
-(2)  553/FFFFFFFFFFFF30FC :                     ; ------------------------------------------------------
-(2)  554/FFFFFFFFFFFF30FC :                     
-(2)  555/FFFFFFFFFFFF30FC :                     ; ====================================================================
-(2)  556/FFFFFFFFFFFF30FC :                     ; ------------------------------------------------------
-(2)  557/FFFFFFFFFFFF30FC :                     ; Includes for this screen
-(2)  558/FFFFFFFFFFFF30FC :                     ; ------------------------------------------------------
-(2)  559/FFFFFFFFFFFF30FC :                     
-(2)  560/FFFFFFFFFFFF30FC :                     ; ====================================================================
-(2)  561/FFFFFFFFFFFF30FC :                     ; ------------------------------------------------------
-(2)  562/FFFFFFFFFFFF30FC :                     ; Small data section
-(2)  563/FFFFFFFFFFFF30FC :                     ; ------------------------------------------------------
-(2)  564/FFFFFFFFFFFF30FC :                     
-(2)  565/FFFFFFFFFFFF30FC :                     ; str_NikonaTest:
-(2)  566/FFFFFFFFFFFF30FC :                     ; 		dc.b "GEMA testing"
-(2)  567/FFFFFFFFFFFF30FC :                     ; 		dc.b 0
-(2)  568/FFFFFFFFFFFF30FC :                     ; 		align 2
-(2)  569/FFFFFFFFFFFF30FC :                     ; str_NewCountr0:
-(2)  570/FFFFFFFFFFFF30FC :                     ; 		dc.l pstr_mem(1,RAM_Objects+obj_x)
-(2)  571/FFFFFFFFFFFF30FC :                     ; 		dc.b " "
-(2)  572/FFFFFFFFFFFF30FC :                     ; 		dc.l pstr_mem(1,RAM_Objects+obj_y)
-(2)  573/FFFFFFFFFFFF30FC :                     ; 		dc.b 0
-(2)  574/FFFFFFFFFFFF30FC :                     ; 		align 2
-(2)  575/FFFFFFFFFFFF30FC :                     map_PushBlk:
-(2)  576/FFFFFFFFFFFF30FC : 0000 0001 0002      		dc.w $0000,$0001,$0002,$0003
-         FFFFFFFFFFFF3102 : 0003             
-(2)  577/FFFFFFFFFFFF3104 : 0004 0005 0006      		dc.w $0004,$0005,$0006,$0007
-         FFFFFFFFFFFF310A : 0007             
-(2)  578/FFFFFFFFFFFF310C : 0008 0009 000A      		dc.w $0008,$0009,$000A,$000B
-         FFFFFFFFFFFF3112 : 000B             
-(2)  579/FFFFFFFFFFFF3114 : 000C 000D 000E      		dc.w $000C,$000D,$000E,$000F
-         FFFFFFFFFFFF311A : 000F             
-(2)  580/FFFFFFFFFFFF311C : 0010 0011 0012      		dc.w $0010,$0011,$0012,$0013
-         FFFFFFFFFFFF3122 : 0013             
-(2)  581/FFFFFFFFFFFF3124 : 0014 0015 0016      		dc.w $0014,$0015,$0016,$0017
-         FFFFFFFFFFFF312A : 0017             
-(2)  582/FFFFFFFFFFFF312C : 0018 0019 001A      		dc.w $0018,$0019,$001A,$001B
-         FFFFFFFFFFFF3132 : 001B             
-(2)  583/FFFFFFFFFFFF3134 : 001C 001D 001E      		dc.w $001C,$001D,$001E,$001F
-         FFFFFFFFFFFF313A : 001F             
-(2)  584/FFFFFFFFFFFF313C :                     		align 2
-(2)  585/FFFFFFFFFFFF313E :                     layout_PushBlk:
-(2)  586/FFFFFFFFFFFF313E : 0101 0101 0100      		dc.b $01,$01,$01,$01,$01,$00,$00,$00
-         FFFFFFFFFFFF3144 : 0000             
-(2)  587/FFFFFFFFFFFF3146 : 0101 0101 0100      		dc.b $01,$01,$01,$01,$01,$00,$00,$00
-         FFFFFFFFFFFF314C : 0000             
-(2)  588/FFFFFFFFFFFF314E : 0101 0101 0100      		dc.b $01,$01,$01,$01,$01,$00,$00,$00
-         FFFFFFFFFFFF3154 : 0000             
-(2)  589/FFFFFFFFFFFF3156 : 0101 0101 0100      		dc.b $01,$01,$01,$01,$01,$00,$00,$00
-         FFFFFFFFFFFF315C : 0000             
-(2)  590/FFFFFFFFFFFF315E : 0101 0101 0100      		dc.b $01,$01,$01,$01,$01,$00,$00,$00
-         FFFFFFFFFFFF3164 : 0000             
-(2)  591/FFFFFFFFFFFF3166 : 0000 0000 0000      		dc.b $00,$00,$00,$00,$00,$00,$00,$00
-         FFFFFFFFFFFF316C : 0000             
-(2)  592/FFFFFFFFFFFF316E : 0000 0000 0000      		dc.b $00,$00,$00,$00,$00,$00,$00,$00
-         FFFFFFFFFFFF3174 : 0000             
-(2)  593/FFFFFFFFFFFF3176 : 0000 0000 0000      		dc.b $00,$00,$00,$00,$00,$00,$00,$00
-         FFFFFFFFFFFF317C : 0000             
-(2)  594/FFFFFFFFFFFF317E :                     		align 2
-(2)  595/FFFFFFFFFFFF3180 :                     
-(2)  596/FFFFFFFFFFFF3180 :                     ; ====================================================================
-(2)  597/FFFFFFFFFFFF3180 :                     
-(1)   16/FFFFFFFFFFFF3180 :                     mcscrn_e:
-(1)   16/   62580 :                                     dephase
-(1)   16/   62580 :                                     phase mctopscrn+(mcscrn_e-RAM_UserCode)
-(1)   16/   62580 :                                     align $800
+(2)  113/FFFFFFFFFFFF2CC2 : 6100 047E           		bsr	Scrn0_DrawMapAll
+(2)  114/FFFFFFFFFFFF2CC6 : 700F                		moveq	#$0F,d0
+(2)  115/FFFFFFFFFFFF2CC8 : 7201                		moveq	#1,d1
+(2)  116/FFFFFFFFFFFF2CCA : 7402                		moveq	#2,d2
+(2)  117/FFFFFFFFFFFF2CCC : 6100 D502           		bsr	gemaPlaySeq
+(2)  118/FFFFFFFFFFFF2CD0 :                     .dont_redrw:
+(2)  119/FFFFFFFFFFFF2CD0 :                     
+(2)  120/FFFFFFFFFFFF2CD0 : 616C                		bsr	.show_counter
+(2)  121/FFFFFFFFFFFF2CD2 : 3E38 DD1C           		move.w	(Controller_1+on_press).w,d7
+(2)  122/FFFFFFFFFFFF2CD6 : 0247 0400           		andi.w	#JoyX,d7
+(2)  123/FFFFFFFFFFFF2CDA : 670A                		beq.s	.not_x
+(2)  124/FFFFFFFFFFFF2CDC : 203C FFFF 2F9C      		move.l	#obj_Ball,d0
+(2)  125/FFFFFFFFFFFF2CE2 : 6100 F356           		bsr	Object_Make
+(2)  126/FFFFFFFFFFFF2CE6 :                     .not_x:
+(2)  127/FFFFFFFFFFFF2CE6 : 3E38 DD1C           		move.w	(Controller_1+on_press).w,d7
+(2)  128/FFFFFFFFFFFF2CEA : 0247 0200           		andi.w	#JoyY,d7
+(2)  129/FFFFFFFFFFFF2CEE : 6716                		beq.s	.not_y
+(2)  130/FFFFFFFFFFFF2CF0 : 41F8 DD58           		lea	(RAM_Objects),a0
+(2)  131/FFFFFFFFFFFF2CF4 : 7000                		moveq	#0,d0
+(2)  132/FFFFFFFFFFFF2CF6 : 7201                		moveq	#1,d1
+(2)  133/FFFFFFFFFFFF2CF8 : 3E3C 0026           		move.w	#(MAX_MDOBJ-1)-1,d7
+(2)  134/FFFFFFFFFFFF2CFC :                     .del_from:
+(2)  135/FFFFFFFFFFFF2CFC : 6100 F328           		bsr	Object_Set
+(2)  136/FFFFFFFFFFFF2D00 : 5241                		addq.w	#1,d1
+(2)  137/FFFFFFFFFFFF2D02 : 51CF FFF8           		dbf	d7,.del_from
+(2)  138/FFFFFFFFFFFF2D06 :                     .not_y:
+(2)  139/FFFFFFFFFFFF2D06 :                     ; 		move.w	(Controller_1+on_press).w,d7
+(2)  140/FFFFFFFFFFFF2D06 :                     ; 		andi.w	#JoyZ,d7
+(2)  141/FFFFFFFFFFFF2D06 :                     ; 		beq.s	.not_z
+(2)  142/FFFFFFFFFFFF2D06 :                     ; 		moveq	#$0F,d0
+(2)  143/FFFFFFFFFFFF2D06 :                     ; 		moveq	#1,d1
+(2)  144/FFFFFFFFFFFF2D06 :                     ; 		moveq	#2,d2
+(2)  145/FFFFFFFFFFFF2D06 :                     ; 		bsr	gemaPlaySeq
+(2)  146/FFFFFFFFFFFF2D06 :                     ; .not_z:
+(2)  147/FFFFFFFFFFFF2D06 :                     
+(2)  148/FFFFFFFFFFFF2D06 :                     	; Copy variables
+(2)  149/FFFFFFFFFFFF2D06 : 3E38 B800           		move.w	(RAM_Cam_Xpos).w,d7
+(2)  150/FFFFFFFFFFFF2D0A : 31C7 DA72           		move.w	d7,(RAM_SprOffsetX).w
+(2)  151/FFFFFFFFFFFF2D0E : 4447                		neg.w	d7
+(2)  152/FFFFFFFFFFFF2D10 : 31C7 D05E           		move.w	d7,(RAM_HorScroll).w
+(2)  153/FFFFFFFFFFFF2D14 :                     
+(2)  154/FFFFFFFFFFFF2D14 :                     	; Check START button
+(2)  155/FFFFFFFFFFFF2D14 : 3E38 DD1C           		move.w	(Controller_1+on_press).w,d7
+(2)  156/FFFFFFFFFFFF2D18 : 0247 0080           		andi.w	#JoyStart,d7
+(2)  157/FFFFFFFFFFFF2D1C : 678E                		beq	.loop
+(2)  158/FFFFFFFFFFFF2D1E : 6100 E194           		bsr	Video_FadeOut_Full
+(2)  159/FFFFFFFFFFFF2D22 :                     	; Stop ALL sequences
+(2)  160/FFFFFFFFFFFF2D22 : 6100 D508           		bsr	gemaStopAll
+(2)  161/FFFFFFFFFFFF2D26 :                     	rept 4
+(2)  162/FFFFFFFFFFFF2D26 :                     		bsr	System_Render		; Wait 4 frames...
+(2)  163/FFFFFFFFFFFF2D26 :                     	endm
+(2)  162/FFFFFFFFFFFF2D26 : 6100 EB18           		bsr	System_Render		; Wait 4 frames...
+(2)  162/FFFFFFFFFFFF2D2A : 6100 EB14           		bsr	System_Render		; Wait 4 frames...
+(2)  162/FFFFFFFFFFFF2D2E : 6100 EB10           		bsr	System_Render		; Wait 4 frames...
+(2)  162/FFFFFFFFFFFF2D32 : 6100 EB0C           		bsr	System_Render		; Wait 4 frames...
+(2)  164/FFFFFFFFFFFF2D36 : 31FC 0000 EDB4      		move.w	#0,(RAM_ScreenMode).w	; Set Screen Mode $07
+(2)  165/FFFFFFFFFFFF2D3C : 4E75                		rts				; <-- RTS
+(2)  166/FFFFFFFFFFFF2D3E :                     
+(2)  167/FFFFFFFFFFFF2D3E :                     ; ------------------------------------------------------
+(2)  168/FFFFFFFFFFFF2D3E :                     ; Show framecounter and input
+(2)  169/FFFFFFFFFFFF2D3E :                     ; ------------------------------------------------------
+(2)  170/FFFFFFFFFFFF2D3E :                     
+(2)  171/FFFFFFFFFFFF2D3E :                     .show_counter:
+(2)  172/FFFFFFFFFFFF2D3E : 4E75                		rts
+(2)  173/FFFFFFFFFFFF2D40 :                     ; 		lea	str_NewCountr0(pc),a0
+(2)  174/FFFFFFFFFFFF2D40 :                     ; 		moveq	#0,d0
+(2)  175/FFFFFFFFFFFF2D40 :                     ; 		moveq	#0,d1
+(2)  176/FFFFFFFFFFFF2D40 :                     ; 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+(2)  177/FFFFFFFFFFFF2D40 :                     ; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
+(2)  178/FFFFFFFFFFFF2D40 :                     ; 		bra	Video_Print
+(2)  179/FFFFFFFFFFFF2D40 :                     
+(2)  180/FFFFFFFFFFFF2D40 :                     ; ====================================================================
+(2)  181/FFFFFFFFFFFF2D40 :                     ; ------------------------------------------------------
+(2)  182/FFFFFFFFFFFF2D40 :                     ; DATA asset locations
+(2)  183/FFFFFFFFFFFF2D40 :                     ; ------------------------------------------------------
+(2)  184/FFFFFFFFFFFF2D40 :                     
+(2)  185/FFFFFFFFFFFF2D40 :                     file_scrn1_main:
+(2)  186/FFFFFFFFFFFF2D40 : 0006 6000           		dc.l DATA_BANK0
+(2)  187/FFFFFFFFFFFF2D44 : 424E 4B5F 4D41      		dc.b "BNK_MAIN.BIN",0
+         FFFFFFFFFFFF2D4A : 494E 2E42 494E 00 
+(2)  188/FFFFFFFFFFFF2D51 :                     		align 2
+(2)  189/FFFFFFFFFFFF2D52 :                     ; file_scrn1_mars:
+(2)  190/FFFFFFFFFFFF2D52 :                     ; 		dc.l DATA_BANK1
+(2)  191/FFFFFFFFFFFF2D52 :                     ; 		dc.b "BNK_MARS.BIN",0
+(2)  192/FFFFFFFFFFFF2D52 :                     ; 		align 2
+(2)  193/FFFFFFFFFFFF2D52 :                     
+(2)  194/FFFFFFFFFFFF2D52 :                     
+(2)  195/FFFFFFFFFFFF2D52 :                     ArtList_scrn1:
+(2)  196/FFFFFFFFFFFF2D52 : 0002                		dc.w 2
+(2)  197/FFFFFFFFFFFF2D54 : 0022 2C00           		dc.l Art_Sisi
+(2)  198/FFFFFFFFFFFF2D58 : 0C40 0580           		dc.w cell_vram(vramLoc_Sisi),Art_Sisi_e-Art_Sisi
+(2)  199/FFFFFFFFFFFF2D5C : 0021 8400           		dc.l Art_BlkPuzzl
+(2)  200/FFFFFFFFFFFF2D60 : 11C0 0400           		dc.w cell_vram(vramLoc_PushBlk),cell_vram($20)
+(2)  201/FFFFFFFFFFFF2D64 :                     		align 2
+(2)  202/FFFFFFFFFFFF2D66 :                     
+(2)  203/FFFFFFFFFFFF2D66 :                     ; ====================================================================
+(2)  204/FFFFFFFFFFFF2D66 :                     ; ------------------------------------------------------
+(2)  205/FFFFFFFFFFFF2D66 :                     ; Objects
+(2)  206/FFFFFFFFFFFF2D66 :                     ; ------------------------------------------------------
+(2)  207/FFFFFFFFFFFF2D66 :                     
+(2)  208/FFFFFFFFFFFF2D66 :                     ; --------------------------------------------------
+(2)  209/FFFFFFFFFFFF2D66 :                     ; Test object
+(2)  210/FFFFFFFFFFFF2D66 :                     ; --------------------------------------------------
+(2)  211/FFFFFFFFFFFF2D66 :                     
+(2)  212/FFFFFFFFFFFF2D66 :                     obj_Player:
+(2)  213/FFFFFFFFFFFF2D66 : 7000                		moveq	#0,d0
+(2)  214/FFFFFFFFFFFF2D68 : 102E 001C           		move.b	obj_index(a6),d0
+(2)  215/FFFFFFFFFFFF2D6C : D040                		add.w	d0,d0
+(2)  216/FFFFFFFFFFFF2D6E : 323B 0006           		move.w	.list(pc,d0.w),d1
+(2)  217/FFFFFFFFFFFF2D72 : 4EFB 1002           		jmp	.list(pc,d1.w)
+(2)  218/FFFFFFFFFFFF2D76 :                     ; ----------------------------------------------
+(2)  219/FFFFFFFFFFFF2D76 : 0004                .list:		dc.w .init-.list
+(2)  220/FFFFFFFFFFFF2D78 : 002E                		dc.w .main-.list
+(2)  221/FFFFFFFFFFFF2D7A :                     ; ----------------------------------------------
+(2)  222/FFFFFFFFFFFF2D7A :                     .init:
+(2)  223/FFFFFFFFFFFF2D7A : 522E 001C           		addq.b	#1,obj_index(a6)
+(2)  224/FFFFFFFFFFFF2D7E : 6100 F324           		bsr	object_ResetAnim	; Init/Reset animation
+(2)  225/FFFFFFFFFFFF2D82 : 3D7C 0202 0010      		move.w	#$0202,obj_size_x(a6)
+(2)  226/FFFFFFFFFFFF2D88 : 3D7C 0303 0012      		move.w	#$0303,obj_size_y(a6)
+(2)  227/FFFFFFFFFFFF2D8E : 3D7C 0101 0014      		move.w	#$0101,obj_size_z(a6)
+(2)  228/FFFFFFFFFFFF2D94 : 3D7C 0000 0004      		move.w	#0,obj_x(a6)		; Set Object's X/Y position
+(2)  229/FFFFFFFFFFFF2D9A : 3D7C 0000 0008      		move.w	#0,obj_y(a6)
+(2)  230/FFFFFFFFFFFF2DA0 : 4BEE 0028           		lea	obj_ram(a6),a5
+(2)  231/FFFFFFFFFFFF2DA4 :                     
+(2)  232/FFFFFFFFFFFF2DA4 :                     ; ----------------------------------------------
+(2)  233/FFFFFFFFFFFF2DA4 :                     ; Main read
+(2)  234/FFFFFFFFFFFF2DA4 :                     ; ----------------------------------------------
+(2)  235/FFFFFFFFFFFF2DA4 :                     
+(2)  236/FFFFFFFFFFFF2DA4 :                     .main:
+(2)  237/FFFFFFFFFFFF2DA4 : 4BEE 0028           		lea	obj_ram(a6),a5
+(2)  238/FFFFFFFFFFFF2DA8 : 49F8 DD18           		lea	(Controller_1).w,a4
+(2)  239/FFFFFFFFFFFF2DAC :                     
+(2)  240/FFFFFFFFFFFF2DAC :                     	; INPUTS
+(2)  241/FFFFFFFFFFFF2DAC : 302E 0016           		move.w	obj_x_spd(a6),d0
+(2)  242/FFFFFFFFFFFF2DB0 : 806E 0018           		or.w	obj_y_spd(a6),d0
+(2)  243/FFFFFFFFFFFF2DB4 : 6600 009A           		bne	.cant_move
+(2)  244/FFFFFFFFFFFF2DB8 : 3E2C 0004           		move.w	on_press(a4),d7
+(2)  245/FFFFFFFFFFFF2DBC : 0807 0003           		btst	#bitJoyRight,d7
+(2)  246/FFFFFFFFFFFF2DC0 : 6722                		beq.s	.go_right
+(2)  247/FFFFFFFFFFFF2DC2 : 3D7C 0208 0016      		move.w	#$200+8,obj_x_spd(a6)
+(2)  248/FFFFFFFFFFFF2DC8 : 3D7C FF00 0018      		move.w	#-$100,obj_y_spd(a6)
+(2)  249/FFFFFFFFFFFF2DCE : 302E 0004           		move.w	obj_x(a6),d0
+(2)  250/FFFFFFFFFFFF2DD2 : D07C 0020           		add.w	#$20,d0
+(2)  251/FFFFFFFFFFFF2DD6 : 3A80                		move.w	d0,(a5)
+(2)  252/FFFFFFFFFFFF2DD8 : 3B6E 0008 0002      		move.w	obj_y(a6),2(a5)
+(2)  253/FFFFFFFFFFFF2DDE : 3B7C 0001 0004      		move.w	#1,4(a5)
+(2)  254/FFFFFFFFFFFF2DE4 :                     .go_right:
+(2)  255/FFFFFFFFFFFF2DE4 : 0807 0002           		btst	#bitJoyLeft,d7
+(2)  256/FFFFFFFFFFFF2DE8 : 6722                		beq.s	.go_left
+(2)  257/FFFFFFFFFFFF2DEA : 3D7C FE08 0016      		move.w	#-$200+8,obj_x_spd(a6)
+(2)  258/FFFFFFFFFFFF2DF0 : 3D7C FF00 0018      		move.w	#-$100,obj_y_spd(a6)
+(2)  259/FFFFFFFFFFFF2DF6 : 302E 0004           		move.w	obj_x(a6),d0
+(2)  260/FFFFFFFFFFFF2DFA : 907C 0020           		sub.w	#$20,d0
+(2)  261/FFFFFFFFFFFF2DFE : 3A80                		move.w	d0,(a5)
+(2)  262/FFFFFFFFFFFF2E00 : 3B6E 0008 0002      		move.w	obj_y(a6),2(a5)
+(2)  263/FFFFFFFFFFFF2E06 : 3B7C 0001 0004      		move.w	#1,4(a5)
+(2)  264/FFFFFFFFFFFF2E0C :                     .go_left:
+(2)  265/FFFFFFFFFFFF2E0C : 0807 0001           		btst	#bitJoyDown,d7
+(2)  266/FFFFFFFFFFFF2E10 : 671C                		beq.s	.go_down
+(2)  267/FFFFFFFFFFFF2E12 : 3D7C FF80 0018      		move.w	#-$80,obj_y_spd(a6)
+(2)  268/FFFFFFFFFFFF2E18 : 302E 0008           		move.w	obj_y(a6),d0
+(2)  269/FFFFFFFFFFFF2E1C : D07C 0018           		add.w	#$18,d0
+(2)  270/FFFFFFFFFFFF2E20 : 3B40 0002           		move.w	d0,2(a5)
+(2)  271/FFFFFFFFFFFF2E24 : 3AAE 0004           		move.w	obj_x(a6),(a5)
+(2)  272/FFFFFFFFFFFF2E28 : 3B7C 0002 0004      		move.w	#2,4(a5)
+(2)  273/FFFFFFFFFFFF2E2E :                     .go_down:
+(2)  274/FFFFFFFFFFFF2E2E : 0807 0000           		btst	#bitJoyUp,d7
+(2)  275/FFFFFFFFFFFF2E32 : 671C                		beq.s	.cant_move
+(2)  276/FFFFFFFFFFFF2E34 : 3D7C FDC0 0018      		move.w	#-$1C0-$80,obj_y_spd(a6)
+(2)  277/FFFFFFFFFFFF2E3A : 302E 0008           		move.w	obj_y(a6),d0
+(2)  278/FFFFFFFFFFFF2E3E : 907C 0018           		sub.w	#$18,d0
+(2)  279/FFFFFFFFFFFF2E42 : 3B40 0002           		move.w	d0,2(a5)
+(2)  280/FFFFFFFFFFFF2E46 : 3AAE 0004           		move.w	obj_x(a6),(a5)
+(2)  281/FFFFFFFFFFFF2E4A : 3B7C 0003 0004      		move.w	#3,4(a5)
+(2)  282/FFFFFFFFFFFF2E50 :                     .cant_move:
+(2)  283/FFFFFFFFFFFF2E50 : 302D 0004           		move.w	4(a5),d0
+(2)  284/FFFFFFFFFFFF2E54 : 6700 00C8           		beq	.show_me
+(2)  285/FFFFFFFFFFFF2E58 : B07C 0001           		cmp.w	#1,d0
+(2)  286/FFFFFFFFFFFF2E5C : 6710                		beq.s	.move_lr
+(2)  287/FFFFFFFFFFFF2E5E : B07C 0002           		cmp.w	#2,d0
+(2)  288/FFFFFFFFFFFF2E62 : 6734                		beq.s	.move_down
+(2)  289/FFFFFFFFFFFF2E64 : B07C 0003           		cmp.w	#3,d0
+(2)  290/FFFFFFFFFFFF2E68 : 6746                		beq.s	.move_up
+(2)  291/FFFFFFFFFFFF2E6A : 6000 00B2           		bra	.show_me
+(2)  292/FFFFFFFFFFFF2E6E :                     
+(2)  293/FFFFFFFFFFFF2E6E :                     ; --------------------------------------
+(2)  294/FFFFFFFFFFFF2E6E :                     
+(2)  295/FFFFFFFFFFFF2E6E :                     .move_lr:
+(2)  296/FFFFFFFFFFFF2E6E : 4A6E 0016           		tst.w	obj_x_spd(a6)
+(2)  297/FFFFFFFFFFFF2E72 : 6B0A                		bmi.s	.x_left
+(2)  298/FFFFFFFFFFFF2E74 : 046E 0010 0016      		subi.w	#$10,obj_x_spd(a6)
+(2)  299/FFFFFFFFFFFF2E7A : 6A0E                		bpl.s	.x_jnone
+(2)  300/FFFFFFFFFFFF2E7C : 6008                		bra.s	.x_jset
+(2)  301/FFFFFFFFFFFF2E7E :                     .x_left:
+(2)  302/FFFFFFFFFFFF2E7E : 066E 0010 0016      		addi.w	#$10,obj_x_spd(a6)
+(2)  303/FFFFFFFFFFFF2E84 : 6B04                		bmi.s	.x_jnone
+(2)  304/FFFFFFFFFFFF2E86 :                     .x_jset:
+(2)  305/FFFFFFFFFFFF2E86 : 6146                		bsr	.set_fpos
+(2)  306/FFFFFFFFFFFF2E88 : 600A                		bra.s	.ret_main
+(2)  307/FFFFFFFFFFFF2E8A :                     .x_jnone:
+(2)  308/FFFFFFFFFFFF2E8A : 066E 0010 0018      		addi.w	#$10,obj_y_spd(a6)
+(2)  309/FFFFFFFFFFFF2E90 : 6100 F21A           		bsr	object_Speed
+(2)  310/FFFFFFFFFFFF2E94 :                     .ret_main:
+(2)  311/FFFFFFFFFFFF2E94 : 6000 0088           		bra	.show_me
+(2)  312/FFFFFFFFFFFF2E98 :                     
+(2)  313/FFFFFFFFFFFF2E98 :                     ; --------------------------------------
+(2)  314/FFFFFFFFFFFF2E98 :                     
+(2)  315/FFFFFFFFFFFF2E98 :                     .move_down:
+(2)  316/FFFFFFFFFFFF2E98 : 066E 0010 0018      		addi.w	#$10,obj_y_spd(a6)
+(2)  317/FFFFFFFFFFFF2E9E : 6100 F20C           		bsr	object_Speed
+(2)  318/FFFFFFFFFFFF2EA2 : 302E 0008           		move.w	obj_y(a6),d0
+(2)  319/FFFFFFFFFFFF2EA6 : B06D 0002           		cmp.w	2(a5),d0
+(2)  320/FFFFFFFFFFFF2EAA : 6D02                		blt.s	.not_y_targ
+(2)  321/FFFFFFFFFFFF2EAC : 6120                		bsr	.set_fpos
+(2)  322/FFFFFFFFFFFF2EAE :                     .not_y_targ:
+(2)  323/FFFFFFFFFFFF2EAE : 606E                		bra	.show_me
+(2)  324/FFFFFFFFFFFF2EB0 :                     
+(2)  325/FFFFFFFFFFFF2EB0 :                     ; --------------------------------------
+(2)  326/FFFFFFFFFFFF2EB0 :                     
+(2)  327/FFFFFFFFFFFF2EB0 :                     .move_up:
+(2)  328/FFFFFFFFFFFF2EB0 : 066E 0018 0018      		addi.w	#$10+8,obj_y_spd(a6)
+(2)  329/FFFFFFFFFFFF2EB6 : 6100 F1F4           		bsr	object_Speed
+(2)  330/FFFFFFFFFFFF2EBA : 4A6E 0018           		tst.w	obj_y_spd(a6)
+(2)  331/FFFFFFFFFFFF2EBE : 6B5E                		bmi.s	.show_me
+(2)  332/FFFFFFFFFFFF2EC0 : 302E 0008           		move.w	obj_y(a6),d0
+(2)  333/FFFFFFFFFFFF2EC4 : B06D 0002           		cmp.w	2(a5),d0
+(2)  334/FFFFFFFFFFFF2EC8 : 6DE4                		blt.s	.not_y_targ
+(2)  335/FFFFFFFFFFFF2ECA : 6102                		bsr	.set_fpos
+(2)  336/FFFFFFFFFFFF2ECC : 6050                		bra	.show_me
+(2)  337/FFFFFFFFFFFF2ECE :                     
+(2)  338/FFFFFFFFFFFF2ECE :                     ; --------------------------------------
+(2)  339/FFFFFFFFFFFF2ECE :                     
+(2)  340/FFFFFFFFFFFF2ECE :                     .set_fpos:
+(2)  341/FFFFFFFFFFFF2ECE : 3D55 0004           		move.w	(a5),obj_x(a6)
+(2)  342/FFFFFFFFFFFF2ED2 : 3D6D 0002 0008      		move.w	2(a5),obj_y(a6)
+(2)  343/FFFFFFFFFFFF2ED8 : 426E 0016           		clr.w	obj_x_spd(a6)
+(2)  344/FFFFFFFFFFFF2EDC : 426E 0018           		clr.w	obj_y_spd(a6)
+(2)  345/FFFFFFFFFFFF2EE0 : 426D 0004           		clr.w	4(a5)
+(2)  346/FFFFFFFFFFFF2EE4 : 7000                		moveq	#0,d0
+(2)  347/FFFFFFFFFFFF2EE6 : 302E 0004           		move.w	obj_x(a6),d0
+(2)  348/FFFFFFFFFFFF2EEA : 6730                		beq.s	.no_timer
+(2)  349/FFFFFFFFFFFF2EEC : EA40                		asr.w	#5,d0
+(2)  350/FFFFFFFFFFFF2EEE : 5340                		subq.w	#1,d0
+(2)  351/FFFFFFFFFFFF2EF0 : B07C 0005           		cmp.w	#5,d0
+(2)  352/FFFFFFFFFFFF2EF4 : 6C26                		bge.s	.no_timer
+(2)  353/FFFFFFFFFFFF2EF6 : 7200                		moveq	#0,d1
+(2)  354/FFFFFFFFFFFF2EF8 : 322E 0008           		move.w	obj_y(a6),d1
+(2)  355/FFFFFFFFFFFF2EFC : 6710                		beq.s	.no_tmry
+(2)  356/FFFFFFFFFFFF2EFE : 82FC 0018           		divu.w	#$18,d1
+(2)  357/FFFFFFFFFFFF2F02 : 5341                		subq.w	#1,d1
+(2)  358/FFFFFFFFFFFF2F04 : B27C 0005           		cmp.w	#5,d1
+(2)  359/FFFFFFFFFFFF2F08 : 6C12                		bge.s	.no_timer
+(2)  360/FFFFFFFFFFFF2F0A : E749                		lsl.w	#3,d1
+(2)  361/FFFFFFFFFFFF2F0C : D041                		add.w	d1,d0
+(2)  362/FFFFFFFFFFFF2F0E :                     .no_tmry:
+(2)  363/FFFFFFFFFFFF2F0E : 41F8 B804           		lea	(RAM_BlocksBuff),a0
+(2)  364/FFFFFFFFFFFF2F12 : D0C0                		adda	d0,a0
+(2)  365/FFFFFFFFFFFF2F14 : 10BC 0002           		move.b	#$02,(a0)
+(2)  366/FFFFFFFFFFFF2F18 : 50F8 B802           		st.b	(RAM_DoRedraw).w
+(2)  367/FFFFFFFFFFFF2F1C :                     .no_timer:
+(2)  368/FFFFFFFFFFFF2F1C : 4E75                		rts
+(2)  369/FFFFFFFFFFFF2F1E :                     
+(2)  370/FFFFFFFFFFFF2F1E :                     ; ----------------------------------------------
+(2)  371/FFFFFFFFFFFF2F1E :                     
+(2)  372/FFFFFFFFFFFF2F1E :                     .show_me:
+(2)  373/FFFFFFFFFFFF2F1E : 207C 0000 0000      		move.l	#0,a0
+(2)  374/FFFFFFFFFFFF2F24 : 43F9 0022 4334      		lea	(Map_Haruna),a1
+(2)  375/FFFFFFFFFFFF2F2A : 45F9 0022 44E4      		lea	(Plc_Haruna),a2
+(2)  376/FFFFFFFFFFFF2F30 : 47F9 0022 06C0      		lea	(Art_Haruna),a3
+(2)  377/FFFFFFFFFFFF2F36 : 7400                		moveq	#0,d2
+(2)  378/FFFFFFFFFFFF2F38 : 302E 0004           		move.w	obj_x(a6),d0
+(2)  379/FFFFFFFFFFFF2F3C : 322E 0008           		move.w	obj_y(a6),d1
+(2)  380/FFFFFFFFFFFF2F40 : 0640 0040           		addi.w	#16+$30,d0
+(2)  381/FFFFFFFFFFFF2F44 : 0641 001C           		addi.w	#$20-4,d1
+(2)  382/FFFFFFFFFFFF2F48 : 142E 001F           		move.b	obj_attr(a6),d2			; <-- Quick attribute bits
+(2)  383/FFFFFFFFFFFF2F4C : E14A                		lsl.w	#8,d2
+(2)  384/FFFFFFFFFFFF2F4E : E74A                		lsl.w	#3,d2				; %000vh000 00000000
+(2)  385/FFFFFFFFFFFF2F50 : D47C 6002           		add.w	#vramLoc_Haruna|$6000,d2 	; +VRAM+$2000(use second palette line)
+(2)  386/FFFFFFFFFFFF2F54 : 362E 0020           		move.w	obj_frame(a6),d3		; Current frame set by _Animate
+(2)  387/FFFFFFFFFFFF2F58 : 6000 E3B0           		bra	Video_MakeSprMap_DMA
+(2)  388/FFFFFFFFFFFF2F5C :                     
+(2)  389/FFFFFFFFFFFF2F5C :                     ; ----------------------------------------------
+(2)  390/FFFFFFFFFFFF2F5C :                     
+(2)  391/FFFFFFFFFFFF2F5C :                     .anim_data:
+(2)  392/FFFFFFFFFFFF2F5C : 0008                		dc.w .anim_down-.anim_data
+(2)  393/FFFFFFFFFFFF2F5E : 0016                		dc.w .anim_up-.anim_data
+(2)  394/FFFFFFFFFFFF2F60 : 0024                		dc.w .anim_right-.anim_data
+(2)  395/FFFFFFFFFFFF2F62 : 0032                		dc.w .anim_left-.anim_data
+(2)  396/FFFFFFFFFFFF2F64 :                     
+(2)  397/FFFFFFFFFFFF2F64 :                     .anim_down:
+(2)  398/FFFFFFFFFFFF2F64 : 0008                		dc.w 8
+(2)  399/FFFFFFFFFFFF2F66 : 0000 0001 0000      		dc.w 0,1,0,2
+         FFFFFFFFFFFF2F6C : 0002             
+(2)  400/FFFFFFFFFFFF2F6E : FFFE                		dc.w -2
+(2)  401/FFFFFFFFFFFF2F70 :                     		align 2
+(2)  402/FFFFFFFFFFFF2F72 :                     .anim_up:
+(2)  403/FFFFFFFFFFFF2F72 : 0008                		dc.w 8
+(2)  404/FFFFFFFFFFFF2F74 : 0003 0004 0003      		dc.w 3,4,3,5
+         FFFFFFFFFFFF2F7A : 0005             
+(2)  405/FFFFFFFFFFFF2F7C : FFFE                		dc.w -2
+(2)  406/FFFFFFFFFFFF2F7E :                     		align 2
+(2)  407/FFFFFFFFFFFF2F80 :                     .anim_right:
+(2)  408/FFFFFFFFFFFF2F80 : 0008                		dc.w 8
+(2)  409/FFFFFFFFFFFF2F82 : 0006 0007 0006      		dc.w 6,7,6,8
+         FFFFFFFFFFFF2F88 : 0008             
+(2)  410/FFFFFFFFFFFF2F8A : FFFE                		dc.w -2
+(2)  411/FFFFFFFFFFFF2F8C :                     		align 2
+(2)  412/FFFFFFFFFFFF2F8E :                     .anim_left:
+(2)  413/FFFFFFFFFFFF2F8E : 0008                		dc.w 8
+(2)  414/FFFFFFFFFFFF2F90 : 0009 000A 0009      		dc.w 9,10,9,11
+         FFFFFFFFFFFF2F96 : 000B             
+(2)  415/FFFFFFFFFFFF2F98 : FFFE                		dc.w -2
+(2)  416/FFFFFFFFFFFF2F9A :                     		align 2
+(2)  417/FFFFFFFFFFFF2F9C :                     
+(2)  418/FFFFFFFFFFFF2F9C :                     ; --------------------------------------------------
+(2)  419/FFFFFFFFFFFF2F9C :                     ; Test object
+(2)  420/FFFFFFFFFFFF2F9C :                     ; --------------------------------------------------
+(2)  421/FFFFFFFFFFFF2F9C :                     
+(2)  422/FFFFFFFFFFFF2F9C :                     obj_Ball:
+(2)  423/FFFFFFFFFFFF2F9C : 7000                		moveq	#0,d0
+(2)  424/FFFFFFFFFFFF2F9E : 102E 001C           		move.b	obj_index(a6),d0
+(2)  425/FFFFFFFFFFFF2FA2 : D040                		add.w	d0,d0
+(2)  426/FFFFFFFFFFFF2FA4 : 323B 0006           		move.w	.list(pc,d0.w),d1
+(2)  427/FFFFFFFFFFFF2FA8 : 4EFB 1002           		jmp	.list(pc,d1.w)
+(2)  428/FFFFFFFFFFFF2FAC :                     ; ----------------------------------------------
+(2)  429/FFFFFFFFFFFF2FAC : 0004                .list:		dc.w .init-.list
+(2)  430/FFFFFFFFFFFF2FAE : 0072                		dc.w .main-.list
+(2)  431/FFFFFFFFFFFF2FB0 :                     ; ----------------------------------------------
+(2)  432/FFFFFFFFFFFF2FB0 :                     .init:
+(2)  433/FFFFFFFFFFFF2FB0 : 522E 001C           		addq.b	#1,obj_index(a6)
+(2)  434/FFFFFFFFFFFF2FB4 : 6100 F0EE           		bsr	object_ResetAnim	; Init/Reset animation
+(2)  435/FFFFFFFFFFFF2FB8 : 3D7C 0202 0010      		move.w	#$0202,obj_size_x(a6)
+(2)  436/FFFFFFFFFFFF2FBE : 3D7C 0303 0012      		move.w	#$0303,obj_size_y(a6)
+(2)  437/FFFFFFFFFFFF2FC4 : 3D7C 0101 0014      		move.w	#$0101,obj_size_z(a6)
+(2)  438/FFFFFFFFFFFF2FCA : 3D7C 0000 0022      		move.w	#0,obj_anim_num(a6)
+(2)  439/FFFFFFFFFFFF2FD0 :                     
+(2)  440/FFFFFFFFFFFF2FD0 : 3D7C 0020 0004      		move.w	#$20,obj_x(a6)		; Set Object's X/Y position
+(2)  441/FFFFFFFFFFFF2FD6 : 3D7C 0010 0008      		move.w	#$10,obj_y(a6)
+(2)  442/FFFFFFFFFFFF2FDC : 303C 0049           		move.w	#$48+1,d0
+(2)  443/FFFFFFFFFFFF2FE0 : 6100 EC14           		bsr	System_DiceRoll
+(2)  444/FFFFFFFFFFFF2FE4 : E348                		lsl.w	#1,d0
+(2)  445/FFFFFFFFFFFF2FE6 : D16E 0004           		add.w	d0,obj_x(a6)
+(2)  446/FFFFFFFFFFFF2FEA : D16E 0008           		add.w	d0,obj_y(a6)
+(2)  447/FFFFFFFFFFFF2FEE : E948                		lsl.w	#4,d0
+(2)  448/FFFFFFFFFFFF2FF0 : 3D40 0016           		move.w	d0,obj_x_spd(a6)
+(2)  449/FFFFFFFFFFFF2FF4 : 3D40 0018           		move.w	d0,obj_y_spd(a6)
+(2)  450/FFFFFFFFFFFF2FF8 :                     
+(2)  451/FFFFFFFFFFFF2FF8 : 08EE 0000 001F      		bset	#0,obj_attr(a6)
+(2)  452/FFFFFFFFFFFF2FFE : 6100 EB9C           		bsr	System_Random
+(2)  453/FFFFFFFFFFFF3002 : 2E38 ED9C           		move.l	(RAM_SysRandom).w,d7
+(2)  454/FFFFFFFFFFFF3006 : E24F                		lsr.w	#1,d7
+(2)  455/FFFFFFFFFFFF3008 : 640A                		bcc.s	.x_random
+(2)  456/FFFFFFFFFFFF300A : 446E 0016           		neg.w	obj_x_spd(a6)
+(2)  457/FFFFFFFFFFFF300E : 086E 0000 001F      		bchg	#0,obj_attr(a6)
+(2)  458/FFFFFFFFFFFF3014 :                     .x_random:
+(2)  459/FFFFFFFFFFFF3014 : E24F                		lsr.w	#1,d7
+(2)  460/FFFFFFFFFFFF3016 : 6404                		bcc.s	.y_random
+(2)  461/FFFFFFFFFFFF3018 : 446E 0018           		neg.w	obj_y_spd(a6)
+(2)  462/FFFFFFFFFFFF301C :                     .y_random:
+(2)  463/FFFFFFFFFFFF301C : 4E75                		rts
+(2)  464/FFFFFFFFFFFF301E :                     
+(2)  465/FFFFFFFFFFFF301E :                     ; ----------------------------------------------
+(2)  466/FFFFFFFFFFFF301E :                     .main:
+(2)  467/FFFFFFFFFFFF301E : 3438 DC16           		move.w	(RAM_VdpRegSetC).w,d2
+(2)  468/FFFFFFFFFFFF3022 : 0802 0002           		btst	#2,d2
+(2)  469/FFFFFFFFFFFF3026 : 660E                		bne.s	.y_fix
+(2)  470/FFFFFFFFFFFF3028 : 0C6E 00F0 0008      		cmpi.w	#240,obj_y(a6)
+(2)  471/FFFFFFFFFFFF302E : 6D06                		blt.s	.y_fix
+(2)  472/FFFFFFFFFFFF3030 : 046E 00F0 0008      		sub.w	#240,obj_y(a6)
+(2)  473/FFFFFFFFFFFF3036 :                     .y_fix:
+(2)  474/FFFFFFFFFFFF3036 :                     
+(2)  475/FFFFFFFFFFFF3036 : 323C 00E0           		move.w	#224,d1
+(2)  476/FFFFFFFFFFFF303A : 3438 DC16           		move.w	(RAM_VdpRegSetC).w,d2
+(2)  477/FFFFFFFFFFFF303E : 0802 0002           		btst	#2,d2
+(2)  478/FFFFFFFFFFFF3042 : 6702                		beq.s	.y_double
+(2)  479/FFFFFFFFFFFF3044 : D241                		add.w	d1,d1
+(2)  480/FFFFFFFFFFFF3046 :                     .y_double:
+(2)  481/FFFFFFFFFFFF3046 : 303C 0140           		move.w	#320,d0
+(2)  482/FFFFFFFFFFFF304A : 342E 0004           		move.w	obj_x(a6),d2
+(2)  483/FFFFFFFFFFFF304E : 4A42                		tst.w	d2
+(2)  484/FFFFFFFFFFFF3050 : 6A0C                		bpl.s	.x_back
+(2)  485/FFFFFFFFFFFF3052 : 446E 0016           		neg.w	obj_x_spd(a6)
+(2)  486/FFFFFFFFFFFF3056 : 6166                		bsr.s	.play_bump
+(2)  487/FFFFFFFFFFFF3058 : 086E 0000 001F      		bchg	#0,obj_attr(a6)
+(2)  488/FFFFFFFFFFFF305E :                     .x_back:
+(2)  489/FFFFFFFFFFFF305E : B440                		cmp.w	d0,d2
+(2)  490/FFFFFFFFFFFF3060 : 6D0C                		blt.s	.x_foward
+(2)  491/FFFFFFFFFFFF3062 : 446E 0016           		neg.w	obj_x_spd(a6)
+(2)  492/FFFFFFFFFFFF3066 : 086E 0000 001F      		bchg	#0,obj_attr(a6)
+(2)  493/FFFFFFFFFFFF306C : 6150                		bsr.s	.play_bump
+(2)  494/FFFFFFFFFFFF306E :                     .x_foward:
+(2)  495/FFFFFFFFFFFF306E : 3D42 0004           		move.w	d2,obj_x(a6)
+(2)  496/FFFFFFFFFFFF3072 :                     
+(2)  497/FFFFFFFFFFFF3072 : 342E 0008           		move.w	obj_y(a6),d2
+(2)  498/FFFFFFFFFFFF3076 : 4A42                		tst.w	d2
+(2)  499/FFFFFFFFFFFF3078 : 6A06                		bpl.s	.y_back
+(2)  500/FFFFFFFFFFFF307A : 6142                		bsr.s	.play_bump
+(2)  501/FFFFFFFFFFFF307C : 446E 0018           		neg.w	obj_y_spd(a6)
+(2)  502/FFFFFFFFFFFF3080 :                     .y_back:
+(2)  503/FFFFFFFFFFFF3080 : B441                		cmp.w	d1,d2
+(2)  504/FFFFFFFFFFFF3082 : 6D06                		blt.s	.y_foward
+(2)  505/FFFFFFFFFFFF3084 : 6138                		bsr.s	.play_bump
+(2)  506/FFFFFFFFFFFF3086 : 446E 0018           		neg.w	obj_y_spd(a6)
+(2)  507/FFFFFFFFFFFF308A :                     .y_foward:
+(2)  508/FFFFFFFFFFFF308A : 3D42 0008           		move.w	d2,obj_y(a6)
+(2)  509/FFFFFFFFFFFF308E : 6100 F01C           		bsr	object_Speed
+(2)  510/FFFFFFFFFFFF3092 :                     
+(2)  511/FFFFFFFFFFFF3092 :                     ; ----------------------------------------------
+(2)  512/FFFFFFFFFFFF3092 :                     ; Show the object...
+(2)  513/FFFFFFFFFFFF3092 :                     
+(2)  514/FFFFFFFFFFFF3092 : 41FA 003E           		lea	.anim_data(pc),a0	; Do animation
+(2)  515/FFFFFFFFFFFF3096 : 6100 F044           		bsr	object_Animate
+(2)  516/FFFFFFFFFFFF309A : 43F9 0022 4594      		lea	(Map_Sisi),a1
+(2)  517/FFFFFFFFFFFF30A0 : 7400                		moveq	#0,d2
+(2)  518/FFFFFFFFFFFF30A2 : 302E 0004           		move.w	obj_x(a6),d0
+(2)  519/FFFFFFFFFFFF30A6 : 322E 0008           		move.w	obj_y(a6),d1
+(2)  520/FFFFFFFFFFFF30AA : 142E 001F           		move.b	obj_attr(a6),d2			; <-- Quick attribute bits
+(2)  521/FFFFFFFFFFFF30AE : E14A                		lsl.w	#8,d2
+(2)  522/FFFFFFFFFFFF30B0 : E74A                		lsl.w	#3,d2				; %000vh000 00000000
+(2)  523/FFFFFFFFFFFF30B2 : D47C 4062           		add.w	#vramLoc_Sisi|$4000,d2 		; +VRAM+$2000(use second palette line)
+(2)  524/FFFFFFFFFFFF30B6 : 362E 0020           		move.w	obj_frame(a6),d3		; Current frame set by _Animate
+(2)  525/FFFFFFFFFFFF30BA : 6000 E266           		bra	Video_MakeSprMap
+(2)  526/FFFFFFFFFFFF30BE :                     
+(2)  527/FFFFFFFFFFFF30BE :                     .play_bump:
+(2)  528/FFFFFFFFFFFF30BE : 48E7 E000           		movem.l	d0-d2,-(sp)
+(2)  529/FFFFFFFFFFFF30C2 : 700F                		moveq	#$0F,d0
+(2)  530/FFFFFFFFFFFF30C4 : 7200                		moveq	#$00,d1
+(2)  531/FFFFFFFFFFFF30C6 : 7401                		moveq	#1,d2
+(2)  532/FFFFFFFFFFFF30C8 : 6100 D106           		bsr	gemaPlaySeq
+(2)  533/FFFFFFFFFFFF30CC : 4CDF 0007           		movem.l	(sp)+,d0-d2
+(2)  534/FFFFFFFFFFFF30D0 : 4E75                		rts
+(2)  535/FFFFFFFFFFFF30D2 :                     
+(2)  536/FFFFFFFFFFFF30D2 :                     ; ----------------------------------------------
+(2)  537/FFFFFFFFFFFF30D2 :                     
+(2)  538/FFFFFFFFFFFF30D2 :                     .anim_data:
+(2)  539/FFFFFFFFFFFF30D2 : 0002                		dc.w .maind-.anim_data
+(2)  540/FFFFFFFFFFFF30D4 :                     .maind:
+(2)  541/FFFFFFFFFFFF30D4 : 0007                		dc.w 7
+(2)  542/FFFFFFFFFFFF30D6 : 0000 0001 0002      		dc.w 0,1,2,1
+         FFFFFFFFFFFF30DC : 0001             
+(2)  543/FFFFFFFFFFFF30DE : FFFE                		dc.w -2
+(2)  544/FFFFFFFFFFFF30E0 :                     		align 2
+(2)  545/FFFFFFFFFFFF30E2 :                     
+(2)  546/FFFFFFFFFFFF30E2 :                     ; ====================================================================
+(2)  547/FFFFFFFFFFFF30E2 :                     ; ------------------------------------------------------
+(2)  548/FFFFFFFFFFFF30E2 :                     ; Subroutines
+(2)  549/FFFFFFFFFFFF30E2 :                     ; ------------------------------------------------------
+(2)  550/FFFFFFFFFFFF30E2 :                     
+(2)  551/FFFFFFFFFFFF30E2 :                     Screen0_PickBackgrnd:
+(2)  552/FFFFFFFFFFFF30E2 : 41F9 0022 45D8      		lea	(Pal_TESTBG),a0				; a0 - Load palette (+2 skips first color)
+(2)  553/FFFFFFFFFFFF30E8 : 7010                		moveq	#16,d0					; d0 - Start at $01
+(2)  554/FFFFFFFFFFFF30EA : 720F                		moveq	#15,d1					; d1 - 15 colors
+(2)  555/FFFFFFFFFFFF30EC : 6100 DE18           		bsr	Video_FadePal				; Load palette to FADE buffer
+(2)  556/FFFFFFFFFFFF30F0 : 4278 D96E           		clr.w	(RAM_Palette).w
+(2)  557/FFFFFFFFFFFF30F4 : 4278 D9EE           		clr.w	(RAM_PaletteFade).w
+(2)  558/FFFFFFFFFFFF30F8 : 203C 0021 8800      		move.l	#Art_TESTBG,d0				; d0 - Graphics pointer (NOT a0 here)
+(2)  559/FFFFFFFFFFFF30FE : 323C 31C0           		move.w	#cell_vram(vramLoc_Backgrnd),d1		; d1 - output VRAM location
+(2)  560/FFFFFFFFFFFF3102 : 343C 7EC0           		move.w	#Art_TESTBG_e-Art_TESTBG,d2		; d2 - Size: end-start
+(2)  561/FFFFFFFFFFFF3106 : 6100 D776           		bsr	Video_LoadArt
+(2)  562/FFFFFFFFFFFF310A : 41F9 0022 45F6      		lea	(Map_TESTBG),a0				; a0 - Map data
+(2)  563/FFFFFFFFFFFF3110 : 203C 0000 0000      		move.l	#splitw(0,0),d0				; d0 - X/Y Positions 0,0
+(2)  564/FFFFFFFFFFFF3116 : 223C 0028 001C      		move.l	#splitw(320/8,224/8),d1			; d1 - Width and Height
+(2)  565/FFFFFFFFFFFF311C : 243C 0080 E000      		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_BG),d2	; d2 - Layer width / Layer output
+(2)  566/FFFFFFFFFFFF3122 : 363C 218E           		move.w	#vramLoc_Backgrnd|$2000,d3		; d3 - Starting cell
+(2)  567/FFFFFFFFFFFF3126 : 6100 DA86           		bsr	Video_LoadMap
+(2)  568/FFFFFFFFFFFF312A : 6000 D5BE           		bra	Video_DisplayOn
+(2)  569/FFFFFFFFFFFF312E :                     
+(2)  570/FFFFFFFFFFFF312E :                     Scrn0_LoadMap:
+(2)  571/FFFFFFFFFFFF312E : 41FA 00A4           		lea	layout_PushBlk(pc),a0
+(2)  572/FFFFFFFFFFFF3132 : 43F8 B804           		lea	(RAM_BlocksBuff).w,a1
+(2)  573/FFFFFFFFFFFF3136 : 303C 003F           		move.w	#(8*8)-1,d0
+(2)  574/FFFFFFFFFFFF313A :                     .copy_base:
+(2)  575/FFFFFFFFFFFF313A : 12D8                		move.b	(a0)+,(a1)+
+(2)  576/FFFFFFFFFFFF313C : 51C8 FFFC           		dbf	d0,.copy_base
+(2)  577/FFFFFFFFFFFF3140 : 4E75                		rts
+(2)  578/FFFFFFFFFFFF3142 :                     
+(2)  579/FFFFFFFFFFFF3142 :                     Scrn0_DrawMapAll:
+(2)  580/FFFFFFFFFFFF3142 : 43F8 B804           		lea	(RAM_BlocksBuff).w,a1
+(2)  581/FFFFFFFFFFFF3146 : 223C 0004 0004      		move.l	#splitw(32/8,32/8),d1			; d1 - Width and Height
+(2)  582/FFFFFFFFFFFF314C : 243C 0080 C000      		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d2	; d2 - Layer width / Layer output
+(2)  583/FFFFFFFFFFFF3152 : 363C 008E           		move.w	#vramLoc_PushBlk,d3			; d3 - Starting cell
+(2)  584/FFFFFFFFFFFF3156 : 7E07                		moveq	#8-1,d7
+(2)  585/FFFFFFFFFFFF3158 : 2C3C 000A 0008      		move.l	#$000A0008,d6
+(2)  586/FFFFFFFFFFFF315E :                     .y_read:
+(2)  587/FFFFFFFFFFFF315E : 4847                		swap	d7
+(2)  588/FFFFFFFFFFFF3160 : 2006                		move.l	d6,d0
+(2)  589/FFFFFFFFFFFF3162 : 3E3C 0007           		move.w	#8-1,d7
+(2)  590/FFFFFFFFFFFF3166 :                     .x_read:
+(2)  591/FFFFFFFFFFFF3166 : 41FA 002A           		lea	map_PushBlk(pc),a0			; a0 - Map data
+(2)  592/FFFFFFFFFFFF316A : 7A00                		moveq	#0,d5
+(2)  593/FFFFFFFFFFFF316C : 1A19                		move.b	(a1)+,d5
+(2)  594/FFFFFFFFFFFF316E : 670A                		beq.s	.not_blk
+(2)  595/FFFFFFFFFFFF3170 : 5345                		subq.w	#1,d5
+(2)  596/FFFFFFFFFFFF3172 : EB8D                		lsl.l	#5,d5
+(2)  597/FFFFFFFFFFFF3174 : D0C5                		adda	d5,a0
+(2)  598/FFFFFFFFFFFF3176 : 6100 DA36           		bsr	Video_LoadMap
+(2)  599/FFFFFFFFFFFF317A :                     .not_blk
+(2)  600/FFFFFFFFFFFF317A : D0BC 0004 0000      		add.l	#$00040000,d0
+(2)  601/FFFFFFFFFFFF3180 : 51CF FFE4           		dbf	d7,.x_read
+(2)  602/FFFFFFFFFFFF3184 : DCBC 0000 0003      		add.l	#$00000003,d6
+(2)  603/FFFFFFFFFFFF318A : 4847                		swap	d7
+(2)  604/FFFFFFFFFFFF318C : 51CF FFD0           		dbf	d7,.y_read
+(2)  605/FFFFFFFFFFFF3190 : 4E75                		rts
+(2)  606/FFFFFFFFFFFF3192 :                     
+(2)  607/FFFFFFFFFFFF3192 :                     ; ====================================================================
+(2)  608/FFFFFFFFFFFF3192 :                     ; ------------------------------------------------------
+(2)  609/FFFFFFFFFFFF3192 :                     ; Custom VBlank
+(2)  610/FFFFFFFFFFFF3192 :                     ; ------------------------------------------------------
+(2)  611/FFFFFFFFFFFF3192 :                     
+(2)  612/FFFFFFFFFFFF3192 :                     ; ------------------------------------------------------
+(2)  613/FFFFFFFFFFFF3192 :                     ; Custom HBlank
+(2)  614/FFFFFFFFFFFF3192 :                     ; ------------------------------------------------------
+(2)  615/FFFFFFFFFFFF3192 :                     
+(2)  616/FFFFFFFFFFFF3192 :                     ; ====================================================================
+(2)  617/FFFFFFFFFFFF3192 :                     ; ------------------------------------------------------
+(2)  618/FFFFFFFFFFFF3192 :                     ; Includes for this screen
+(2)  619/FFFFFFFFFFFF3192 :                     ; ------------------------------------------------------
+(2)  620/FFFFFFFFFFFF3192 :                     
+(2)  621/FFFFFFFFFFFF3192 :                     ; ====================================================================
+(2)  622/FFFFFFFFFFFF3192 :                     ; ------------------------------------------------------
+(2)  623/FFFFFFFFFFFF3192 :                     ; Small data section
+(2)  624/FFFFFFFFFFFF3192 :                     ; ------------------------------------------------------
+(2)  625/FFFFFFFFFFFF3192 :                     
+(2)  626/FFFFFFFFFFFF3192 :                     ; str_NikonaTest:
+(2)  627/FFFFFFFFFFFF3192 :                     ; 		dc.b "GEMA testing"
+(2)  628/FFFFFFFFFFFF3192 :                     ; 		dc.b 0
+(2)  629/FFFFFFFFFFFF3192 :                     ; 		align 2
+(2)  630/FFFFFFFFFFFF3192 :                     ; str_NewCountr0:
+(2)  631/FFFFFFFFFFFF3192 :                     ; 		dc.l pstr_mem(1,RAM_Objects+obj_x)
+(2)  632/FFFFFFFFFFFF3192 :                     ; 		dc.b " "
+(2)  633/FFFFFFFFFFFF3192 :                     ; 		dc.l pstr_mem(1,RAM_Objects+obj_y)
+(2)  634/FFFFFFFFFFFF3192 :                     ; 		dc.b 0
+(2)  635/FFFFFFFFFFFF3192 :                     ; 		align 2
+(2)  636/FFFFFFFFFFFF3192 :                     map_PushBlk:
+(2)  637/FFFFFFFFFFFF3192 : 0000 0001 0002      		dc.w $0000,$0001,$0002,$0003
+         FFFFFFFFFFFF3198 : 0003             
+(2)  638/FFFFFFFFFFFF319A : 0004 0005 0006      		dc.w $0004,$0005,$0006,$0007
+         FFFFFFFFFFFF31A0 : 0007             
+(2)  639/FFFFFFFFFFFF31A2 : 0008 0009 000A      		dc.w $0008,$0009,$000A,$000B
+         FFFFFFFFFFFF31A8 : 000B             
+(2)  640/FFFFFFFFFFFF31AA : 000C 000D 000E      		dc.w $000C,$000D,$000E,$000F
+         FFFFFFFFFFFF31B0 : 000F             
+(2)  641/FFFFFFFFFFFF31B2 : 0010 0011 0012      		dc.w $0010,$0011,$0012,$0013
+         FFFFFFFFFFFF31B8 : 0013             
+(2)  642/FFFFFFFFFFFF31BA : 0014 0015 0016      		dc.w $0014,$0015,$0016,$0017
+         FFFFFFFFFFFF31C0 : 0017             
+(2)  643/FFFFFFFFFFFF31C2 : 0018 0019 001A      		dc.w $0018,$0019,$001A,$001B
+         FFFFFFFFFFFF31C8 : 001B             
+(2)  644/FFFFFFFFFFFF31CA : 001C 001D 001E      		dc.w $001C,$001D,$001E,$001F
+         FFFFFFFFFFFF31D0 : 001F             
+(2)  645/FFFFFFFFFFFF31D2 :                     		align 2
+(2)  646/FFFFFFFFFFFF31D4 :                     layout_PushBlk:
+(2)  647/FFFFFFFFFFFF31D4 : 0101 0101 0100      		dc.b $01,$01,$01,$01,$01,$00,$00,$00
+         FFFFFFFFFFFF31DA : 0000             
+(2)  648/FFFFFFFFFFFF31DC : 0101 0101 0100      		dc.b $01,$01,$01,$01,$01,$00,$00,$00
+         FFFFFFFFFFFF31E2 : 0000             
+(2)  649/FFFFFFFFFFFF31E4 : 0101 0101 0100      		dc.b $01,$01,$01,$01,$01,$00,$00,$00
+         FFFFFFFFFFFF31EA : 0000             
+(2)  650/FFFFFFFFFFFF31EC : 0101 0101 0100      		dc.b $01,$01,$01,$01,$01,$00,$00,$00
+         FFFFFFFFFFFF31F2 : 0000             
+(2)  651/FFFFFFFFFFFF31F4 : 0101 0101 0100      		dc.b $01,$01,$01,$01,$01,$00,$00,$00
+         FFFFFFFFFFFF31FA : 0000             
+(2)  652/FFFFFFFFFFFF31FC : 0000 0000 0000      		dc.b $00,$00,$00,$00,$00,$00,$00,$00
+         FFFFFFFFFFFF3202 : 0000             
+(2)  653/FFFFFFFFFFFF3204 : 0000 0000 0000      		dc.b $00,$00,$00,$00,$00,$00,$00,$00
+         FFFFFFFFFFFF320A : 0000             
+(2)  654/FFFFFFFFFFFF320C : 0000 0000 0000      		dc.b $00,$00,$00,$00,$00,$00,$00,$00
+         FFFFFFFFFFFF3212 : 0000             
+(2)  655/FFFFFFFFFFFF3214 :                     		align 2
+(2)  656/FFFFFFFFFFFF3216 :                     
+(2)  657/FFFFFFFFFFFF3216 :                     ; ====================================================================
+(2)  658/FFFFFFFFFFFF3216 :                     
+(1)   16/FFFFFFFFFFFF3216 :                     mcscrn_e:
+(1)   16/   62616 :                                     dephase
+(1)   16/   62616 :                                     phase mctopscrn+(mcscrn_e-RAM_UserCode)
+(1)   16/   62616 :                                     align $800
 (1)   16/   62800 :                     ; Md_Screen00_e:
 (1)   16/   62800 : =$62800              MD_SCREEN01_E label *
 (1)   16/   62800 :  (MACRO-2)                   erreport "SCREEN CODE: MD_SCREEN01",mcscrn_e-mcscrn_s,MAX_UserCode
@@ -17903,7 +17964,7 @@
 (1)   50/  200000 :                                     phase sysmcd_wram
 (1)   50/  200000 : =$200000             GLBL_MDATA_ST := *
 (1)   51/  200000 :                     	; ------------------------------------------------
-(1)   52/  200000 :                     		include "sound/tracks.asm"		; GEMA user sound data
+(1)   52/  200000 :                     		include "sound/data.asm"		; GEMA user sound data
 (2)    1/  200000 :                     ; ===========================================================================
 (2)    2/  200000 :                     ; -------------------------------------------------------------------
 (2)    3/  200000 :                     ; Main sound data
@@ -17951,8 +18012,8 @@
 (2)   27/  200042 : 0020 004E                   dc.l .BLK
 (2)   27/  200046 : 0020 0051                   dc.l .PAT
 (2)   27/  20004A : 0020 0096                   dc.l .INS
-(2)   28/  20004E :                     .blk:	binclude "sound/tracks/sfxall_blk.bin"
-(2)   29/  200051 :                     .pat:	binclude "sound/tracks/sfxall_patt.bin"
+(2)   28/  20004E :                     .blk:	binclude "sound/seq/sfxall_blk.bin"
+(2)   29/  200051 :                     .pat:	binclude "sound/seq/sfxall_patt.bin"
 (2)   30/  200096 :                     .ins:
 (2)   31/  200096 : (MACRO)              	gInsFm -36,FmIns_sfx_punch
 (2)   31/  200096 : A0DC 215A                   dc.b $A0,-36,((FMINS_SFX_PUNCH>>16)&$FF),((FMINS_SFX_PUNCH>>8)&$FF)
@@ -17964,8 +18025,8 @@
 (2)   34/  2000A6 :                     ; ----------------------------------------------------
 (2)   35/  2000A6 :                     gtrk_Test0:
 (2)   36/  2000A6 :                     ; 	gemaHead .blk,.pat,.ins,4
-(2)   37/  2000A6 :                     ; .blk:	binclude "sound/tracks/test_blk.bin"
-(2)   38/  2000A6 :                     ; .pat:	binclude "sound/tracks/test_patt.bin"
+(2)   37/  2000A6 :                     ; .blk:	binclude "sound/seq/test_blk.bin"
+(2)   38/  2000A6 :                     ; .pat:	binclude "sound/seq/test_patt.bin"
 (2)   39/  2000A6 :                     ; .ins:
 (2)   40/  2000A6 :                     ; 	gInsPcm -12,PcmIns_TEST,1
 (2)   41/  2000A6 :                     
@@ -17974,8 +18035,8 @@
 (2)   42/  2000A8 : 0020 00B4                   dc.l .BLK
 (2)   42/  2000AC : 0020 00B8                   dc.l .PAT
 (2)   42/  2000B0 : 0020 05B9                   dc.l .INS
-(2)   43/  2000B4 :                     .blk:	binclude "sound/tracks/test_2_blk.bin"
-(2)   44/  2000B8 :                     .pat:	binclude "sound/tracks/test_2_patt.bin"
+(2)   43/  2000B4 :                     .blk:	binclude "sound/seq/test_2_blk.bin"
+(2)   44/  2000B8 :                     .pat:	binclude "sound/seq/test_2_patt.bin"
 (2)   45/  2005B9 :                     .ins:
 (2)   46/  2005B9 :                     
 (2)   52/  2005B9 : (MACRO)              	gInsPcm 0,PcmIns_sxbeats,0
@@ -18007,8 +18068,8 @@
 (2)   67/  2005F3 : 0020 05FF                   dc.l .BLK
 (2)   67/  2005F7 : 0020 0624                   dc.l .PAT
 (2)   67/  2005FB : 0020 1595                   dc.l .INS
-(2)   68/  2005FF :                     .blk:	binclude "sound/tracks/sauron_blk.bin"
-(2)   69/  200624 :                     .pat:	binclude "sound/tracks/sauron_patt.bin"
+(2)   68/  2005FF :                     .blk:	binclude "sound/seq/sauron_blk.bin"
+(2)   69/  200624 :                     .pat:	binclude "sound/seq/sauron_patt.bin"
 (2)   70/  201595 :                     .ins:
 (2)   71/  201595 : (MACRO)              	gInsPcm -12,PcmIns_sauron_01,0
 (2)   71/  201595 : D0F4 03E5                   dc.b $D0|0,-12,((PCMINS_SAURON_01>>16)&$FF),((PCMINS_SAURON_01>>8)&$FF)
@@ -18051,8 +18112,8 @@
 (2)   83/  2015F9 : 0000 0000                   dc.b $00,$00,$00,$00
 (2)   84/  2015FD :                     
 (2)   85/  2015FD :                     ; 		gemaHead .blk,.pat,.ins,10
-(2)   86/  2015FD :                     ; .blk:		binclude "sound/tracks/test_blk.bin"
-(2)   87/  2015FD :                     ; .pat:		binclude "sound/tracks/test_patt.bin"
+(2)   86/  2015FD :                     ; .blk:		binclude "sound/seq/test_blk.bin"
+(2)   87/  2015FD :                     ; .pat:		binclude "sound/seq/test_patt.bin"
 (2)   88/  2015FD :                     ; .ins:
 (2)   89/  2015FD :                     ; 		gInsPcm 0,PcmIns_TEST,0
 (2)   90/  2015FD :                     
@@ -18063,8 +18124,8 @@
 (2)   93/  2015FF : 0020 160B                   dc.l .BLK
 (2)   93/  201603 : 0020 162E                   dc.l .PAT
 (2)   93/  201607 : 0020 D699                   dc.l .INS
-(2)   94/  20160B :                     .blk:	binclude "sound/tracks/trnthem_blk.bin"
-(2)   95/  20162E :                     .pat:	binclude "sound/tracks/trnthem_patt.bin"
+(2)   94/  20160B :                     .blk:	binclude "sound/seq/trnthem_blk.bin"
+(2)   95/  20162E :                     .pat:	binclude "sound/seq/trnthem_patt.bin"
 (2)   96/  20D699 :                     .ins:
 (2)   97/  20D699 : (MACRO)              	gInsPwm -12,PwmIns_trnthem_01,1
 (2)   97/  20D699 : 0000 0000                   dc.b $00,$00,$00,$00
@@ -18126,8 +18187,8 @@
 (2)  118/  20D723 : 0020 D72F                   dc.l .BLK
 (2)  118/  20D727 : 0020 D740                   dc.l .PAT
 (2)  118/  20D72B : 0021 52DF                   dc.l .INS
-(2)  119/  20D72F :                     .blk:	binclude "sound/tracks/box_blk.bin"
-(2)  120/  20D740 :                     .pat:	binclude "sound/tracks/box_patt.bin"
+(2)  119/  20D72F :                     .blk:	binclude "sound/seq/box_blk.bin"
+(2)  120/  20D740 :                     .pat:	binclude "sound/seq/box_patt.bin"
 (2)  121/  2152DF :                     .ins:
 (2)  122/  2152DF : (MACRO)              	gInsFm -24,FmIns_Organ_drawbar
 (2)  122/  2152DF : A0E8 2157                   dc.b $A0,-24,((FMINS_ORGAN_DRAWBAR>>16)&$FF),((FMINS_ORGAN_DRAWBAR>>8)&$FF)
@@ -18191,161 +18252,161 @@
 (2)  147/  215367 :                     ; -----------------------------------------------------------
 (2)  148/  215367 :                     
 (2)  149/  215367 :                     FmIns_Bass_big_81:
-(2)  150/  215367 :                     		binclude "sound/instr/fm/bin/bass_big_82.bin"
+(2)  150/  215367 :                     		binclude "sound/ins/fm/bin/bass_big_82.bin"
 (2)  151/  215387 :                     FmIns_Bass_big_110:
-(2)  152/  215387 :                     		binclude "sound/instr/fm/bin/bass_big_110.bin"
+(2)  152/  215387 :                     		binclude "sound/ins/fm/bin/bass_big_110.bin"
 (2)  153/  2153A7 :                     FmIns_Bass_big_114:
-(2)  154/  2153A7 :                     		binclude "sound/instr/fm/bin/bass_big_114.bin"
+(2)  154/  2153A7 :                     		binclude "sound/ins/fm/bin/bass_big_114.bin"
 (2)  155/  2153C7 :                     FmIns_Bass_big_122:
-(2)  156/  2153C7 :                     		binclude "sound/instr/fm/bin/bass_big_122.bin"
+(2)  156/  2153C7 :                     		binclude "sound/ins/fm/bin/bass_big_122.bin"
 (2)  157/  2153E7 :                     FmIns_Bass_cave_47:
-(2)  158/  2153E7 :                     		binclude "sound/instr/fm/bin/bass_cave_47.bin"
+(2)  158/  2153E7 :                     		binclude "sound/ins/fm/bin/bass_cave_47.bin"
 (2)  159/  215407 :                     FmIns_Bass_club_108:
-(2)  160/  215407 :                     		binclude "sound/instr/fm/bin/bass_club_108.bin"
+(2)  160/  215407 :                     		binclude "sound/ins/fm/bin/bass_club_108.bin"
 (2)  161/  215427 :                     FmIns_Bass_foot_75:
-(2)  162/  215427 :                     		binclude "sound/instr/fm/bin/bass_foot_75.bin"
+(2)  162/  215427 :                     		binclude "sound/ins/fm/bin/bass_foot_75.bin"
 (2)  163/  215447 :                     FmIns_Bass_gem_26:
-(2)  164/  215447 :                     		binclude "sound/instr/fm/bin/bass_gem_26.bin"
+(2)  164/  215447 :                     		binclude "sound/ins/fm/bin/bass_gem_26.bin"
 (2)  165/  215467 :                     FmIns_Bass_groove_119:
-(2)  166/  215467 :                     		binclude "sound/instr/fm/bin/bass_groove_119.bin"
+(2)  166/  215467 :                     		binclude "sound/ins/fm/bin/bass_groove_119.bin"
 (2)  167/  215487 :                     FmIns_Bass_heavy_107:
-(2)  168/  215487 :                     		binclude "sound/instr/fm/bin/bass_heavy_107.bin"
+(2)  168/  215487 :                     		binclude "sound/ins/fm/bin/bass_heavy_107.bin"
 (2)  169/  2154A7 :                     FmIns_Bass_heavy_118:
-(2)  170/  2154A7 :                     		binclude "sound/instr/fm/bin/bass_heavy_118.bin"
+(2)  170/  2154A7 :                     		binclude "sound/ins/fm/bin/bass_heavy_118.bin"
 (2)  171/  2154C7 :                     FmIns_Bass_loud_117:
-(2)  172/  2154C7 :                     		binclude "sound/instr/fm/bin/bass_loud_117.bin"
+(2)  172/  2154C7 :                     		binclude "sound/ins/fm/bin/bass_loud_117.bin"
 (2)  173/  2154E7 :                     FmIns_bass_low_46:
-(2)  174/  2154E7 :                     		binclude "sound/instr/fm/bin/bass_low_46.bin"
+(2)  174/  2154E7 :                     		binclude "sound/ins/fm/bin/bass_low_46.bin"
 (2)  175/  215507 :                     FmIns_Bass_Groove_1:
-(2)  176/  215507 :                     		binclude "sound/instr/fm/bin/bass_groove_1.bin"
+(2)  176/  215507 :                     		binclude "sound/ins/fm/bin/bass_groove_1.bin"
 (2)  177/  215527 :                     FmIns_bass_low_81:
-(2)  178/  215527 :                     		binclude "sound/instr/fm/bin/bass_low_81.bin"
+(2)  178/  215527 :                     		binclude "sound/ins/fm/bin/bass_low_81.bin"
 (2)  179/  215547 :                     FmIns_bass_low_103:
-(2)  180/  215547 :                     		binclude "sound/instr/fm/bin/bass_low_103.bin"
+(2)  180/  215547 :                     		binclude "sound/ins/fm/bin/bass_low_103.bin"
 (2)  181/  215567 :                     FmIns_bass_low_106:
-(2)  182/  215567 :                     		binclude "sound/instr/fm/bin/bass_low_106.bin"
+(2)  182/  215567 :                     		binclude "sound/ins/fm/bin/bass_low_106.bin"
 (2)  183/  215587 :                     FmIns_bass_low_126:
-(2)  184/  215587 :                     		binclude "sound/instr/fm/bin/bass_low_126.bin"
+(2)  184/  215587 :                     		binclude "sound/ins/fm/bin/bass_low_126.bin"
 (2)  185/  2155A7 :                     FmIns_bass_mid_19:
-(2)  186/  2155A7 :                     		binclude "sound/instr/fm/bin/bass_mid_19.bin"
+(2)  186/  2155A7 :                     		binclude "sound/ins/fm/bin/bass_mid_19.bin"
 (2)  187/  2155C7 :                     FmIns_bass_mid_80:
-(2)  188/  2155C7 :                     		binclude "sound/instr/fm/bin/bass_mid_80.bin"
+(2)  188/  2155C7 :                     		binclude "sound/ins/fm/bin/bass_mid_80.bin"
 (2)  189/  2155E7 :                     FmIns_bass_mid_111:
-(2)  190/  2155E7 :                     		binclude "sound/instr/fm/bin/bass_mid_111.bin"
+(2)  190/  2155E7 :                     		binclude "sound/ins/fm/bin/bass_mid_111.bin"
 (2)  191/  215607 :                     FmIns_bass_power_123:
-(2)  192/  215607 :                     		binclude "sound/instr/fm/bin/bass_power_123.bin"
+(2)  192/  215607 :                     		binclude "sound/ins/fm/bin/bass_power_123.bin"
 (2)  193/  215627 :                     FmIns_bass_silent_53:
-(2)  194/  215627 :                     		binclude "sound/instr/fm/bin/bass_silent_53.bin"
+(2)  194/  215627 :                     		binclude "sound/ins/fm/bin/bass_silent_53.bin"
 (2)  195/  215647 :                     FmIns_bass_slap_10:
-(2)  196/  215647 :                     		binclude "sound/instr/fm/bin/bass_slap_10.bin"
+(2)  196/  215647 :                     		binclude "sound/ins/fm/bin/bass_slap_10.bin"
 (2)  197/  215667 :                     FmIns_bass_slap_105:
-(2)  198/  215667 :                     		binclude "sound/instr/fm/bin/bass_slap_105.bin"
+(2)  198/  215667 :                     		binclude "sound/ins/fm/bin/bass_slap_105.bin"
 (2)  199/  215687 :                     FmIns_bass_synth_60:
-(2)  200/  215687 :                     		binclude "sound/instr/fm/bin/bass_synth_60.bin"
+(2)  200/  215687 :                     		binclude "sound/ins/fm/bin/bass_synth_60.bin"
 (2)  201/  2156A7 :                     FmIns_bass_synth_61:
-(2)  202/  2156A7 :                     		binclude "sound/instr/fm/bin/bass_synth_61.bin"
+(2)  202/  2156A7 :                     		binclude "sound/ins/fm/bin/bass_synth_61.bin"
 (2)  203/  2156C7 :                     FmIns_bass_synth_72:
-(2)  204/  2156C7 :                     		binclude "sound/instr/fm/bin/bass_synth_72.bin"
+(2)  204/  2156C7 :                     		binclude "sound/ins/fm/bin/bass_synth_72.bin"
 (2)  205/  2156E7 :                     FmIns_bass_synth_73:
-(2)  206/  2156E7 :                     		binclude "sound/instr/fm/bin/bass_synth_73.bin"
+(2)  206/  2156E7 :                     		binclude "sound/ins/fm/bin/bass_synth_73.bin"
 (2)  207/  215707 :                     FmIns_bass_vlow_74:
-(2)  208/  215707 :                     		binclude "sound/instr/fm/bin/bass_vlow_74.bin"
+(2)  208/  215707 :                     		binclude "sound/ins/fm/bin/bass_vlow_74.bin"
 (2)  209/  215727 :                     FmIns_Organ_drawbar:
-(2)  210/  215727 :                     		binclude "sound/instr/fm/bin/organ_drawbar.bin"
+(2)  210/  215727 :                     		binclude "sound/ins/fm/bin/organ_drawbar.bin"
 (2)  211/  215747 :                     FmIns_Flaute_1:
-(2)  212/  215747 :                     		binclude "sound/instr/fm/bin/flaute_1.bin"
+(2)  212/  215747 :                     		binclude "sound/ins/fm/bin/flaute_1.bin"
 (2)  213/  215767 :                     FmIns_Flaute_2:
-(2)  214/  215767 :                     		binclude "sound/instr/fm/bin/flaute_2.bin"
+(2)  214/  215767 :                     		binclude "sound/ins/fm/bin/flaute_2.bin"
 (2)  215/  215787 :                     FmIns_Vibraphone_1:
-(2)  216/  215787 :                     		binclude "sound/instr/fm/bin/vibraphone_1.bin"
+(2)  216/  215787 :                     		binclude "sound/ins/fm/bin/vibraphone_1.bin"
 (2)  217/  2157A7 :                     FmIns_Vibraphone_2:
-(2)  218/  2157A7 :                     		binclude "sound/instr/fm/bin/vibraphone_2.bin"
+(2)  218/  2157A7 :                     		binclude "sound/ins/fm/bin/vibraphone_2.bin"
 (2)  219/  2157C7 :                     FmIns_Xylophone:
-(2)  220/  2157C7 :                     		binclude "sound/instr/fm/bin/xylophone2_43.bin"
+(2)  220/  2157C7 :                     		binclude "sound/ins/fm/bin/xylophone2_43.bin"
 (2)  221/  2157E7 :                     FmIns_Bass_low81:
-(2)  222/  2157E7 :                     		binclude "sound/instr/fm/bin/bass_low_46.bin"
+(2)  222/  2157E7 :                     		binclude "sound/ins/fm/bin/bass_low_46.bin"
 (2)  223/  215807 :                     FmIns_Trumpet_low:
-(2)  224/  215807 :                     		binclude "sound/instr/fm/bin/trumpet_low.bin"
+(2)  224/  215807 :                     		binclude "sound/ins/fm/bin/trumpet_low.bin"
 (2)  225/  215827 :                     FmIns_Trumpet_genie:
-(2)  226/  215827 :                     		binclude "sound/instr/fm/bin/trumpet_genie.bin"
+(2)  226/  215827 :                     		binclude "sound/ins/fm/bin/trumpet_genie.bin"
 (2)  227/  215847 :                     FmIns_Trumpet_bus:
-(2)  228/  215847 :                     		binclude "sound/instr/fm/bin/trumpet_bus.bin"
+(2)  228/  215847 :                     		binclude "sound/ins/fm/bin/trumpet_bus.bin"
 (2)  229/  215867 :                     FmIns_Hats_1:
-(2)  230/  215867 :                     		binclude "sound/instr/fm/bin/hats_96.bin"
+(2)  230/  215867 :                     		binclude "sound/ins/fm/bin/hats_96.bin"
 (2)  231/  215887 :                     FmIns_Bell_mid36:
-(2)  232/  215887 :                     		binclude "sound/instr/fm/bin/bell_mid_36.bin"
+(2)  232/  215887 :                     		binclude "sound/ins/fm/bin/bell_mid_36.bin"
 (2)  233/  2158A7 :                     FmIns_Drum_Kick:
-(2)  234/  2158A7 :                     		binclude "sound/instr/fm/bin/kick_low.bin"
+(2)  234/  2158A7 :                     		binclude "sound/ins/fm/bin/kick_low.bin"
 (2)  235/  2158C7 :                     FmIns_Tick:
-(2)  236/  2158C7 :                     		binclude "sound/instr/fm/bin/tick_44.bin"
+(2)  236/  2158C7 :                     		binclude "sound/ins/fm/bin/tick_44.bin"
 (2)  237/  2158E7 :                     
 (2)  238/  2158E7 :                     ; -----------------------------------------------------------
 (2)  239/  2158E7 :                     ; Special FM3 Instruments
 (2)  240/  2158E7 :                     ; -----------------------------------------------------------
 (2)  241/  2158E7 :                     
 (2)  242/  2158E7 :                     FmSpIns_clack_1:
-(2)  243/  2158E7 :                     		binclude "sound/instr/fm/bin/fm3_clack_1.bin"
+(2)  243/  2158E7 :                     		binclude "sound/ins/fm/bin/fm3_clack_1.bin"
 (2)  244/  21590F :                     FmSpIns_cowbell_h:
-(2)  245/  21590F :                     		binclude "sound/instr/fm/bin/fm3_cowbell_h.bin"
+(2)  245/  21590F :                     		binclude "sound/ins/fm/bin/fm3_cowbell_h.bin"
 (2)  246/  215937 :                     FmSpIns_cowbell_l:
-(2)  247/  215937 :                     		binclude "sound/instr/fm/bin/fm3_cowbell_l.bin"
+(2)  247/  215937 :                     		binclude "sound/ins/fm/bin/fm3_cowbell_l.bin"
 (2)  248/  21595F :                     FmSpIns_hats_hq:
-(2)  249/  21595F :                     		binclude "sound/instr/fm/bin/fm3_hats_hq.bin"
+(2)  249/  21595F :                     		binclude "sound/ins/fm/bin/fm3_hats_hq.bin"
 (2)  250/  215987 :                     FmSpIns_sfx_alien:
-(2)  251/  215987 :                     		binclude "sound/instr/fm/bin/fm3_sfx_alien.bin"
+(2)  251/  215987 :                     		binclude "sound/ins/fm/bin/fm3_sfx_alien.bin"
 (2)  252/  2159AF :                     FmSpIns_sfx_knckbuzz:
-(2)  253/  2159AF :                     		binclude "sound/instr/fm/bin/fm3_sfx_knckbuzz.bin"
+(2)  253/  2159AF :                     		binclude "sound/ins/fm/bin/fm3_sfx_knckbuzz.bin"
 (2)  254/  2159D7 :                     FmSpIns_sfx_knock_h:
-(2)  255/  2159D7 :                     		binclude "sound/instr/fm/bin/fm3_sfx_knock_h.bin"
+(2)  255/  2159D7 :                     		binclude "sound/ins/fm/bin/fm3_sfx_knock_h.bin"
 (2)  256/  2159FF :                     FmSpIns_sfx_knock_l:
-(2)  257/  2159FF :                     		binclude "sound/instr/fm/bin/fm3_sfx_knock_l.bin"
+(2)  257/  2159FF :                     		binclude "sound/ins/fm/bin/fm3_sfx_knock_l.bin"
 (2)  258/  215A27 :                     FmSpIns_sfx_laser:
-(2)  259/  215A27 :                     		binclude "sound/instr/fm/bin/fm3_sfx_laser.bin"
+(2)  259/  215A27 :                     		binclude "sound/ins/fm/bin/fm3_sfx_laser.bin"
 (2)  260/  215A4F :                     
 (2)  261/  215A4F :                     ; -----------------------------------------------------------
 (2)  262/  215A4F :                     ; FM sound effects
 (2)  263/  215A4F :                     ; -----------------------------------------------------------
 (2)  264/  215A4F :                     
 (2)  265/  215A4F :                     FmIns_sfx_punch:
-(2)  266/  215A4F :                     		binclude "sound/instr/fm/bin/sfx_punch.bin"
+(2)  266/  215A4F :                     		binclude "sound/ins/fm/bin/sfx_punch.bin"
 (2)  267/  215A6F :                     FmIns_sfx_slash:
-(2)  268/  215A6F :                     		binclude "sound/instr/fm/bin/sfx_slash.bin"
+(2)  268/  215A6F :                     		binclude "sound/ins/fm/bin/sfx_slash.bin"
 (2)  269/  215A8F :                     FmIns_sfx_alien1:
-(2)  270/  215A8F :                     		binclude "sound/instr/fm/bin/sfx_alien_83.bin"
+(2)  270/  215A8F :                     		binclude "sound/ins/fm/bin/sfx_alien_83.bin"
 (2)  271/  215AAF :                     FmIns_sfx_alien2:
-(2)  272/  215AAF :                     		binclude "sound/instr/fm/bin/sfx_alien_84.bin"
+(2)  272/  215AAF :                     		binclude "sound/ins/fm/bin/sfx_alien_84.bin"
 (2)  273/  215ACF :                     
 (2)  274/  215ACF :                     ; ====================================================================
 (2)  275/  215ACF :                     
 (2)  276/  215ACF :                     ; FM3 Special
 (2)  277/  215ACF :                     FmIns_Sp_OpenHat:
-(2)  278/  215ACF :                     		binclude "sound/instr/fm/gsx/fm3_openhat.gsx",$2478,$28
+(2)  278/  215ACF :                     		binclude "sound/ins/fm/gsx/fm3_openhat.gsx",$2478,$28
 (2)  279/  215AF7 :                     FmIns_Sp_ClosedHat:
-(2)  280/  215AF7 :                     		binclude "sound/instr/fm/gsx/fm3_closedhat.gsx",$2478,$28
+(2)  280/  215AF7 :                     		binclude "sound/ins/fm/gsx/fm3_closedhat.gsx",$2478,$28
 (2)  281/  215B1F :                     FmIns_Sp_Cowbell:
-(2)  282/  215B1F :                     		binclude "sound/instr/fm/gsx/fm3_cowbell.gsx",$2478,$28
+(2)  282/  215B1F :                     		binclude "sound/ins/fm/gsx/fm3_cowbell.gsx",$2478,$28
 (2)  283/  215B47 :                     FmIns_Drums_Kick1:
-(2)  284/  215B47 :                     		binclude "sound/instr/fm/gsx/drum_kick_gem.gsx",$2478,$20
+(2)  284/  215B47 :                     		binclude "sound/ins/fm/gsx/drum_kick_gem.gsx",$2478,$20
 (2)  285/  215B67 :                     FmIns_Piano_Aqua:
-(2)  286/  215B67 :                     		binclude "sound/instr/fm/gsx/piano_aqua.gsx",$2478,$20
+(2)  286/  215B67 :                     		binclude "sound/ins/fm/gsx/piano_aqua.gsx",$2478,$20
 (2)  287/  215B87 :                     FmIns_HBeat_tom:
-(2)  288/  215B87 :                     		binclude "sound/instr/fm/gsx/nadia_tom.gsx",$2478,$20
+(2)  288/  215B87 :                     		binclude "sound/ins/fm/gsx/nadia_tom.gsx",$2478,$20
 (2)  289/  215BA7 :                     FmIns_Trumpet_1:
-(2)  290/  215BA7 :                     		binclude "sound/instr/fm/gsx/trumpet_1.gsx",$2478,$20
+(2)  290/  215BA7 :                     		binclude "sound/ins/fm/gsx/trumpet_1.gsx",$2478,$20
 (2)  291/  215BC7 :                     FmIns_Bass_duck:
-(2)  292/  215BC7 :                     		binclude "sound/instr/fm/gsx/bass_duck.gsx",$2478,$20
+(2)  292/  215BC7 :                     		binclude "sound/ins/fm/gsx/bass_duck.gsx",$2478,$20
 (2)  293/  215BE7 :                     FmIns_ClosedHat:
-(2)  294/  215BE7 :                     		binclude "sound/instr/fm/gsx/hats_closed.gsx",$2478,$20
+(2)  294/  215BE7 :                     		binclude "sound/ins/fm/gsx/hats_closed.gsx",$2478,$20
 (2)  295/  215C07 :                     FmIns_Trumpet_carnival:
-(2)  296/  215C07 :                     		binclude "sound/instr/fm/gsx/OLD_trumpet_carnivl.gsx",$2478,$20
+(2)  296/  215C07 :                     		binclude "sound/ins/fm/gsx/OLD_trumpet_carnivl.gsx",$2478,$20
 (2)  297/  215C27 :                     FmIns_Bass_club:
-(2)  298/  215C27 :                     		binclude "sound/instr/fm/gsx/OLD_bass_club.gsx",$2478,$20
+(2)  298/  215C27 :                     		binclude "sound/ins/fm/gsx/OLD_bass_club.gsx",$2478,$20
 (2)  299/  215C47 :                     FmIns_Bass_groove_2:
-(2)  300/  215C47 :                     		binclude "sound/instr/fm/gsx/bass_groove_2.gsx",$2478,$20
+(2)  300/  215C47 :                     		binclude "sound/ins/fm/gsx/bass_groove_2.gsx",$2478,$20
 (2)  301/  215C67 :                     FmIns_PSynth_plus:
-(2)  302/  215C67 :                     		binclude "sound/instr/fm/gsx/psynth_plus.gsx",$2478,$20
+(2)  302/  215C67 :                     		binclude "sound/ins/fm/gsx/psynth_plus.gsx",$2478,$20
 (2)  303/  215C87 :                     FmIns_Brass_7:
-(2)  304/  215C87 :                     		binclude "sound/instr/fm/gsx/brass_7.gsx",$2478,$20
+(2)  304/  215C87 :                     		binclude "sound/ins/fm/gsx/brass_7.gsx",$2478,$20
 (2)  305/  215CA7 :                     
 (2)  306/  215CA7 :                     ; ===========================================================================
 (2)  307/  215CA7 :                     ; -------------------------------------------------------------------
@@ -18357,13 +18418,13 @@
 (2)  313/  215CA7 :                     		align $800
 (2)  314/  216000 :                     		;gSmplData Label,"file_path",loop_start
 (2)  315/  216000 :                     ; -----------------------------------------------------------
-(2)  321/  216000 :                     ; 		gSmplData DacIns_trnthem_10,"sound/instr/smpl/trnthem/10.wav",3033
-(2)  322/  216000 :                     ; 		gSmplData DacIns_trnthem_20,"sound/instr/smpl/trnthem/20.wav",14309
-(2)  323/  216000 :                     ; 		gSmplData DacIns_Kick,"sound/instr/smpl/kick.wav",0
-(2)  324/  216000 :                     ; 		gSmplData DacIns_Snare,"sound/instr/smpl/snare.wav",0
-(2)  325/  216000 :                     ; 		gSmplData DacIns_Timpani,"sound/instr/smpl/timpani.wav",0
-(2)  326/  216000 :                     ; 		gSmplData DacIns_wegot_kick,"sound/instr/smpl/wegot_kick.wav",0
-(2)  327/  216000 :                     ; 		gSmplData DacIns_wegot_crash,"sound/instr/smpl/wegot_crash.wav",0
+(2)  321/  216000 :                     ; 		gSmplData DacIns_trnthem_10,"sound/ins/smpl/trnthem/10.wav",3033
+(2)  322/  216000 :                     ; 		gSmplData DacIns_trnthem_20,"sound/ins/smpl/trnthem/20.wav",14309
+(2)  323/  216000 :                     ; 		gSmplData DacIns_Kick,"sound/ins/smpl/kick.wav",0
+(2)  324/  216000 :                     ; 		gSmplData DacIns_Snare,"sound/ins/smpl/snare.wav",0
+(2)  325/  216000 :                     ; 		gSmplData DacIns_Timpani,"sound/ins/smpl/timpani.wav",0
+(2)  326/  216000 :                     ; 		gSmplData DacIns_wegot_kick,"sound/ins/smpl/wegot_kick.wav",0
+(2)  327/  216000 :                     ; 		gSmplData DacIns_wegot_crash,"sound/ins/smpl/wegot_crash.wav",0
 (2)  328/  216000 :                     
 (1)   53/  216000 :                     		include "game/data/bank_main.asm"
 (2)    1/  216000 :                     ; ===========================================================================
@@ -19485,7 +19546,7 @@
      425/   AB000 : 00                  		dc.b 0
      426/   AB001 :                     		align $8000
      427/   B0000 :                     
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 2 - 10/18/2024 03:14:10 AM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 2 - 10/21/2024 05:44:37 AM
 
 
   Symbol Table (* = unused):
@@ -19650,7 +19711,7 @@
  DATA_BANK0 :                 66000 C |  DATA_BANK0_E :               8C800 C |
  DATA_BANK1 :                 8C800 C |  DATA_BANK1_E :               A4800 C |
  DATA_BNKSTAMP :              A4800 C |  DATA_BNKSTAMP_E :            AB000 C |
- DATE :                "10/18/2024" - |  DDACCNTR :                    18A6 C |
+ DATE :                "10/21/2024" - |  DDACCNTR :                    18A6 C |
  DDACFIFOMID :                 18A2 C |  DDACPNTR :                    18A3 C |
 *DEF_HSIZE_128 :                100 - | *DEF_HSIZE_32 :                  40 - |
  DEF_HSIZE_64 :                  80 - |  DEF_MAXSTAMPCOUT :              60 - |
@@ -20247,7 +20308,7 @@
 *TESTENTRYLOOP :                 1F - | *TEXTR_HARUNA :               10900 C |
  TH :                      20000000 - |  TICKCNT :                     1CF8 C |
  TICKFLAG :                    1CF7 C |  TICKSPSET :                   1CF6 C |
-*TIME :               "03:14:09 AM" - | *TIMERCTL :                      30 - |
+*TIME :               "05:44:37 AM" - | *TIMERCTL :                      30 - |
  TRACK_OUT :                    5B2 C |  TRACK_OUT.INDX_DEL :           5C0 C |
  TRACK_OUT.NOTHIN :             5EE C |  TRKBLKS_0 :                   17BD C |
  TRKBLKS_1 :                   17C5 C |  TRKBLKS_2 :                   17CD C |
@@ -20590,7 +20651,7 @@
    1802 symbols
     469 unused symbols
 
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 3 - 10/18/2024 03:14:10 AM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 3 - 10/21/2024 05:44:37 AM
 
 
   Defined Macros:
@@ -20613,7 +20674,7 @@ SCREEN_CODE                           | VDP_SHOWME
 
      28 macros
 
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 4 - 10/18/2024 03:14:10 AM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 4 - 10/21/2024 05:44:37 AM
 
 
   Defined Structures/Unions:
@@ -20715,7 +20776,7 @@ STMPI
   8      (I16) YD
   A      (I16) FLAGS
 7 structures
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 5 - 10/18/2024 03:14:10 AM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 5 - 10/21/2024 05:44:37 AM
 
 
   Defined Functions:
@@ -20725,7 +20786,7 @@ FULL_LOC                              | PSTR_MEM
 COLOR_INDX                            | CELL_VRAM                            
 SPLITW                                |
 
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 6 - 10/18/2024 03:14:10 AM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 6 - 10/21/2024 05:44:37 AM
 
 
   Code Pages:
@@ -20735,10 +20796,10 @@ STANDARD (0 changed characters)
 
 1 code page
 
-0.36 seconds assembly time
+0.35 seconds assembly time
 
-  19121 lines source file
-  20854 lines incl. macro expansions
+  19182 lines source file
+  20915 lines incl. macro expansions
       6 passes
       0 errors
       0 warnings

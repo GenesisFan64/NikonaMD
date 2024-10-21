@@ -111,6 +111,10 @@ RAM_BlocksBuff		ds.b 8*8
 		beq.s	.dont_redrw
 		clr.w	(RAM_DoRedraw).w
 		bsr	Scrn0_DrawMapAll
+		moveq	#$0F,d0
+		moveq	#1,d1
+		moveq	#2,d2
+		bsr	gemaPlaySeq
 .dont_redrw:
 
 		bsr	.show_counter
@@ -132,14 +136,14 @@ RAM_BlocksBuff		ds.b 8*8
 		addq.w	#1,d1
 		dbf	d7,.del_from
 .not_y:
-		move.w	(Controller_1+on_press).w,d7
-		andi.w	#JoyZ,d7
-		beq.s	.not_z
-		moveq	#$0F,d0
-		moveq	#1,d1
-		moveq	#2,d2
-		bsr	gemaPlaySeq
-.not_z:
+; 		move.w	(Controller_1+on_press).w,d7
+; 		andi.w	#JoyZ,d7
+; 		beq.s	.not_z
+; 		moveq	#$0F,d0
+; 		moveq	#1,d1
+; 		moveq	#2,d2
+; 		bsr	gemaPlaySeq
+; .not_z:
 
 	; Copy variables
 		move.w	(RAM_Cam_Xpos).w,d7
@@ -224,55 +228,121 @@ obj_Player:
 		move.w	#0,obj_x(a6)		; Set Object's X/Y position
 		move.w	#0,obj_y(a6)
 		lea	obj_ram(a6),a5
-		clr.l	(a5)+
-		clr.l	(a5)+
-		clr.w	(a5)+
-		move.w	#0,4(a5)
-		move.w	#0,6(a5)
 
 ; ----------------------------------------------
+; Main read
+; ----------------------------------------------
+
 .main:
 		lea	obj_ram(a6),a5
 		lea	(Controller_1).w,a4
 
-		tst.w	8(a5)
-		bne.s	.on_timer
-		move.w	on_hold(a4),d7
+	; INPUTS
+		move.w	obj_x_spd(a6),d0
+		or.w	obj_y_spd(a6),d0
+		bne	.cant_move
+		move.w	on_press(a4),d7
 		btst	#bitJoyRight,d7
-		beq.s	.n_rtmr
-		move.w	#1,(a5)
-		move.w	#0,2(a5)
-		addq.w	#1,4(a5)
-		move.w	#$20,8(a5)
-.n_rtmr:	btst	#bitJoyLeft,d7
-		beq.s	.n_ltmr
-		move.w	#-1,(a5)
-		move.w	#0,2(a5)
-		subq.w	#1,4(a5)
-		move.w	#$20,8(a5)
-.n_ltmr:	btst	#bitJoyDown,d7
-		beq.s	.d_rtmr
-		move.w	#0,(a5)
-		move.w	#1,2(a5)
-		addq.w	#1,6(a5)
-		move.w	#$18,8(a5)
-.d_rtmr:	btst	#bitJoyUp,d7
-		beq.s	.u_ltmr
-		move.w	#0,(a5)
-		move.w	#-1,2(a5)
-		subq.w	#1,6(a5)
-		move.w	#$18,8(a5)
-.u_ltmr:
-		bra.s	.no_timer
+		beq.s	.go_right
+		move.w	#$200+8,obj_x_spd(a6)
+		move.w	#-$100,obj_y_spd(a6)
+		move.w	obj_x(a6),d0
+		add.w	#$20,d0
+		move.w	d0,(a5)
+		move.w	obj_y(a6),2(a5)
+		move.w	#1,4(a5)
+.go_right:
+		btst	#bitJoyLeft,d7
+		beq.s	.go_left
+		move.w	#-$200+8,obj_x_spd(a6)
+		move.w	#-$100,obj_y_spd(a6)
+		move.w	obj_x(a6),d0
+		sub.w	#$20,d0
+		move.w	d0,(a5)
+		move.w	obj_y(a6),2(a5)
+		move.w	#1,4(a5)
+.go_left:
+		btst	#bitJoyDown,d7
+		beq.s	.go_down
+		move.w	#-$80,obj_y_spd(a6)
+		move.w	obj_y(a6),d0
+		add.w	#$18,d0
+		move.w	d0,2(a5)
+		move.w	obj_x(a6),(a5)
+		move.w	#2,4(a5)
+.go_down:
+		btst	#bitJoyUp,d7
+		beq.s	.cant_move
+		move.w	#-$1C0-$80,obj_y_spd(a6)
+		move.w	obj_y(a6),d0
+		sub.w	#$18,d0
+		move.w	d0,2(a5)
+		move.w	obj_x(a6),(a5)
+		move.w	#3,4(a5)
+.cant_move:
+		move.w	4(a5),d0
+		beq	.show_me
+		cmp.w	#1,d0
+		beq.s	.move_lr
+		cmp.w	#2,d0
+		beq.s	.move_down
+		cmp.w	#3,d0
+		beq.s	.move_up
+		bra	.show_me
 
-.on_timer:
-		move.w	(a5),d0
-		move.w	2(a5),d1
-		add.w	d0,obj_x(a6)
-		add.w	d1,obj_y(a6)
-		subq.w	#1,8(a5)
-		bne.s	.no_timer
+; --------------------------------------
 
+.move_lr:
+		tst.w	obj_x_spd(a6)
+		bmi.s	.x_left
+		subi.w	#$10,obj_x_spd(a6)
+		bpl.s	.x_jnone
+		bra.s	.x_jset
+.x_left:
+		addi.w	#$10,obj_x_spd(a6)
+		bmi.s	.x_jnone
+.x_jset:
+		bsr	.set_fpos
+		bra.s	.ret_main
+.x_jnone:
+		addi.w	#$10,obj_y_spd(a6)
+		bsr	object_Speed
+.ret_main:
+		bra	.show_me
+
+; --------------------------------------
+
+.move_down:
+		addi.w	#$10,obj_y_spd(a6)
+		bsr	object_Speed
+		move.w	obj_y(a6),d0
+		cmp.w	2(a5),d0
+		blt.s	.not_y_targ
+		bsr	.set_fpos
+.not_y_targ:
+		bra	.show_me
+
+; --------------------------------------
+
+.move_up:
+		addi.w	#$10+8,obj_y_spd(a6)
+		bsr	object_Speed
+		tst.w	obj_y_spd(a6)
+		bmi.s	.show_me
+		move.w	obj_y(a6),d0
+		cmp.w	2(a5),d0
+		blt.s	.not_y_targ
+		bsr	.set_fpos
+		bra	.show_me
+
+; --------------------------------------
+
+.set_fpos:
+		move.w	(a5),obj_x(a6)
+		move.w	2(a5),obj_y(a6)
+		clr.w	obj_x_spd(a6)
+		clr.w	obj_y_spd(a6)
+		clr.w	4(a5)
 		moveq	#0,d0
 		move.w	obj_x(a6),d0
 		beq.s	.no_timer
@@ -280,35 +350,26 @@ obj_Player:
 		subq.w	#1,d0
 		cmp.w	#5,d0
 		bge.s	.no_timer
+		moveq	#0,d1
 		move.w	obj_y(a6),d1
 		beq.s	.no_tmry
 		divu.w	#$18,d1
 		subq.w	#1,d1
 		cmp.w	#5,d1
-		bge.s	.no_tmry
+		bge.s	.no_timer
 		lsl.w	#3,d1
 		add.w	d1,d0
-.no_tmry
+.no_tmry:
 		lea	(RAM_BlocksBuff),a0
 		adda	d0,a0
 		move.b	#$02,(a0)
 		st.b	(RAM_DoRedraw).w
 .no_timer:
+		rts
 
 ; ----------------------------------------------
-; Show the object...
 
-; 		tst.w	d3
-; 		beq.s	.no_anim
-; 		lea	.anim_data(pc),a0	; Do animation
-; 		bsr	object_Animate
-; .no_anim:
-; 		clr.l	(RAM_TestTouch).w
-; 		bsr	object_Touch
-; 		tst.l	d0
-; 		beq.s	.lel
-; 		move.l	d0,(RAM_TestTouch).w
-; .lel:
+.show_me:
 		move.l	#0,a0
 		lea	(Map_Haruna),a1
 		lea	(Plc_Haruna),a2
