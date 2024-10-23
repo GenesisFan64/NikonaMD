@@ -425,7 +425,7 @@ if has_img == True:
 print("USING PLC: "+str(PLC_MODE))
 print("DOUBLE MODE: "+str(DOUBLE_MODE))
 print("Maximum cells: "+hex(cell_max))
-#print("Cells used: "+hex(cell_tell))
+print("Cells used: "+hex(cell_tell))
 input_file.close()
 art_file.close()
 map_file.close()

@@ -5,11 +5,19 @@
 
 ; ====================================================================
 ; ------------------------------------------------------
+; Settings
+; ------------------------------------------------------
+
+VIEW_GEMAINFO		equ False		; ** Using this causes loss of DAC quality **
+VIEW_FAIRY		equ True		; Show status Dodo/Mifi/Fifi
+
+; ====================================================================
+; ------------------------------------------------------
 ; Variables
 ; ------------------------------------------------------
 
 MAX_SNDPICK		equ 7
-SET_SNDVIEWY		equ 22
+SET_SNDVIEWY		equ 16
 
 ; ====================================================================
 ; ------------------------------------------------------
@@ -61,27 +69,6 @@ sizeof_thisbuff		ds.l 0
 		bsr	System_Default
 	; ----------------------------------------------
 	; Load assets
-; 	if MARS|MARSCD
-; 		lea	file_tscrn_mars(pc),a0			; Load DATA BANK for 32X stuff
-; 		bsr	System_SetDataBank
-; 		lea	(PalMars_STest),a0
-; 		move.w	#0,d0
-; 		move.w	#256,d1
-; 		moveq	#0,d2
-; 		bsr	Video_MdMars_FadePal
-; 		clr.w	(RAM_MdMars_PalFd).w
-; 		lea	(ArtMars_Test2D),a0
-; 		move.l	#0,a1
-; 		move.l	#ArtMars_Test2D_e-ArtMars_Test2D,d0
-; 		bsr	Video_MdMars_LoadVram
-; 		lea	(RAM_MdMars_Models).w,a0
-; 		move.l	#MarsObj_test_2,mmdl_data(a0)
-; 		move.l	#0,mmdl_z_pos(a0)
-; 		moveq	#2,d0					; 32X 3D mode
-; 		bsr	Video_MdMars_VideoMode
-; 	endif
-	; ----------------------------------------------
-	; Load assets
 		lea	file_tscrn_main(pc),a0		; ** LOAD BANK **
 		bsr	System_SetDataBank
 	; ----------------------------------------------
@@ -91,7 +78,7 @@ sizeof_thisbuff		ds.l 0
 		move.l	#ASCII_FONT_W,d0
 		move.w	#DEF_PrintVramW|$6000,d1
 		bsr	Video_PrintInitW
-		lea	(RAM_PaletteFade+$40).w,a0	; Palette line 4:
+		lea	(RAM_PaletteFade+$40).w,a0
 		move.w	#$0000,(a0)
 		move.w	#$00E0,2(a0)
 		move.w	#$00A0,4(a0)
@@ -107,7 +94,6 @@ sizeof_thisbuff		ds.l 0
 		bsr	Video_FadePal
 		lea	ArtList_Stuff(pc),a0
 		bsr	Video_LoadArt_List
-
 	; ----------------------------------------------
 		lea	str_TesterTitle(pc),a0
 		moveq	#6,d0
@@ -116,14 +102,17 @@ sizeof_thisbuff		ds.l 0
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bsr	Video_PrintW
 		lea	str_TesterInfo(pc),a0
+	if VIEW_FAIRY
 		moveq	#6,d0
-		moveq	#6,d1
+	else
+		moveq	#13,d0
+	endif
+		moveq	#7,d1
 		move.w	#DEF_PrintVram|$4000,d2
 		bsr	Video_Print
 		lea	str_Instruc(pc),a0
 		moveq	#2,d0
-; 		moveq	#14,d1
-		moveq	#19,d1
+		moveq	#21,d1
 		move.w	#DEF_PrintVram|$4000,d2
 		bsr	Video_Print
 		bsr	.gema_viewinit
@@ -155,25 +144,13 @@ sizeof_thisbuff		ds.l 0
 		bsr	.gema_view
 		bsr	Object_Run
 		bsr	Video_BuildSprites
-; 	if MARS|MARSCD
-; 		lea	(RAM_MdMars_Models).w,a0
-; 		add.l	#1,mmdl_y_rot(a0)
-; 		add.l	#1,mmdl_x_rot(a0)
-; 	endif
-
-
-; 		lea	str_Info(pc),a0
-; 		moveq	#31,d0
-; 		moveq	#4,d1
-; 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
-; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
-; 		bsr	Video_PrintW
+	if MCD|MARSCD
+		bsr	System_MdMcd_CheckHome
+		bcs	.exit_shell
+	endif
 
 	; NEW controls
 		lea	(Controller_1).w,a6
-		move.w	on_hold(a6),d7
-		btst	#bitJoyStart,d7
-		bne	.exit_all
 	; LEFT/RIGHT
 		move.w	on_press(a6),d7
 		andi.w	#JoyLeft+JoyRight,d7
@@ -292,11 +269,12 @@ sizeof_thisbuff		ds.l 0
 
 ; ------------------------------------------------------
 
-.exit_all:
-		bsr	gemaStopAll
+.exit_shell:
 		bsr	Video_FadeOut_Full
-		move.w	#0,(RAM_ScreenMode).w	; Return to mode 0
-		rts				; EXIT
+		bsr	gemaStopAll
+		bsr	System_Render
+		bsr	System_Render
+		bra	System_MdMcd_ExitShell
 
 ; ------------------------------------------------------
 
@@ -309,14 +287,22 @@ sizeof_thisbuff		ds.l 0
 		move.w	d0,(RAM_CurrBeats).w
 
 		lea	str_ShowBeats(pc),a0
+	if VIEW_FAIRY
 		moveq	#13,d0
-		moveq	#11,d1
+	else
+		moveq	#20,d0
+	endif
+		moveq	#12,d1
 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bsr	Video_Print
 		lea	str_ShowVars(pc),a0
+	if VIEW_FAIRY
 		moveq	#7,d0
-		moveq	#8,d1
+	else
+		moveq	#14,d0
+	endif
+		moveq	#9,d1
 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		bra	Video_PrintW
@@ -494,20 +480,27 @@ sizeof_thisbuff		ds.l 0
 ; ------------------------------------------------------
 
 .gema_viewinit:
-		move.l	#obj_Fairy,d0
-		moveq	#0,d2
-		bsr	Object_Make
-		addq.w	#1,d2
-		bsr	Object_Make
-		addq.w	#1,d2
-		bsr	Object_Make
-; 		lea	str_VmInfo(pc),a0
-; 		moveq	#2,d0
-; 		moveq	#SET_SNDVIEWY,d1
-; 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
-; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
-; 		bsr	Video_Print
+	if VIEW_FAIRY
+		move.l	#obj_Fairy,d0		; <-- If you don't like the fairies comment out or
+		moveq	#0,d1			; delete all of this
+		bsr	Object_Make		;
+		addq.w	#1,d1			;
+		bsr	Object_Make		;
+		addq.w	#1,d1			;
+		bsr	Object_Make		; <-- until here
+	endif
+
+	if VIEW_GEMAINFO
+		lea	str_VmInfo(pc),a0
+		moveq	#2,d0
+		moveq	#SET_SNDVIEWY,d1
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
+		bsr	Video_Print
+	endif
+
 .gema_view:
+	if VIEW_FAIRY
 		move.w	#$0100,(z80_bus).l
 		lea	(RAM_GemaStatus),a1
 		moveq	#0,d0
@@ -522,8 +515,9 @@ sizeof_thisbuff		ds.l 0
 		move.w	d0,(a1)+
 		move.w	d1,(a1)+
 		move.w	d2,(a1)+
-		rts
+	endif
 
+	if VIEW_GEMAINFO
 		bsr	sndLockZ80
 		lea	(z80_cpu+tblPSG),a0
 		lea	(RAM_GemaCache_PSG),a1
@@ -551,7 +545,9 @@ sizeof_thisbuff		ds.l 0
 		move.b	(z80_cpu+8),d7
 		move.w	d7,(RAM_Copy_HasDac).w
 		bsr	sndUnlockZ80
+	endif
 
+	if VIEW_GEMAINFO
 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 		lea	(RAM_GemaCache_PSG),a3
@@ -610,6 +606,8 @@ sizeof_thisbuff		ds.l 0
 		moveq	#SET_SNDVIEWY+3,d1
 		moveq	#8-1,d7
 		bsr	.show_table
+	endif
+
 		rts
 
 ; ----------------------------------------------
@@ -688,10 +686,10 @@ file_tscrn_main:
 		dc.l DATA_BANK0
 		dc.b "BNK_MAIN.BIN",0
 		align 2
-file_tscrn_mars:
-		dc.l DATA_BANK1
-		dc.b "BNK_MARS.BIN",0
-		align 2
+; file_tscrn_mars:
+; 		dc.l DATA_BANK1
+; 		dc.b "BNK_MARS.BIN",0
+; 		align 2
 
 ; ====================================================================
 ; ------------------------------------------------------
@@ -733,9 +731,11 @@ obj_Fairy:
 
 		move.b	obj_subid(a6),d7
 		mulu.w	#42,d7
-		lsl.w	#4,d7
-		neg.w	d7
-		move.w	d7,4(a1)
+		lsl.w	#5,d7
+		move.l	d7,d0
+		bsr	System_DiceRoll
+; 		neg.w	d7
+		move.w	d0,(a1)+
 
 ; ----------------------------------------------
 .main:
@@ -752,7 +752,7 @@ obj_Fairy:
 ; 		lsl.w	#3,d3
 		move.w	(a5),d2
 		move.w	2(a5),d3
-		move.w	#1,d4			; Multiply
+		move.w	#2,d4			; Multiply
 		btst	#7,1(a4)
 		beq.s	.not_enbls
 		move.w	#4,d4
@@ -818,9 +818,9 @@ obj_Fairy:
 		align 2
 
 .fixd_pos:
-		dc.w $B8,$40
-		dc.w $B8+$24,$40
-		dc.w $B8+$48,$40
+		dc.w $B8,$50
+		dc.w $B8+$24,$50
+		dc.w $B8+$48,$50
 		align 2
 
 ; ====================================================================
@@ -887,7 +887,7 @@ ArtList_Stuff:
 		dc.w cell_vram($30)
 
 str_TesterTitle:
-		dc.b "GEMA Sound driver   V1.0-dev",0
+		dc.b "GEMA Sound Driver       V1.0",0
 		align 2
 str_TesterInfo:
 		dc.b "Seq# Blk# Indx",$0A
@@ -900,8 +900,7 @@ str_Instruc:
 		dc.b "UD - Seq. Blk#",$0A
 		dc.b " A - STOP ALL",$0A
 		dc.b " B - STOP Seq.",$0A
-		dc.b " C - PLAY Seq.    Z - PLAY auto-fill",$0A,$0A
-		dc.b "START - Exit"
+		dc.b " C - PLAY Seq.    Z - PLAY auto-fill"
 		dc.b 0
 		align 2
 
@@ -924,8 +923,15 @@ strL_NoteList:	dc.b "---",0
 		dc.b "C-7",0,"C#7",0,"D-7",0,"D#7",0,"E-7",0,"F-7",0,"F#7",0,"G-7",0,"G#7",0,"A-7",0,"A#7",0,"B-7",0
 		dc.b "C-8",0,"C#8",0,"D-8",0,"D#8",0,"E-8",0,"F-8",0,"F#8",0,"G-8",0,"G#8",0,"A-8",0,"A#8",0,"B-8",0
 		dc.b "C-9",0,"C#9",0,"D-9",0,"D#9",0,"E-9",0,"F-9",0,"F#9",0,"G-9",0,"G#9",0,"A-9",0,"A#9",0,"B-9",0
+		dc.b "?-A",0,"?-A",0,"?-A",0,"?-A",0,"?-A",0,"?-A",0,"?-A",0,"?-A",0,"?-A",0,"?-A",0,"?-A",0,"?-A",0
+		dc.b "?-B",0,"?-B",0,"?-B",0,"?-B",0,"?-B",0,"?-B",0,"?-B",0,"?-B",0,"?-B",0,"?-B",0,"?-B",0,"?-B",0
+		dc.b "?-C",0,"?-C",0,"?-C",0,"?-C",0,"?-C",0,"?-C",0,"?-C",0,"?-C",0,"?-C",0,"?-C",0,"?-C",0,"?-C",0
+		dc.b "?-D",0,"?-D",0,"?-D",0,"?-D",0,"?-D",0,"?-D",0,"?-D",0,"?-D",0,"?-D",0,"?-D",0,"?-D",0,"?-D",0
+		dc.b "?-E",0,"?-E",0,"?-E",0,"?-E",0,"?-E",0,"?-E",0,"?-E",0,"?-E",0,"?-E",0,"?-E",0,"?-E",0,"?-E",0
+		dc.b "?-F",0,"?-F",0,"?-F",0,"?-F",0,"?-F",0,"?-F",0,"?-F",0,"?-F",0,"?-F",0,"?-F",0,"?-F",0,"?-F",0
 strL_FmOnly:	dc.b "---",0
 		dc.b "C- ",0,"C# ",0,"D- ",0,"D# ",0,"E- ",0,"F- ",0,"F# ",0,"G- ",0,"G# ",0,"A- ",0,"A# ",0,"B- ",0
+		dc.b "?- ",0,"?- ",0,"?- ",0
 strL_LazyVal:	dc.b "0",0,"1",0,"2",0,"3",0,"4",0,"5",0,"6",0,"7",0,"8",0,"9",0
 
 str_Speci:	dc.b "FM3",0

@@ -28,8 +28,10 @@ gtrk_SfxAll:
 .blk:	binclude "sound/seq/sfxall_blk.bin"
 .pat:	binclude "sound/seq/sfxall_patt.bin"
 .ins:
-	gInsFm -36,FmIns_sfx_punch
-	gInsFm -24,FmIns_sfx_alien1
+	gInsFm -12,FmIns_sfx_smash
+	gInsFm -12,FmIns_sfx_smash
+	gInsFm -12,FmIns_sfx_explode
+	gInsFm 0,FmIns_Bell_mid36
 
 ; ----------------------------------------------------
 gtrk_Test0:
@@ -230,6 +232,13 @@ FmIns_Hats_1:
 		binclude "sound/ins/fm/bin/hats_96.bin"
 FmIns_Bell_mid36:
 		binclude "sound/ins/fm/bin/bell_mid_36.bin"
+FmIns_Bell_62:
+		binclude "sound/ins/fm/bin/bell_62.bin"
+FmIns_Bell_93:
+		binclude "sound/ins/fm/bin/bell_93.bin"
+FmIns_Bell_low13:
+		binclude "sound/ins/fm/bin/bell_low_13.bin"
+
 FmIns_Drum_Kick:
 		binclude "sound/ins/fm/bin/kick_low.bin"
 FmIns_Tick:
@@ -264,6 +273,8 @@ FmSpIns_sfx_laser:
 
 FmIns_sfx_punch:
 		binclude "sound/ins/fm/bin/sfx_punch.bin"
+FmIns_sfx_explode:
+		binclude "sound/ins/fm/bin/sfx_explode.bin"
 FmIns_sfx_slash:
 		binclude "sound/ins/fm/bin/sfx_slash.bin"
 FmIns_sfx_alien1:
@@ -302,6 +313,11 @@ FmIns_PSynth_plus:
 		binclude "sound/ins/fm/gsx/psynth_plus.gsx",$2478,$20
 FmIns_Brass_7:
 		binclude "sound/ins/fm/gsx/brass_7.gsx",$2478,$20
+
+FmIns_sfx_punch_2:
+		binclude "sound/ins/fm/gsx/fmsfx_punch.gsx",$2478,$20
+FmIns_sfx_smash:
+		binclude "sound/ins/fm/gsx/fmsfx_smash.gsx",$2478,$20
 
 ; ===========================================================================
 ; -------------------------------------------------------------------

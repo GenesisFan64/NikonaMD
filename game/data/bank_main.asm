@@ -9,7 +9,8 @@
 
 		binclude_dma_e	Art_TESTBG,Art_TESTBG_e,"game/data/md/maps/test/art.bin"
 
-		binclude_dma	Art_Haruna,"game/data/md/sprites/haruna/art.bin"
+		binclude_dma_e	Art_Haruna,Art_Haruna_e,"game/data/md/sprites/haruna/art.bin"
+		binclude_dma_e	Art_Emily,Art_Emily_e,"game/data/md/sprites/emily/art.bin"
 		binclude_dma_e	Art_Sisi,Art_Sisi_e,"game/data/md/sprites/sisi/art.bin"
 
 		binclude_dma	Art_FairyDodo,"game/data/md/sprites/dodo/art.bin"
@@ -27,8 +28,11 @@ Pal_Haruna:	binclude "game/data/md/sprites/haruna/pal.bin"
 		align 2
 Map_Haruna:	binclude "game/data/md/sprites/haruna/map.bin"
 		align 2
-Plc_Haruna:	binclude "game/data/md/sprites/haruna/plc.bin"
+Pal_Emily:	binclude "game/data/md/sprites/emily/pal.bin"
 		align 2
+Map_Emily:	binclude "game/data/md/sprites/emily/map.bin"
+		align 2
+
 
 Pal_Sisi:	binclude "game/data/md/sprites/sisi/pal.bin"
 		align 2

@@ -1854,9 +1854,9 @@ Object_Run:
 ; Input:
 ; d0.l | Object code pointer
 ;        If 0: DELETE the object including it's memory
-; d1.w | Object slot
+; d1.b | Object sub-type (obj_subid)
+; d2.w | Object slot
 ;        If -1: Auto-search starting from FIRST slot.
-; d2.b | Object sub-type (obj_subid)
 ;
 ; Returns:
 ; bcc | Found free slot
@@ -1872,7 +1872,7 @@ Object_Set:
 		movem.l	d6-d7/a5-a6,-(sp)
 		lea	(RAM_Objects).w,a6
 		moveq	#0,d7
-		move.w	d1,d7
+		move.w	d2,d7
 		mulu.w	#obj_len,d7
 		adda	d7,a6
 		bra.s	objSet_Go
@@ -1900,7 +1900,7 @@ objSet_Go:
 		beq.s	.from_del
 		move.l	d0,d7
 		move.l	d7,obj_code(a6)
-		move.b	d2,obj_subid(a6)
+		move.b	d1,obj_subid(a6)
 		bra.s	.exit_this
 .from_del:
 		move.l	a6,a5			; Delete entire object
