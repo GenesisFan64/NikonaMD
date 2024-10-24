@@ -11,15 +11,15 @@
 ; --------------------------------------------------------
 
 ; !! = HARDCODED
-MAX_TRFRPZ	equ 8		; !! Max readRom packets(bytes) **AFFECTS WAVE QUALITY**
+MAX_TRFRPZ	equ 10		; !! Max readRom packets(bytes) **AFFECTS WAVE QUALITY**
 MAX_TRKCHN	equ 32		; !! Max internal shared tracker channel slots *** LIMTED to 32 ***
 MAX_RCACH	equ 20h		; !! Max storage for ROM pattern data *** 1-BIT SIZES ONLY, MUST BE ALIGNED ***
 MAX_BUFFNTRY	equ 4*2		; !! nikona_BuffList buffer entry size
 MAX_SLOTS	equ 3		; !! Number of buffers
+MAX_ZCMND	equ 20h		; !! Size of command array ** 1-bit SIZES ONLY ** (68k uses this label too)
 
 MAX_TBLSIZE	equ 12h		; Maximum size for chip tables
 MAX_TRKINDX	equ 26		; Max channel indexes per buffer: 4PSG+6FM+8PCM+8PWM
-MAX_ZCMND	equ 20h		; Size of command array ** 1-bit SIZES ONLY ** (68k uses this label too)
 
 ; --------------------------------------------------------
 ; Structs
@@ -201,15 +201,14 @@ dac_fill:	push	af		; Save af <-- Changes between PUSH AF(play) and RET(stop)
 ; --------------------------------------------------------
 ; 02Eh - User read/write values
 
-mcdBlock	db 0			; 36h: Flag to BLOCK PCM transfers.
-marsBlock	db 0			; 37h: Flag to BLOCK PWM transfers.
-palMode		db 0			; 3Eh: PAL mode flag
-
 commZRead	db 0			; cmd fifo READ pointer (here)
 psgHatMode	db 0			; Current PSGN mode
 fmSpecial	db 0			; copy of FM3 enable bit
 sbeatAcc	dw 0			; Accumulates on each tick to trigger the sub beats
 sbeatPtck	dw 214			; Default global subbeats (this-32 for PAL) 214=125
+x68ksrclsb	db 0			; readRom temporal LSB
+x68ksrcmid	db 0			; readRom temporal MID
+dDacFifoMid	db 0			; WAVE play halfway refill flag (00h/80h)
 
 ; --------------------------------------------------------
 ; Z80 Interrupt at 0038h
@@ -219,10 +218,6 @@ sbeatPtck	dw 214			; Default global subbeats (this-32 for PAL) 214=125
 		ld	(tickSpSet),sp		; Write TICK flag using current sp (read tickFlag only)
 		di				; Disable interrupt
 		ret
-
-; --------------------------------------------------------
-; 03Eh - More user settings
-
 
 ; --------------------------------------------------------
 ; Initialize
@@ -983,11 +978,10 @@ upd_track:
 		ld	h,(iy+(trk_RomBlks+1))
 		ld	a,(iy+(trk_RomBlks+2))
 		rst	20h
-		rst	8
 		add	hl,bc
 		adc	a,0
 		ld	bc,8			; 8 blocks stored
-		call	readRom		; ** ROM ACCESS **
+		call	readRom			; ** ROM ACCESS **
 .keep_blk:
 		pop	hl
 		pop	bc
@@ -1042,7 +1036,7 @@ upd_track:
 		add	hl,bc
 		adc	a,0
 		ld	bc,4*8			; 8 heads stored
-		call	readRom		; ** ROM ACCESS **
+		call	readRom			; ** ROM ACCESS **
 .keep_it:
 		pop	bc
 		ld	a,c
@@ -1096,7 +1090,7 @@ upd_track:
 		xor	a
 		ld	(iy+trk_rowPause),a
 		ld	(iy+trk_TickTmr),a
-		ld	(iy+trk_Status),a	; Disable track slot
+		ld	(iy+trk_Status),-1	; Disable track slot
 		ret
 
 ; ----------------------------------------
@@ -1162,33 +1156,29 @@ upd_track:
 		ld	c,0Eh
 		call	readRom		; ** ROM access **
 
-
 	; headerOut:
 	; dc.w numof_chnls
 	; dc.l .blk,.pat,.ins
 	; *** READING BACKWARDS
 		ld	ix,headerOut_e-1	; Read temp header BACKWARDS
-		rst	8
+		rst	20h
 		call	.grab_rhead		; Instrument data
 		ld	(iy+trk_RomInst),l
 		ld	(iy+(trk_RomInst+1)),h
 		ld	(iy+(trk_RomInst+2)),b
-		rst	20h
-		rst	8
 		call	.grab_rhead		; Pattern heads
 		ld	(iy+trk_RomPatt),l	; Save ROM patt base
 		ld	(iy+(trk_RomPatt+1)),h
 		ld	(iy+(trk_RomPatt+2)),b
 		ld	(iy+trk_BankHeads),80h	; Reset pattern banking
-		rst	8
 		call	.grab_rhead		; Block data
 		ld	(iy+trk_RomBlks),l	; Save ROM patt base
 		ld	(iy+(trk_RomBlks+1)),h
 		ld	(iy+(trk_RomBlks+2)),b
 		ld	(iy+trk_BankBlk),80h	; Reset pattern banking
-		rst	8
 		ld	a,(ix)			; dc.w numof_chnls
 		ld	(iy+trk_MaxChnl),a
+		rst	8
 		jp	.set_track
 
 ; Read 68K pointer:
@@ -1295,12 +1285,8 @@ proc_chips:
 ; iy - Buffer
 tblbuff_read:
 		rst	20h			; Refill wave here
-; 		ld	l,(iy)
-; 		ld	h,(iy+1)
 		call	get_tick
 		rst	8
-; 		push	hl
-; 		pop	iy
 		ld	b,(iy+trk_Status)	; bit7: Track active?
 		bit	7,b
 		ret	z
@@ -1309,8 +1295,8 @@ tblbuff_read:
 		jp	nz,.track_cont
 		call	track_out
 		ld	(iy+trk_Status),0
+; 		rst	20h			; Refill wave
 .track_cont:
-		rst	20h			; Refill wave
 		push	iy
 		pop	hl
 		rst	8
@@ -1329,8 +1315,8 @@ tblbuff_read:
 		or	a
 		jr	nz,.has_indx		; If non-zero: valid
 		push	bc			; ** wave sync
-		ld	b,4
-		djnz	$
+; 		ld	b,4
+; 		djnz	$
 		pop	bc			; **
 		rst	8
 		jr	.no_indx
@@ -1367,11 +1353,12 @@ tblbuff_read:
 		ld	a,(ix+chnl_Ins)		; Check intrument type FIRST
 		or	a
 		ret	z			; If 0 == stop
-		rst	8
+		rst	20h			; Refill wave here
 		dec	a			; inst-1
 		and	01111111b
 		ld	hl,instListOut		; hl - Temporal storage for instrument
 		push	hl
+		rst	8
 		rlca
 		rlca
 		rlca
@@ -1554,11 +1541,6 @@ tblbuff_read:
 		inc	hl
 		ld	b,(hl)			; Read MSB
 		dec	hl
-; 		nop	; wave sync
-; 		nop
-; 		rst	8
-; 		nop
-; 		nop
 		or	b
 		jr	z,.new_link_z
 		call	.nextsrch_tbl
@@ -1580,7 +1562,7 @@ tblbuff_read:
 		or	a			; Failsafe zero priority overwrite
 		jr	z,.new_link_o
 		cp	c
-		jr	z,.new_link_o
+; 		jr	z,.new_link_o
 		jr	c,.new_link_o		; PRIORITY
 		rst	8
 		call	.nextsrch_tbl
@@ -1590,11 +1572,6 @@ tblbuff_read:
 		ld	de,MAX_TBLSIZE
 		add	hl,de
 		pop	de
-; 		nop	; wave sync
-; 		nop
-; 		rst	8
-; 		nop
-; 		nop
 		ret
 .new_link_z:
 		inc	sp		; skip backup
@@ -1641,7 +1618,7 @@ tblbuff_read:
 		or	a			; Failsafe zero priority overwrite
 		jr	z,.l_hiprio
 		cp	c
-		jr	z,.l_hiprio
+; 		jr	z,.l_hiprio
 		jr	c,.l_hiprio		; PRIORITY
 		rst	8
 .set_asfull:
@@ -1695,8 +1672,6 @@ dtbl_multi:
 		rst	8
 		ld	de,MAX_TBLSIZE
 		add	iy,de
-		ld	b,4		; ** wave sync ** IMPORTANT
-		djnz	$
 		rst	8
 		jr	dtbl_multi
 dtbl_singl:
@@ -1768,6 +1743,7 @@ dtbl_singl:
 .siln_dac:
 		call	dac_off
 .siln_fm:
+		call	.fm_tloff
 		jp	.fm_keyoff
 
 ; ----------------------------------------
@@ -1912,11 +1888,11 @@ dtbl_singl:
 		jp	z,.no_req
 		neg	a
 		ld	e,a
-; 		ld	c,a
+		ld	c,a
 		xor	a
 		ld	(iy+ztbl_PitchBend),a
 		ccf
-		sla	e
+		sla	c
 		sbc	a,a
 		ld	d,a
 		add	hl,de
@@ -2032,33 +2008,13 @@ dtbl_singl:
 		xor	a			; clear high
 		ccf				; clear carry
 		sla	e			; pitchbend << 2
-		sla	e
+		nop				; **
 		sbc	a,a			; get carry MSB
 		ld	d,a
 		add	hl,de			; Pitchbend the freq
 		call	.fm_setfreq
 		pop	bc
 .nofm_note:
-		ret
-
-; --------------------------------
-
-; c - KeyID
-.fm_setfreq:
-		ld	a,c
-		and	011b
-		or	0A4h
-		ld	d,a
-		ld	e,h
-		rst	8
-		call	fm_autoreg
-		ld	a,c
-		and	011b
-		or	0A0h
-		ld	d,a
-		ld	e,l
-		call	fm_autoreg
-		rst	8
 		ret
 
 ; --------------------------------
@@ -2152,75 +2108,58 @@ dtbl_singl:
 		djnz	.tl_down
 		ret
 
+; --------------------------------
+
+; c - KeyID
+.fm_setfreq:
+		ld	a,c
+		and	011b
+		or	0A4h
+		ld	d,a
+		ld	e,h
+		rst	8
+		call	fm_autoreg
+		ld	a,c
+		and	011b
+		or	0A0h
+		ld	d,a
+		ld	e,l
+		call	fm_autoreg
+		rst	8
+		ret
+
 ; ----------------------------------------
 
 .mkfm_set:
 		ld	a,(iy+ztbl_Chip)
 		call	.get_fmcach
+
+		push	hl
 		ld	de,1Ch			; Go to last regs
 		add	hl,de
-		ld	c,(hl)			; c - 0B0h from here
-		push	hl			; Save point
-		ld	de,-18h			; <-- backwards relocate to TLs
-		add	hl,de
-		rst	8
-; d - 40h+
-; hl - TL data
-; .mkfm_set:
-		push	bc
-		push	hl
-		ld	hl,.fm_cindx		; hl - jump carry list
-		ld	a,c			; Read 0B0h copy
-		and	0111b
-		ld	d,0
-		ld	e,a
-		add	hl,de
-		ld	a,(iy+ztbl_Chip)
-		and	011b
-		or	40h			; TL registers
-		ld	d,a
-		rst	8
-		ld	a,(iy+ztbl_Volume)	; Read current Volume
-		sub	a,(iy+ztbl_VolSlide)
-		sub	a,(iy+ztbl_MasterVol)	; + MASTER vol
-		ld	c,a			; c - Current Volume
-		ld	b,(hl)			; b - Current jump-carry byte
+		ld	b,(hl)			; c - 0B0h from here
 		pop	hl
-		rrc	b			; OP1
-		call	c,.write_tl
-		inc	hl
-		inc	d
-		inc	d
 		rst	8
-		inc	d
-		inc	d
-		rrc	b			; OP2
-		call	c,.write_tl
-		inc	hl
-		inc	d
-		inc	d
-		inc	d
-		inc	d
-		rrc	b			; OP3
-		call	c,.write_tl
-		inc	hl
-		rst	8
-		inc	d
-		inc	d
-		inc	d
-		inc	d
-		rrc	b			; OP4
-		call	c,.write_tl
-		inc	hl
-		inc	d
-		inc	d
-		inc	d
-		inc	d
-		rst	8
-		pop	bc
-		pop	hl			; Restore point
-		ld	c,(iy+ztbl_Chip)	; 0B0h algorithm
-		ld	a,(hl)
+		ld	c,(iy+ztbl_Chip)
+		ld	a,c
+		and	011b
+		or	30h			; Start at reg 30h
+		ld	d,a
+
+	; hl - reg data
+	;  b - 0B0h algorithm copy
+	;  c - current FM channel 0-6
+	;  d - Starting FM reg
+		call	.mkfm_wregs		; 30h+
+		call	.mkfm_tlvol		; 40h+
+		call	.mkfm_wregs		; 50h+
+		call	.mkfm_wregs		; 60h+
+		call	.mkfm_wregs		; 70h+
+		call	.mkfm_wregs		; 80h+
+		call	.mkfm_wregs		; 90h+
+
+; 		ld	a,(hl)			; 0B0h algorithm
+		ld	a,b
 		inc	hl
 		ld	e,a
 		ld	a,c
@@ -2263,6 +2202,107 @@ dtbl_singl:
 		ld	d,28h
 		jp	fm_send_1		; Set keys
 
+; ----------------------------------------
+
+.mkfm_wregs:
+		rst	8
+		ld	e,(hl)
+		inc	hl
+		call	fm_autoreg
+		inc	d
+		inc	d
+		inc	d
+		inc	d
+		rst	8
+		ld	e,(hl)
+		inc	hl
+		call	fm_autoreg
+		inc	d
+		inc	d
+		inc	d
+		inc	d
+		rst	8
+		ld	e,(hl)
+		inc	hl
+		call	fm_autoreg
+		inc	d
+		inc	d
+		inc	d
+		inc	d
+		rst	8
+		ld	e,(hl)
+		inc	hl
+		call	fm_autoreg
+		inc	d
+		inc	d
+		inc	d
+		inc	d
+		rst	8
+		ret
+
+; ----------------------------------------
+; Write 40+ TL w/volume
+
+; hl - TL reg data
+; b - current 0B0h
+; d - 40h+
+
+.mkfm_tlvol:
+		ld	a,b			; Read 0B0h copy
+		push	bc
+		push	hl
+		ld	hl,.fm_cindx		; hl - jump carry list
+		and	0111b
+		ld	b,0
+		ld	c,a
+		add	hl,bc
+		rst	8
+		ld	a,(iy+ztbl_Volume)	; Read current Volume
+		sub	a,(iy+ztbl_VolSlide)
+		sub	a,(iy+ztbl_MasterVol)	; + MASTER vol
+		ld	c,a			; c - Current Volume
+		ld	b,(hl)			; b - Current jump-carry byte
+		pop	hl
+		rrc	b			; OP1
+		call	c,.write_tl
+		call	nc,.write_ntl
+		inc	hl
+		inc	d
+		inc	d
+		rst	8
+		inc	d
+		inc	d
+		rrc	b			; OP2
+		call	c,.write_tl
+		call	nc,.write_ntl
+		inc	hl
+		inc	d
+		inc	d
+		inc	d
+		inc	d
+		rrc	b			; OP3
+		call	c,.write_tl
+		call	nc,.write_ntl
+		inc	hl
+		rst	8
+		inc	d
+		inc	d
+		inc	d
+		inc	d
+		rrc	b			; OP4
+		call	c,.write_tl
+		call	nc,.write_ntl
+		inc	hl
+		inc	d
+		inc	d
+		inc	d
+		inc	d
+		rst	8
+		pop	bc
+		ret
+
+; --------------------------------
+
 .write_tl:
 		ld	a,(hl)
 		sub	a,c			; reg - volume
@@ -2276,6 +2316,17 @@ dtbl_singl:
 		rst	8
 		pop	bc
 		ret
+
+.write_ntl:
+		push	bc
+		ld	e,(hl)
+		ld	c,(iy+ztbl_Chip)
+		call	fm_autoreg
+		rst	8
+		pop	bc
+		ret
+
+; --------------------------------
 ; Jump carry list
 .fm_cindx:
 		db 1000b
@@ -2293,6 +2344,9 @@ dtbl_singl:
 ;
 ; Ouput:
 ; hl - instrument data
+;
+; Uses:
+; de
 ; --------------------------------
 
 .get_fmcach:
@@ -2900,6 +2954,7 @@ dtbl_singl:
 		ld	e,(ix)
 		inc	ix
 		ld	d,(ix)
+
 		ld	ix,fmlist_rsave
 		ld	a,(iy+ztbl_Chip)
 		add	a,a
@@ -2935,34 +2990,7 @@ dtbl_singl:
 		ld	(ix),l
 		ld	a,b
 		ld	bc,28h			; <- size
-		push	de
-		call	readRom		; *** ROM ACCESS ***
-		pop	hl
-		rst	20h
-		ld	c,(iy+ztbl_Chip)
-	; hl - fmcach intrument
-	; de - FM reg and data: 3000h
-	;  c - FM keyChannel
-		ld	a,c
-		and	011b
-		or	30h			; Start at reg 30h
-		ld	d,a
-		ld	e,0
-		rst	8
-		ld	b,7*4			; Write ALL base FM registers
-.fm_setrlist:
-		ld	e,(hl)
-		inc	hl
-		call	fm_autoreg
-		nop
-		nop
-		rst	8
-		nop
-		inc	d		; +4
-		inc	d
-		inc	d
-		inc	d
-		djnz	.fm_setrlist
+		call	readRom			; *** ROM ACCESS ***
 .same_patch:
 		pop	bc
 		pop	hl
@@ -3133,7 +3161,7 @@ dtbl_singl:
 		ret	z
 		cp	-2
 		ret	z
-		rst	20h
+; 		rst	20h
 		rst	8
 		ld	a,(hl)
 		and	11110000b
@@ -3260,7 +3288,7 @@ zmars_send:
 		jr	nz,.wait_in
 		ld	c,0C0h
 		ld	(iy),c		; Set our entrance ID
-		ld	b,8		; Retry times
+		ld	b,14		; Retry 14 times
 .make_sure:
 		ld	a,(iy)		; Check if did write
 		cp	c
@@ -3276,7 +3304,7 @@ zmars_send:
 		set	5,(iy)		; "MAIN" lock
 		rst	8
 		ld	de,10h+8	; ix - MAIN comm ports
-		add	hl,de		; starting at 8
+		add	hl,de
 	; ix - table
 	; hl - main data
 		ld	c,40h/8		; c - Packets to send
@@ -3613,7 +3641,7 @@ readRom:
 		rst	8
 		ld	a,c
 		ld	(cdRamLen),a
-		ld	hl,RAM_ZCdFlag_D&07FFFh+8000h	; ** 68K LABEL **
+		ld	hl,RAM_ZCdFlagD&07FFFh+8000h	; ** 68K LABEL **
 		ld	(hl),1				; WRITE flag
 .wait:
 	; Get stuck here until 68K finishes
@@ -4292,9 +4320,6 @@ mcdUpd		db 0			; Flag to request a PCM transfer
 		dw fmcach_4		; Followup
 		dw fmcach_5
 		dw fmcach_6
-x68ksrclsb	db 0		; readRom temporal LSB
-x68ksrcmid	db 0		; readRom temporal MID
-dDacFifoMid	db 0		; WAVE play halfway refill flag (00h/80h)
 dDacPntr	db 0,0,0	; WAVE play current ROM position
 dDacCntr	db 0,0,0	; WAVE play length counter
 headerOut	ds 00Eh		; Temporal storage for 68k pointers
@@ -4430,16 +4455,20 @@ trkCach_2	ds MAX_RCACH
 ; ====================================================================
 ; ----------------------------------------------------------------
 ; Control area
+; * MANUAL ORDER, check gema.asm *
 ; ----------------------------------------------------------------
 
 		org 1F60h
 commZfifo	ds MAX_ZCMND			; Buffer for commands from 68k side
 commZWrite	db 0				; cmd fifo wptr (from 68k)
 commZRomBlk	db 0				; 68k ROM block flag
-cdRamLen	db 0				; Size + status flag
 cdRamDst	db 0,0				; ** Z80 destination
 cdRamSrc	db 0,0				; ** 68k 24-bit source
 cdRamSrcB	db 0				; **
+cdRamLen	db 0				; Size + status flag
+palMode		db 0				; PAL mode flag
+mcdBlock	db 0				; Flag to BLOCK PCM transfers.
+marsBlock	db 0				; Flag to BLOCK PWM transfers.
 
 ; --------------------------------------------------------
 		dephase

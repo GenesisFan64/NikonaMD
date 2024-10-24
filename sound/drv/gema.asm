@@ -1,35 +1,7 @@
 ; ===========================================================================
 ; -------------------------------------------------------------------
-; GEMA/Nikona Sound Driver v1.0
+; GEMA/Nikona Sound Driver v1.0.x
 ; by GenesisFan64 2023-2024
-;
-; Features:
-; - Support for SEGA CD's PCM channels:
-;   | All 8 channels with streaming support
-;   | for larger samples.
-;
-; - Support for 32X's PWM:
-;   | 8 pseudo-channels in either MONO
-;   | or STEREO.
-;
-; - Sample playback at 16000hz base for all chips
-;
-; - DMA ROM protection for DAC
-;   | This keeps the wave playback in a
-;   | decent quality while doing any DMA
-;   | task in the 68k side.
-; - FM special mode with custom frequencies
-; - Autodetection for the PSG's Tone3 mode
-;
-; * Notes:
-; This driver uses the area $FFFF00-$FFFFFF
-; The Z80 writes a flag directly to RAM for
-; a workaround to bypass a data-reading
-; hardware limitation. (see gemaSendRam)
-;
-; CURRENTLY THIS CAN ONLY BE USED HERE IN NikonaSDK
-; BECAUSE OF CROSS-REFERENCING LABELS BETWEEN THE
-; Z80 and 68K.
 ; -------------------------------------------------------------------
 
 ; ====================================================================
@@ -37,25 +9,27 @@
 ; Variables
 ; --------------------------------------------------------
 
-; z80_cpu	equ $A00000		; Z80 CPU area, size: $2000
-; z80_bus 	equ $A11100		; only read bit 0 (bit 8 as WORD)
-; z80_reset	equ $A11200		; WRITE only: $0000 reset/$0100 cancel
+; z80_cpu	equ $A00000			; Z80 CPU area, size: $2000
+; z80_bus 	equ $A11100			; only read bit 0 (bit 8 as WORD)
+; z80_reset	equ $A11200			; WRITE only: $0000 reset/$0100 cancel
 
 ; Z80-area points:
-zDrvFifo	equ commZfifo		; FIFO command storage
-zDrvFWrt	equ commZWrite		; FIFO command index
-zDrvRomBlk	equ commZRomBlk		; ROM block flag
-zDrvMarsBlk	equ marsBlock		; Flag to disable 32X's PWM
-zDrvMcdBlk	equ mcdBlock		; Flag to disable SegaCD's PCM
-zDrvRamSrc	equ cdRamSrcB		; RAM-read source+dest pointers
-zDrvRamLen	equ cdRamLen		; RAM-read length and flag
+zDrvFifo	equ $1F60;commZfifo		; FIFO command storage
+zDrvFWrt	equ $1F80;commZWrite		; FIFO command index
+zDrvRomBlk	equ $1F81;commZRomBlk		; ROM block flag
+zDrvRamSrc	equ $1F82+4;cdRamSrcB		; !! RAM-read source+dest pointers
+zDrvRamLen	equ $1F87;cdRamLen		; RAM-read length + flag
+zDrvPalMode	equ $1F88;palMode		; PAL speed flag
+zDrvMarsBlk	equ $1F89;marsBlock		; Flag to disable 32X's PWM
+zDrvMcdBlk	equ $1F8A;mcdBlock		; Flag to disable SegaCD's PCM
+zDrvMaxCmnd	equ $20;MAX_ZCMND		; Command fifo size
 
 ; ====================================================================
 ; --------------------------------------------------------
 ; Labels
 ; --------------------------------------------------------
 
-RAM_ZCdFlag_D	equ RAM_SoundBuff	; transferRom flag (shared with Z80)
+RAM_ZCdFlagD	equ RAM_SoundBuff		; transferRom flag (shared with Z80)
 
 ; ====================================================================
 ; --------------------------------------------------------
@@ -85,11 +59,11 @@ gemaInit:
 		move.b	(a0)+,(a1)+
 		dbf	d0,.copy
 		move.w	#0,(z80_reset).l		; Reset
-		clr.b	(RAM_ZCdFlag_D).w		; Reset Z80 transferRom flag
+		clr.b	(RAM_ZCdFlagD).w		; Reset Z80 transferRom flag
 		move.b	(sys_io).l,d0			; Write PAL mode flag from here
 		btst	#6,d0
 		beq.s	.not_pal
-		move.b	#1,(z80_cpu+palMode).l
+		move.b	#1,(z80_cpu+zDrvPalMode).l
 .not_pal:
 		nop
 		nop
@@ -119,12 +93,8 @@ gemaReset:
 ; this a lot during display, commonly during the VBlank waiting
 ; loop.
 ;
-; This checks if the Z80 wants to read from RAM (as it can't
-; see it), The 68k CPU manually writes the RAM bytes from
-; here to the Z80's RAM
-; THIS IS REQUIRED if you want to play your the tracks
-; (and instruments) in case you use the ASIC-Stamp scaling/
-; rotation.
+; This checks if the Z80 wants to read from RAM, then here
+; we manually write the bytes the Z80 wants to read.
 ;
 ; SCD/CD32X:
 ; - DAC samples are safe to read from WORD-RAM, but NOT
@@ -135,17 +105,17 @@ gemaReset:
 ; ----------------------------------------------------------------
 
 gemaSendRam:
-		tst.b	(RAM_ZCdFlag_D).w		; Z80 WROTE the flag?
+		tst.b	(RAM_ZCdFlagD).w		; Z80 WROTE the flag?
 		beq.s	.no_task
-		clr.b	(RAM_ZCdFlag_D).w		; Clear here
+		clr.b	(RAM_ZCdFlagD).w		; Clear here, Z80 doesn't know.
 		movem.l	a4-a6/d5-d7,-(sp)
-		moveq	#0,d7
+		moveq	#0,d7				; Cleanup d7
 		bsr	sndLockZ80
-		move.b	(z80_cpu+zDrvRamLen).l,d7	; Size != 0?
-		beq.s	.no_size
-		subq.w	#1,d7
-		lea	(z80_cpu+(zDrvRamSrc+1)),a6
-		lea	(z80_cpu),a5
+		move.b	(z80_cpu+zDrvRamLen).l,d7	; Len == 0?
+		beq.s	.no_size			; Invalid size, do nothing
+		subq.w	#1,d7				; dbf -1
+		lea	(z80_cpu+(zDrvRamSrc+1)),a6	; a6 - SRC location and DST, backwards
+		lea	(z80_cpu),a5			; a5 - Z80 area
 		move.b	-(a6),d6			; d6 - Source
 		swap	d6
 		move.b	-(a6),d6
@@ -160,7 +130,7 @@ gemaSendRam:
 .copy_bytes:
 		move.b	(a4)+,(a5)+
 		dbf	d7,.copy_bytes
-		move.b	#0,(z80_cpu+zDrvRamLen).l	; Clear LEN, unlocks Z80 loop
+		move.b	#0,(z80_cpu+zDrvRamLen).l	; clear LEN, breaks loop
 .no_size:
 		bsr	sndUnlockZ80
 		movem.l	(sp)+,a4-a6/d5-d7
@@ -207,7 +177,7 @@ sndReq_Enter:
 	endif
 		suba	#4,sp				; Extra jump return
 		movem.l	d6-d7/a5-a6,-(sp)		; Save these regs to the stack
-		move.w	sr,-(sp)
+		move.w	sr,-(sp)			; and sr too
 		ori.w	#$0700,sr			; Disable interrupts
 		adda	#(4*4)+2+4,sp			; Go back to the RTS jump
 		lea	(z80_cpu+zDrvFWrt).l,a5		; a5 - commZWrite
@@ -245,24 +215,25 @@ sndReq_Exit:
 ; ------------------------------------------------
 
 sndReq_scmd:
-		move.b	#-1,(a6,d6.w)			; write command-start flag
-		addq.b	#1,d6				; next fifo pos
-		andi.b	#MAX_ZCMND-1,d6			; * Z80 label *
+		move.b	#-1,(a6,d6.w)			; Command-start flag
+		addq.b	#1,d6				; Next fifo pos
+		andi.b	#zDrvMaxCmnd-1,d6
 		bra.s	sndReq_sbyte
 sndReq_slong:
 		bsr	sndReq_sbyte
 		ror.l	#8,d7
-sndReq_saddr:	; 24-bit address
+; 24-bit address
+sndReq_saddr:
 		bsr	sndReq_sbyte
 		ror.l	#8,d7
 sndReq_sword:
 		bsr	sndReq_sbyte
 		ror.l	#8,d7
 sndReq_sbyte:
-		move.b	d7,(a6,d6.w)			; write byte
-		addq.b	#1,d6				; next fifo pos
-		andi.b	#MAX_ZCMND-1,d6			; * Z80 label *
-		move.b	d6,(a5)				; update commZWrite
+		move.b	d7,(a6,d6.w)			; Write byte
+		addq.b	#1,d6				; Next fifo pos
+		andi.b	#zDrvMaxCmnd-1,d6
+		move.b	d6,(a5)				; Update commZWrite
 		rts
 
 ; --------------------------------------------------------
@@ -274,40 +245,36 @@ sndReq_sbyte:
 ; --------------------------------------------------------
 
 gemaDmaPause:
-	if PICO
-		rts
-	else
+	if PICO=0
 		move.l	d7,-(sp)
 		bsr	sndLockZ80
-		move.b	#1,(z80_cpu+zDrvRomBlk).l	; Block flag for Z80
+		move.b	#1,(z80_cpu+zDrvRomBlk).l	; Set ROM-busy flag
 		bsr	sndUnlockZ80
 		move.w	#96,d7				; Small delay
 		dbf	d7,*
 		move.l	(sp)+,d7
-		rts
 	endif
+		rts
 
 ; --------------------------------------------------------
 ; gemaDmaResume
 ;
 ; Call this AFTER finishing DMA transfer
 ;
-; 32X: Clear the RV bit manually AFTER calling this.
+; 32X: Reset the RV bit manually BEFORE calling this.
 ; --------------------------------------------------------
 
 gemaDmaResume:
-	if PICO
-		rts
-	else
+	if PICO=0
 		move.l	d7,-(sp)
 		bsr	sndLockZ80
-		move.b	#0,(z80_cpu+zDrvRomBlk).l	; Unblock flag for Z80
+		move.b	#0,(z80_cpu+zDrvRomBlk).l	; Clear ROM-busy flag
 		bsr	sndUnlockZ80
 		move.w	#96,d7				; Small delay
 		dbf	d7,*
 		move.l	(sp)+,d7
-		rts
 	endif
+		rts
 
 ; ====================================================================
 ; --------------------------------------------------------
@@ -319,7 +286,7 @@ gemaDmaResume:
 ; --------------------------------------------------------
 ; gemaTest
 ;
-; For TESTING only.
+; For TESTING only
 ; --------------------------------------------------------
 
 gemaTest:
@@ -331,22 +298,14 @@ gemaTest:
 ; --------------------------------------------------------
 ; gemaSetMasterList
 ;
-; Sets the Master tracklist location, data can be stored
-; on ROM, RAM* and Word-RAM*
+; Sets the Master sequence list location
 ;
 ; Input:
 ; a0 | 68k pointer
 ;
 ; Notes:
-; - ALL TRACKS MUST BE STOPPED, CALL gemaStopAll FIRST
-;
-; * RAM data (SCD/CD32X when using Stamps):
-;   Requires calling gemaSendRam manually as a
-;   workaround for the Z80's limitation of not being
-;   able to read from RAM
-; * Word-RAM (SCD/CD32X):
-;   Make sure the Word-RAM permission is set to MAIN-CPU
-;   all the time.
+; - ALL TRACKS MUST BE STOPPED, CALL gemaStopAll FIRST,
+; wait a few frames is required.
 ; --------------------------------------------------------
 
 gemaSetMasterList:
@@ -367,6 +326,7 @@ gemaSetMasterList:
 ; d1.b | Starting block
 ; d2.b | Playback slot number
 ;        If -1: Auto-search free slot
+;        (same as gemaPlaySeqAuto)
 ; --------------------------------------------------------
 
 gemaPlaySeq:
@@ -410,9 +370,11 @@ gemaPlaySeqAuto:
 ;
 ; Input:
 ; d0.b | Sequence number to search for
-;        If -1: Stop tracks with any sequence
+;        If -1: Stop all tracks with any sequence
 ; d1.b | Playback slot number
 ;        If -1: Stop all slots
+;
+; If both d0 and d1 are -1 it acts like gemaStopAll
 ; --------------------------------------------------------
 
 gemaStopSeq:
@@ -473,8 +435,7 @@ gemaFadeSeq:
 ; Set Master volume to a Seq slot.
 ;
 ; Input:
-; d0.b | Master volume:
-;        $00-max $40-min
+; d0.b | Master volume: $00-max $40-min
 ; d1.b | Playback slot number
 ;        If -1: Set to all slots
 ;
@@ -497,17 +458,15 @@ gemaSetSeqVol:
 ; --------------------------------------------------------
 ; gemaSetBeats
 ;
-; Sets global sub-beats, affects ALL tracks.
+; Set global sub-beats
 ;
 ; Input:
-; d0.w | sub-beats
+; d0.w | Sub-beats value
 ;
 ; Note:
-; This gets auto-converted if Z80 is in PAL-speed
-; mode.
+; If the Z80 is running in PAL mode the number will
+; change inside the Z80 to match the PAL's speed.
 ; --------------------------------------------------------
-
-; Ex. sub-beats 215 is tempo 125 on NTSC speed
 
 gemaSetBeats:
 		bsr	sndReq_Enter

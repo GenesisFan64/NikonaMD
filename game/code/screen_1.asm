@@ -101,7 +101,7 @@ RAM_BlocksBuff		ds.b 8*8
 		bsr	Scrn0_DrawMapAll
 	; ----------------------------------------------
 		moveq	#0,d0
-		moveq	#1,d1
+		moveq	#0,d1
 		bsr	gemaPlaySeq
 		bsr	Object_Run
 		bsr	Video_BuildSprites
@@ -174,7 +174,7 @@ RAM_BlocksBuff		ds.b 8*8
 		move.w	(Controller_1+on_press).w,d7
 		andi.w	#JoyMode,d7
 		beq.s	.not_m
-		move.w	#$38,(RAM_ShakeMe).w
+; 		move.w	#$38,(RAM_ShakeMe).w
 		moveq	#$0F,d0
 		moveq	#SFX_punch,d1
 		moveq	#1,d2

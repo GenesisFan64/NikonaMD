@@ -31,38 +31,30 @@ gtrk_SfxAll:
 	gInsFm -12,FmIns_sfx_smash
 	gInsFm -12,FmIns_sfx_smash
 	gInsFm -12,FmIns_sfx_explode
-	gInsFm 0,FmIns_Bell_mid36
+	gInsFm 0,FmIns_Bell_low13
 
 ; ----------------------------------------------------
 gtrk_Test0:
 ; 	gemaHead .blk,.pat,.ins,4
-; .blk:	binclude "sound/seq/test_blk.bin"
-; .pat:	binclude "sound/seq/test_patt.bin"
+; .blk:	binclude "sound/seq/test_2_blk.bin"
+; .pat:	binclude "sound/seq/test_2_patt.bin"
 ; .ins:
-; 	gInsPcm -12,PcmIns_TEST,1
+; 	gInsDac 0,DacIns_sxbeats,0
+; 	gInsDac 0,DacIns_sxbeats2,0
+; 	gInsDac 0,DacIns_drumsetA,0
 
 	gemaHead .blk,.pat,.ins,10
-.blk:	binclude "sound/seq/test_2_blk.bin"
-.pat:	binclude "sound/seq/test_2_patt.bin"
+.blk:	binclude "sound/seq/carillon_blk.bin"
+.pat:	binclude "sound/seq/carillon_patt.bin"
 .ins:
-
- if MARS
-	gInsPwm 0,PwmIns_sxbeats,0
-	gInsPwm 0,PwmIns_sxbeats2,0
-	gInsPwm 0,PwmIns_drumsetA,0
- elseif MCD|MARSCD
-	gInsPcm 0,PcmIns_sxbeats,0
-	gInsPcm 0,PcmIns_sxbeats2,0
-	gInsPcm 0,PcmIns_drumsetA,0
- else
-	gInsDac 0,DacIns_sxbeats,0
-	gInsDac 0,DacIns_sxbeats2,0
-	gInsDac 0,DacIns_drumsetA,0
- endif
-	gInsFm +24,FmIns_Hats_1
-	gInsFm3 0,FmSpIns_cowbell_l
-	gInsPsgN 0,$20,$20,$20,$00,$0C,$00,%101
-	gInsPsgN 0,$40,$40,$40,$00,$10,$00,%100
+	gInsFm -12,FmIns_Guitar_bball
+	gInsFm -24,FmIns_Bell_mid36
+	gInsFm 0,FmIns_Trumpet_carnival
+	gInsFm -12,FmIns_Trumpet_bus
+	gInsDac 0,DacIns_Kick_2,0
+	gInsDac +12,DacIns_Snare_2,0
+	gInsFm 0,FmIns_Hats_1
+	gInsPsgN +24,$00,$00,$00,$00,$00,$00,%011
 
 ; ----------------------------------------------------
 gtrk_Test1:
@@ -319,6 +311,11 @@ FmIns_sfx_punch_2:
 FmIns_sfx_smash:
 		binclude "sound/ins/fm/gsx/fmsfx_smash.gsx",$2478,$20
 
+FmIns_bass_italo:
+		binclude "sound/ins/fm/gsx/bass_italo.gsx",$2478,$20
+FmIns_Guitar_bball:
+		binclude "sound/ins/fm/gsx/guitar_bball.gsx",$2478,$20
+
 ; ===========================================================================
 ; -------------------------------------------------------------------
 ; GEMA/Nikona DAC samples
@@ -336,8 +333,10 @@ FmIns_sfx_smash:
 	endif
 ; 		gSmplData DacIns_trnthem_10,"sound/ins/smpl/trnthem/10.wav",3033
 ; 		gSmplData DacIns_trnthem_20,"sound/ins/smpl/trnthem/20.wav",14309
-; 		gSmplData DacIns_Kick,"sound/ins/smpl/kick.wav",0
-; 		gSmplData DacIns_Snare,"sound/ins/smpl/snare.wav",0
+		gSmplData DacIns_Kick,"sound/ins/smpl/kick.wav",0
+		gSmplData DacIns_Snare,"sound/ins/smpl/snare.wav",0
+		gSmplData DacIns_Kick_2,"sound/ins/smpl/kick_2.wav",0
+		gSmplData DacIns_Snare_2,"sound/ins/smpl/snare_2.wav",0
 ; 		gSmplData DacIns_Timpani,"sound/ins/smpl/timpani.wav",0
 ; 		gSmplData DacIns_wegot_kick,"sound/ins/smpl/wegot_kick.wav",0
 ; 		gSmplData DacIns_wegot_crash,"sound/ins/smpl/wegot_crash.wav",0

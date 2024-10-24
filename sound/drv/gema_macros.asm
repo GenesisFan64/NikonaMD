@@ -1,15 +1,19 @@
+; ===========================================================================
 ; ------------------------------------------------------------
 ; GEMA MACROS
+;
+; AS format
+;
+; Labels required:
+; MCD, MARS, MARSCD
 ; ------------------------------------------------------------
 
 ; ----------------------------------------------------
 ; gSmplData - Special include for .wav files,
-;             works for all chips.
 ;
-; labl | 24-bit pointer depending of the current CPU
+; labl | Label used in this sample
 ; file | WAV file location
-; loop | Loop start point, only used if looping is
-;        enabled
+; loop | Loop start point
 ; ----------------------------------------------------
 
 gSmplData macro labl,file,loop
@@ -21,6 +25,29 @@ labl	label *
 	dc.b ((loop)&$FF),(((loop)>>8)&$FF),(((loop)>>16)&$FF)
 labl_s:
 	binclude file,$2C
+labl_e:
+	if MARS|MARSCD		; <-- label align for 32X
+		align 4
+	endif
+	endm
+
+; ----------------------------------------------------
+; gSmplRaw - Special include for raw files
+;
+; labl | Label used in this sample
+; file | RAW file location
+; loop | Loop start point
+; ----------------------------------------------------
+
+gSmplRaw macro labl,file,loop
+	if MARS|MARSCD		; <-- label align for 32X
+		align 4
+	endif
+labl	label *
+	dc.b ((labl_e-labl_s)&$FF),(((labl_e-labl_s)>>8)&$FF),(((labl_e-labl_s)>>16)&$FF)
+	dc.b ((loop)&$FF),(((loop)>>8)&$FF),(((loop)>>16)&$FF)
+labl_s:
+	binclude file
 labl_e:
 	if MARS|MARSCD		; <-- label align for 32X
 		align 4
