@@ -5,10 +5,10 @@
 
 MainGemaSeqList:
 	gemaTrk 1,6,gtrk_Test0
+	gemaTrk 0,6,gtrk_SfxAll	; $0F
 	gemaTrk 1,6,gtrk_Test1
 	gemaTrk 1,3,gtrk_Test2
 	gemaTrk 1,3,gtrk_Test3
-	gemaTrk 1,6,gtrk_Test0
 	gemaTrk 1,6,gtrk_Test0
 	gemaTrk 1,6,gtrk_Test0
 	gemaTrk 1,6,gtrk_Test0
@@ -48,13 +48,13 @@ gtrk_Test0:
 .pat:	binclude "sound/seq/carillon_patt.bin"
 .ins:
 	gInsFm -12,FmIns_Guitar_bball
-	gInsFm -24,FmIns_Bell_mid36
+	gInsNull;gInsFm -24,FmIns_Bell_mid36
 	gInsFm 0,FmIns_Trumpet_carnival
 	gInsFm -12,FmIns_Trumpet_bus
 	gInsDac 0,DacIns_Kick_2,0
 	gInsDac +12,DacIns_Snare_2,0
 	gInsFm 0,FmIns_Hats_1
-	gInsPsgN +24,$00,$00,$00,$00,$00,$00,%011
+	gInsFm3 0,FmIns_Sp_OpenHat
 
 ; ----------------------------------------------------
 gtrk_Test1:

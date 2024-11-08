@@ -144,15 +144,14 @@ sizeof_thisbuff		ds.l 0
 		bsr	.gema_view
 		bsr	Object_Run
 		bsr	Video_BuildSprites
-	if MCD|MARSCD
-		bsr	System_MdMcd_CheckHome
-		bcs	.exit_shell
-	endif
 
 	; NEW controls
 		lea	(Controller_1).w,a6
 	; LEFT/RIGHT
 		move.w	on_press(a6),d7
+		move.w	d7,d6
+		andi.w	#JoyStart,d6
+		bne	.exit_this
 		andi.w	#JoyLeft+JoyRight,d7
 		beq.s	.lr_seq
 		moveq	#1,d0
@@ -266,6 +265,16 @@ sizeof_thisbuff		ds.l 0
 
 ; .n_cbtn:
 		bra	.loop
+
+.exit_this:
+		bsr	Video_FadeOut_Full
+	; Stop ALL sequences
+		bsr	gemaStopAll
+	rept 4
+		bsr	System_Render		; Wait 4 frames...
+	endm
+		move.w	#0,(RAM_ScreenMode).w	; Set Screen Mode $07
+		rts				; <-- RTS
 
 ; ------------------------------------------------------
 

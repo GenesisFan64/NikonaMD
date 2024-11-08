@@ -21,7 +21,7 @@ HTAG_SYS_PICO	equ "SEGA PICO       "
 ; --------------------------------------------------------
 ; SCD/CD32X ONLY
 ;
-; Volume and System(SDK/engine) name
+; Volume and System(SDK/Engine) name
 ;
 ; Note:
 ; Leave HTAG_SYSNAME as is if you haven't modified
@@ -39,7 +39,7 @@ HTAG_CDVER	equ $0100|$02		; $0100|Version: $00-$FF
 ; "(C)name year.month"
 ; --------------------------------------------------------
 
-HTAG_DATEINFO	equ "(C)USER 2024.???"
+HTAG_DATEINFO	equ "(C)GF64 2024.???"
 
 ; --------------------------------------------------------
 ; "Domestic" Name, Your game's name in your language

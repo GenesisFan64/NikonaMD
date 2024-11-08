@@ -22,8 +22,8 @@ SFX_btnoff	equ 2
 ; ----------------------------------------------
 
 			memory 2		; Cell $0002
-vramLoc_Haruna		ds.b $140
-vramLoc_Emily		ds.b $110
+vramLoc_Haruna		ds.b $160
+vramLoc_Emily		ds.b $140
 vramLoc_PushBlk		ds.b $40
 vramLoc_Backgrnd	ds.b $3F7
 			endmemory
@@ -99,6 +99,7 @@ RAM_BlocksBuff		ds.b 8*8
 
 		bsr	Scrn0_LoadMap
 		bsr	Scrn0_DrawMapAll
+		bsr	Scrn0_ShowScore			; Draw counter
 	; ----------------------------------------------
 		moveq	#0,d0
 		moveq	#0,d1
@@ -137,19 +138,8 @@ RAM_BlocksBuff		ds.b 8*8
 		move.w	(RAM_ShakeMe).w,d7
 		beq.s	.no_shake
 		sub.w	#1,(RAM_ShakeMe).w
-; 		bset	#0,(RAM_BoardUpd).w
 		tst.w	(RAM_ShakeMe).w
 		bne.s	.no_shake
-
-		lea	(RAM_Score_Haru).w,a0
-		tst.w	(RAM_WhoGotScore).w
-		beq.s	.haruna_scor
-		adda	#1,a0
-.haruna_scor:
-		move.b	(a0),d0
-		moveq	#1,d1
-		bsr	System_BCD_AddB
-		move.b	d0,(a0)
 		bsr	Scrn0_ResetMap
 		bsr	Scrn0_DrawMapAll
 .no_shake:
@@ -232,14 +222,16 @@ ArtList_scrn1:
 ; --------------------------------------------------
 
 obj_Player:
+		lea	obj_ram(a6),a5
 		moveq	#0,d0
 		move.b	obj_index(a6),d0
 		beq.s	.on_init
+		cmp.b	#5,d0
+		bge.s	.on_init
 		tst.w	(RAM_ShakeMe).w
 		bne	.show_me
 .on_init:
 		add.w	d0,d0
-		lea	obj_ram(a6),a5
 		move.w	.list(pc,d0.w),d1
 		jmp	.list(pc,d1.w)
 ; ----------------------------------------------
@@ -248,6 +240,8 @@ obj_Player:
 		dc.w .move_lr-.list	; $02
 		dc.w .move_down-.list	; $03
 		dc.w .move_up-.list	; $04
+		dc.w .hurt_main-.list	; $05
+		dc.w .hurt_dizzy-.list	; $06
 ; ----------------------------------------------
 .init:
 		addq.b	#1,obj_index(a6)
@@ -262,6 +256,7 @@ obj_Player:
 		beq.s	.first_plyr
 		move.w	#$C0,obj_x(a6)
 .first_plyr:
+		move.b	#$70,4(a5)		; Flash timer
 
 ; ----------------------------------------------
 ; Main read
@@ -279,7 +274,7 @@ obj_Player:
 		btst	#bitJoyRight,d7
 		beq.s	.go_right
 		move.w	#$200+8,obj_x_spd(a6)
-		move.w	#-$100,obj_y_spd(a6)
+		move.w	#-$1C0,obj_y_spd(a6)
 		move.w	obj_x(a6),d0
 		add.w	#$20,d0
 		move.w	d0,(a5)
@@ -292,8 +287,8 @@ obj_Player:
 		beq.s	.go_left
 		btst	#bitJoyLeft,d7
 		beq.s	.go_left
-		move.w	#-$200+8,obj_x_spd(a6)
-		move.w	#-$100,obj_y_spd(a6)
+		move.w	#-$200,obj_x_spd(a6)
+		move.w	#-$1C0,obj_y_spd(a6)
 		move.w	obj_x(a6),d0
 		sub.w	#$20,d0
 		move.w	d0,(a5)
@@ -306,7 +301,7 @@ obj_Player:
 		bge.s	.go_down
 		btst	#bitJoyDown,d7
 		beq.s	.go_down
-		move.w	#-$80,obj_y_spd(a6)
+		move.w	#-$100,obj_y_spd(a6)
 		move.w	obj_y(a6),d0
 		add.w	#$18,d0
 		move.w	d0,2(a5)
@@ -319,36 +314,75 @@ obj_Player:
 		beq.s	.cant_move
 		btst	#bitJoyUp,d7
 		beq.s	.cant_move
-		move.w	#-$180-$100,obj_y_spd(a6)
+		move.w	#(-$180*2)-$80,obj_y_spd(a6)
 		move.w	obj_y(a6),d0
 		sub.w	#$18,d0
 		move.w	d0,2(a5)
 		move.w	obj_x(a6),(a5)
 		move.b	#4,obj_index(a6)
 		move.w	#1,obj_anim_num(a6)
-		bra	.show_me
 .cant_move:
 		bra	.show_me
+
+; ----------------------------------------------
+; Hurt
+; ----------------------------------------------
+
+.hurt_main:
+		bsr	object_Speed
+		addi.w	#$30,obj_y_spd(a6)
+		move.w	obj_y(a6),d0
+		cmp.w	2(a5),d0
+		blt.s	.on_air
+		clr.w	obj_y_spd(a6)
+		move.w	#$60,6(a5)
+		move.b	#6,obj_index(a6)	; Next code
+		move.w	#5,obj_anim_num(a6)	; Next frame
+.on_air:
+		bra	.anima_me
+
+; ----------------------------------------------
+; Hurt dizzy
+; ----------------------------------------------
+
+.hurt_dizzy:
+		subq.w	#1,6(a5)
+		bne	.anima_me
+		clr.b	obj_index(a6)
+		clr.w	obj_frame(a6)
+		lea	(RAM_Score_Haru).w,a0
+		tst.w	(RAM_WhoGotScore).w
+		beq.s	.haruna_scor
+		adda	#1,a0
+.haruna_scor:
+		move.b	(a0),d0
+		moveq	#1,d1
+		bsr	System_BCD_AddB
+		move.b	d0,(a0)
+		bsr	Scrn0_ShowScore
+		bra	.anima_me
 
 ; ----------------------------------------------
 ; Left/Right
 ; ----------------------------------------------
 
 .move_lr:
+		bsr	object_Speed
+
 		tst.w	obj_x_spd(a6)
 		bmi.s	.x_left
 		subi.w	#$10,obj_x_spd(a6)
-		bpl.s	.x_jnone
-		bra.s	.x_jset
+		bra	.x_jset
 .x_left:
 		addi.w	#$10,obj_x_spd(a6)
-		bmi.s	.x_jnone
 .x_jset:
+		move.w	obj_y(a6),d0
+		cmp.w	2(a5),d0
+		blt.s	.x_jnone
 		bsr	.set_fpos
 		bra	.show_me
 .x_jnone:
-		addi.w	#$10,obj_y_spd(a6)
-		bsr	object_Speed
+		addi.w	#$30,obj_y_spd(a6)
 .ret_main:
 		bra	.anima_me
 
@@ -358,7 +392,7 @@ obj_Player:
 
 .move_down:
 		lea	obj_ram(a6),a5
-		addi.w	#$10,obj_y_spd(a6)
+		addi.w	#$30+8,obj_y_spd(a6)
 		bsr	object_Speed
 		move.w	obj_y(a6),d0
 		cmp.w	2(a5),d0
@@ -371,13 +405,13 @@ obj_Player:
 ; ----------------------------------------------
 
 .move_up:
-		addi.w	#$10+8,obj_y_spd(a6)
+		addi.w	#$30+8,obj_y_spd(a6)
 		bsr	object_Speed
 		tst.w	obj_y_spd(a6)
-		bmi.s	.anima_me
+		bmi	.anima_me
 		move.w	obj_y(a6),d0
 		cmp.w	2(a5),d0
-		blt.s	.anima_me
+		blt	.anima_me
 		bsr	.set_fpos
 		bra	.show_me
 
@@ -431,6 +465,13 @@ obj_Player:
 		lea	.anim_data(pc),a0
 		bsr	object_Animate
 .show_me:
+		tst.b	4(a5)
+		beq.s	.no_timr
+		subq.b	#1,4(a5)
+		btst	#0,4(a5)
+		beq.s	.no_timr
+		rts		; exit
+.no_timr:
 		move.l	#0,a0
 		lea	(Map_Haruna),a1
 		tst.b	obj_subid(a6)
@@ -440,6 +481,11 @@ obj_Player:
 		moveq	#0,d2
 		move.w	obj_x(a6),d0
 		move.w	obj_y(a6),d1
+		move.b	obj_subid(a6),d3
+		eor.b	#1,d3
+		move.b	(RAM_WhoGotScore).w,d4
+		cmp.b	d3,d4
+		beq.s	.midshk
 		move.w	(RAM_ShakeMe).w,d3
 		move.w	d3,d4
 		lsr.w	#3,d3
@@ -468,6 +514,8 @@ obj_Player:
 		dc.w .anim_up-.anim_data
 		dc.w .anim_right-.anim_data
 		dc.w .anim_left-.anim_data
+		dc.w .hurt_1-.anim_data
+		dc.w .hurt_2-.anim_data
 .anim_down:
 		dc.w 4
 		dc.w 0,1,2
@@ -486,6 +534,16 @@ obj_Player:
 .anim_left:
 		dc.w 4
 		dc.w 9,10,11
+		dc.w -1
+		align 2
+.hurt_1:
+		dc.w 4
+		dc.w 12
+		dc.w -1
+		align 2
+.hurt_2:
+		dc.w 4
+		dc.w 13
 		dc.w -1
 		align 2
 
@@ -639,8 +697,7 @@ Screen0_PickBackgrnd:
 		move.l	#splitw(320/8,224/8),d1			; d1 - Width and Height
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_BG),d2	; d2 - Layer width / Layer output
 		move.w	#vramLoc_Backgrnd|$6000,d3		; d3 - Starting cell
-		bsr	Video_LoadMap
-		rts
+		bra	Video_LoadMap
 
 Scrn0_LoadMap:
 		lea	layout_PushBlk(pc),a0
@@ -652,7 +709,6 @@ Scrn0_LoadMap:
 		rts
 
 Scrn0_DrawMapAll:
-		bsr	.show_score			; Draw counter
 		lea	(RAM_BlocksBuff).w,a2
 		move.l	#splitw(32/8,32/8),d1			; d1 - Width and Height
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d2	; d2 - Layer width / Layer output
@@ -734,26 +790,25 @@ Scrn0_DrawMapAll:
 		tst.w	d3
 		beq.s	.xs_off
 		move.w	#$38,(RAM_ShakeMe).w
-; 		move.b	obj_subid(a6),d0
-; 		or.w	#$80,d0
-; 		move.w	d0,(RAM_GotHitFrom).w
 		moveq	#$0F,d0
 		moveq	#SFX_punch,d1
 		moveq	#1,d2
 		bsr	gemaPlaySeq
+		lea	(RAM_Objects).w,a4
+		tst.w	(RAM_WhoGotScore).w
+		bne.s	.make_hit
+		adda	#obj_len,a4
+.make_hit:
+		tst.w	obj_ram+4(a4)
+		bne.s	.xs_off
+		cmp.b	#5,obj_index(a4)
+		bge.s	.xs_off
+		move.b	#5,obj_index(a4)
+		move.w	#4,obj_anim_num(a4)
+		move.w	#-$300,obj_y_spd(a4)	; Starting speed
+		clr.w	obj_x_spd(a4)
 .xs_off:
 		rts
-
-.show_score:
-		lea	str_NewCountr0(pc),a0
-		moveq	#1,d0
-		moveq	#1,d1
-		move.w	#DEF_PrintVramW|$4000,d2
-		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
-		bsr	Video_PrintW
-		lea	str_NewCountr1(pc),a0
-		moveq	#37,d0
-		bra	Video_PrintW
 
 Scrn0_ResetMap:
 		lea	(RAM_BlocksBuff).w,a6
@@ -773,6 +828,17 @@ Scrn0_ResetMap:
 		adda	#8,a6
 		dbf	d6,.x_chk_n
 		rts
+
+Scrn0_ShowScore:
+		lea	str_NewCountr0(pc),a0
+		moveq	#1,d0
+		moveq	#1,d1
+		move.w	#DEF_PrintVramW|$4000,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
+		bsr	Video_PrintW
+		lea	str_NewCountr1(pc),a0
+		moveq	#37,d0
+		bra	Video_PrintW
 
 ; ====================================================================
 ; ------------------------------------------------------
