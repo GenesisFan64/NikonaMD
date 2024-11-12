@@ -32,7 +32,7 @@ A code-base in pure assembly for developing on these SEGA systems: Genesis, Sega
 * CDDA Playback: Play, Stop, Volume fading
 * BRAM Saving/Loading
 * PCM playback: All 8 channels with data-streaming for larger samples *see GEMA Sound Driver
-* Scaling and Rotation "Stamps" **WIP**
+* Scaling and Rotation "Stamps" **unstable**
 
 ### with Sega 32X
 
@@ -58,10 +58,15 @@ This is a custom sound driver, tracker-based that supports all the sound channel
 ## NOTES
 
 * All the user code goes to `/game`, DO NOT MODIFY `/system` as it will get updated with the latest changes and fixes
-* To keep compatibilty to all systems CODE and DATA are separated, game code is stored separately as "modes" (ex. Title, Level...) and the DATA are stored as "banks" (applies to CD, 32X and CD32X) and called manually depending of the system.
+* To keep compatibilty to all systems CODE and DATA are separated: game code is stored as "screen modes" (ex. Title, Level...) and the DATA is stored as "banks" and loaded manually depending of the system, this is for SCD, 32X and CD32X.
 
 ## CURRENT ISSUES
 
 * This is NOT finished at all and no documentation.
 * (SCD) Stamps support is unstable/unfinished
 * (32X) 2D-mode might break on hardware if placing too many Super-Sprites
+
+## PLANNED
+
+* Support for the Sega Mapper "SSF2" (Genesis and 32X only)
+* Convert the entire Z80 driver to 68K for Pico

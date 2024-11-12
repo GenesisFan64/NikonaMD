@@ -76,8 +76,34 @@ RAM_SC0_OldOption	ds.w 1
 
 .loop:
 		bsr	System_Render
-		bsr	.print_cursor
 
+		move.w	#MAX_SC0_OPTIONS,d4
+		lea	(Controller_1).w,a6
+		lea	(RAM_SC0_CurrOption).w,a5
+		move.w	on_press(a6),d7
+		btst	#bitJoyDown,d7
+		beq.s	.not_down
+		addq.w	#1,(a5)
+		move.w	(a5),d6
+		cmp.w	d4,d6
+		ble.s	.not_down
+		clr.w	(a5)
+.not_down:
+		move.w	on_press(a6),d7
+		btst	#bitJoyUp,d7
+		beq.s	.not_up
+		subq.w	#1,(a5)
+		tst.w	(a5)
+		bpl.s	.not_up
+		move.w	d4,(a5)
+.not_up:
+		move.w	(a5),d0
+		move.w	2(a5),d1
+		cmp.w	d1,d0
+		beq.s	.no_change
+		bsr	.print_full
+		move.w	(RAM_SC0_CurrOption).w,(RAM_SC0_OldOption).w
+.no_change:
 	if MCD|MARSCD
 		bsr	System_MdMcd_CheckHome
 		bcs.s	.exit_shell
@@ -94,10 +120,10 @@ RAM_SC0_OldOption	ds.w 1
 		rts
 
 .ex_mode:
-		dc.w 7
-		dc.w 7
-		dc.w 7
-		dc.w 7
+		dc.w 1
+		dc.w 2
+		dc.w 3
+		dc.w 4
 		dc.w 7
 
 ; ------------------------------------------------------
@@ -110,10 +136,24 @@ RAM_SC0_OldOption	ds.w 1
 ; Show framecounter and input
 ; ------------------------------------------------------
 
-.print_cursor:
-		lea	str_InputMe(pc),a0
+.print_full:
+		lea	str_MenuCursorOff(pc),a0
 		moveq	#1,d0
-		moveq	#3,d1
+		moveq	#5,d1
+		move.w	(RAM_SC0_OldOption).w,d2
+		add.w	d2,d2
+		add.w	d2,d1
+		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width
+		bsr	Video_PrintW
+
+.print_cursor:
+		lea	str_MenuCursor(pc),a0
+		moveq	#1,d0
+		moveq	#5,d1
+		move.w	(RAM_SC0_CurrOption).w,d2
+		add.w	d2,d2
+		add.w	d2,d1
 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width
 		bra	Video_PrintW
@@ -156,24 +196,35 @@ file_scrn1_main:
 ; Small data section
 ; ------------------------------------------------------
 
-; str_MenuCursorOff:
-; 		dc.b "   ",0
-; 		align 2
-; str_MenuCursor:
-; 		dc.b "-->",0
-; 		align 2
+str_MenuCursorOff:
+		dc.b "   ",0
+		align 2
+str_MenuCursor:
+		dc.b "-->",0
+		align 2
 
 str_MenuText:
-		dc.b "Nikona screen template",$0A
+		dc.b "Nikona test menu       ROM: \{DATE}",$0A
+		dc.b $0A
+		dc.b "    Genesis VDP",$0A
+		dc.b "    Sega CD stamps",$0A
+		dc.b "    32X 2D mode",$0A
+		dc.b "    32X 3D mode",$0A
+		dc.b "    GEMA sound test"
 		dc.b 0
 		align 2
-str_InputMe:
-		dc.l pstr_mem(3,RAM_Framecount)
-		dc.b " "
-		dc.l pstr_mem(1,Controller_1+on_hold)
-		dc.b " "
-		dc.l pstr_mem(1,Controller_2+on_hold)
-		dc.b 0
-		align 2
+
+; str_InputMe:
+; 	if MARS|MARSCD
+; 		dc.l pstr_mem(0,sysmars_reg+comm0)
+; 		dc.b " "
+; 		dc.l pstr_mem(0,sysmars_reg+comm1)
+; 		dc.b " "
+; 		dc.l pstr_mem(3,RAM_Framecount)
+; 	else
+; 		dc.b " "
+; 	endif
+; 		dc.b 0
+; 		align 2
 
 ; ====================================================================

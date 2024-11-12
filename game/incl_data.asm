@@ -2,9 +2,9 @@
 ; ----------------------------------------------------------------
 ; 68K DATA BANKS
 ;
-; Size limits:
-;  $40000 for SegaCD's Word-RAM **compatible to all**
-;  $80000 for Sega-Mapper(SSF2) bank
+; Size limitations:
+;  $40000 for SegaCD's Word-RAM
+;  $80000 for Sega-Mapper(SSF2) bank *not tested*
 ; $100000 for 32X Cartridge
 ; All 4MB for Genesis/Pico
 ;
@@ -21,7 +21,6 @@
 ;	binclude_dma_e LABEL_START,LABEL_END,filepath	; Start and End labels
 ;
 ; - For the SVDP graphics:
-;
 ; 	mars_VramStart Label_test			; Start label
 ; example_0:
 ; 	include "your_svdp_graphics.bin"
@@ -32,46 +31,12 @@
 ;	mars_VramEnd Label_end				; End label
 ; ----------------------------------------------------------------
 
-; --------------------------------------------------------
-; EXAMPLE INCLUDE
-; --------------------------------------------------------
-; 	data_dset DATA_BANKEXMPL
-; 	; ------------------------------------------------
-; 		include "your_data.asm"		; GEMA: Track data
-; 		include "etc_stuff.asm"
-; 	; ------------------------------------------------
-; 	data_dend DATA_BANKEXMPL_e
-
 ; ============================================================
 ; --------------------------------------------------------
 ; MAIN bank
 ; --------------------------------------------------------
 
 	data_dset DATA_BANK0
-	; ------------------------------------------------
-		include "sound/data.asm"		; GEMA user sound data
+		include "sound/data.asm"		; GEMA sound data
 		include "game/data/bank_main.asm"
-	; ------------------------------------------------
 	data_dend DATA_BANK0_e
-
-; ============================================================
-; --------------------------------------------------------
-; 32X stuff only
-; --------------------------------------------------------
-
-	data_dset DATA_BANK1
-	; ------------------------------------------------
-		include "game/data/bank_mars.asm"
-	; ------------------------------------------------
-	data_dend DATA_BANK1_e
-
-; ============================================================
-; --------------------------------------------------------
-; STAMP BANK test
-; --------------------------------------------------------
-
-	data_dset DATA_BNKSTAMP
-	; ------------------------------------------------
-		include "game/data/stamps_0.asm"
-	; ------------------------------------------------
-	data_dend DATA_BNKSTAMP_e
