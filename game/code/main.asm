@@ -40,17 +40,18 @@ RAM_SC0_OldOption	ds.w 1
 ; Init
 ; ------------------------------------------------------
 
-		bsr	Video_DisplayOff
-		bsr	System_Default
+		bsr	Video_DisplayOff			; Disable VDP Display
+		bsr	System_Default				; Default system settings
 	; ----------------------------------------------
-		lea	file_scrn1_main(pc),a0			; Load MAIN DATA bank
-		bsr	System_SetDataBank
-		bsr	System_SramInit
+	; Init/Load save
+		bsr	System_SramInit				; Init/Load
 		addq.l	#1,(RAM_Save_Counter).w			; Temporal counter
 		bsr	System_SramSave				; Save to SRAM/BRAM
 	; ----------------------------------------------
-	; Load PRINT
-		move.l	#ASCII_FONT,d0				; d0 - Font data
+	; Init Print
+		lea	file_scrn1_main(pc),a0			; Load MAIN DATA bank
+		bsr	System_SetDataBank
+		move.l	#ASCII_FONT,d0
 		move.w	#DEF_PrintVram,d1
 		bsr	Video_PrintInit
 		move.l	#ASCII_FONT_W,d0
@@ -58,16 +59,16 @@ RAM_SC0_OldOption	ds.w 1
 		bsr	Video_PrintInitW
 		bsr	Video_PrintDefPal_Fade
 	; ----------------------------------------------
-		lea	str_MenuText(pc),a0			; Print the title string
-		moveq	#1,d0					; X/Y positions 1,1
+		lea	str_MenuText(pc),a0
+		moveq	#1,d0					; X/Y position 1,1
 		moveq	#1,d1
 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2		; FG VRAM location
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width
 		bsr	Video_PrintW
-		bsr	.print_cursor				; Draw counter
-		bsr	Video_DisplayOn
+		bsr	.loop_print				; Draw counter
 	; ----------------------------------------------
-		bsr	Video_FadeIn_Full
+		bsr	Video_DisplayOn				; Enable VDP Display
+		bsr	Video_FadeIn_Full			; Full fade-in w/Delay
 
 ; ====================================================================
 ; ------------------------------------------------------
@@ -76,8 +77,9 @@ RAM_SC0_OldOption	ds.w 1
 
 .loop:
 		bsr	System_Render
-		bsr	.print_cursor
+		bsr	.loop_print
 
+	; CD only, check ABC+Start "home" combo
 	if MCD|MARSCD
 		bsr	System_MdMcd_CheckHome
 		bcs.s	.exit_shell
@@ -87,50 +89,43 @@ RAM_SC0_OldOption	ds.w 1
 		btst	#bitJoyStart,d7
 		beq.s	.loop
 		bsr	Video_FadeOut_Full
-		moveq	#0,d0
-		move.w	(RAM_SC0_CurrOption).w,d0
-		add.w	d0,d0
-		move.w	.ex_mode(pc,d0.w),(RAM_ScreenMode).w
+		move.w	#7,(RAM_ScreenMode).w			; Go to Screen $07: GEMA tester
 		rts
-
-.ex_mode:
-		dc.w 7
-		dc.w 7
-		dc.w 7
-		dc.w 7
-		dc.w 7
-
-; ------------------------------------------------------
-
-.exit_shell:
-		bsr	Video_FadeOut_Full
-		bra	System_MdMcd_ExitShell
 
 ; ------------------------------------------------------
 ; Show framecounter and input
 ; ------------------------------------------------------
 
-.print_cursor:
-		lea	str_InputMe(pc),a0
-		moveq	#1,d0
-		moveq	#3,d1
-		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
-		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width
-		bra	Video_PrintW
+.loop_print:
+		lea	(RAM_Framecount),a0			; Memory location to print
+		move.l	#3,a1					; Display type 3
+		moveq	#1,d0					; X pos: 1
+		moveq	#4,d1					; Y pos: 2
+		move.w	#DEF_PrintVramW|DEF_PrintPal,d2		; VRAM ascii location w/attr
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; VRAM output location and width size
+		bsr	Video_PrintValW
+		move.w	#DEF_PrintVram|DEF_PrintPal,d2		; small VRAM ver
+		addi.w	#8+1,d0					; X pos + 9
+		bra	Video_PrintVal
 
-; ====================================================================
 ; ------------------------------------------------------
-; DATA asset locations
+; SCD ONLY
+; ------------------------------------------------------
+
+	if MCD|MARSCD
+.exit_shell:
+		bsr	Video_FadeOut_Full
+		bra	System_MdMcd_ExitShell
+	endif
+
+; ------------------------------------------------------
+; BANK data location
 ; ------------------------------------------------------
 
 file_scrn1_main:
 		dc.l DATA_BANK0
 		dc.b "BNK_MAIN.BIN",0
 		align 2
-; file_scrn1_mars:
-; 		dc.l DATA_BANK1
-; 		dc.b "BNK_MARS.BIN",0
-; 		align 2
 
 ; ====================================================================
 ; ------------------------------------------------------
@@ -156,23 +151,8 @@ file_scrn1_main:
 ; Small data section
 ; ------------------------------------------------------
 
-; str_MenuCursorOff:
-; 		dc.b "   ",0
-; 		align 2
-; str_MenuCursor:
-; 		dc.b "-->",0
-; 		align 2
-
 str_MenuText:
 		dc.b "Nikona screen template",$0A
-		dc.b 0
-		align 2
-str_InputMe:
-		dc.l pstr_mem(3,RAM_Framecount)
-		dc.b " "
-		dc.l pstr_mem(1,Controller_1+on_hold)
-		dc.b " "
-		dc.l pstr_mem(1,Controller_2+on_hold)
 		dc.b 0
 		align 2
 

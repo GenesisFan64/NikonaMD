@@ -2008,57 +2008,8 @@ Video_Print:
 		rol.l	#8,d4
 		move.b	(a5)+,d4	; $000000xx
 		move.l	d4,a4
-		andi.w	#%11,d6
-		swap	d7
-		move.w	#1-1,d7
-		cmp.b	#$03,d6
-		beq.s	.show_long
-		cmp.b	#$02,d6
-		beq.s	.show_24
-		cmp.b	#$01,d6
-		beq.s	.show_word
-.show_byte:
-		move.b	(a4),d4
-		swap	d4
-		rol.l	#8,d4
-		bra.s	.mk_value
-.show_word:
-		move.w	(a4),d4
-		swap	d4
-		addq.w	#1,d7
-		bra.s	.mk_value
-.show_24:
-		move.l	(a4),d4
-		rol.l	#8,d4
-		addq.w	#2,d7
-		bra.s	.mk_value
-.show_long:
-		move.l	(a4),d4
-		addq.w	#3,d7
-.mk_value:
-		rol.l	#4,d4
-		bsr.s	.show_nibbl
-		rol.l	#4,d4
-		bsr.s	.show_nibbl
-		dbf	d7,.mk_value
-		swap	d6
-		swap	d7
+		bsr	vid_PrintTVal
 		bra	.loop
-.show_nibbl:
-		move.l	d6,a4
-		move.b	d4,d6
-		andi.w	#$0F,d6
-		cmpi.w	#$0A,d6
-		bcs.s	.hex_incr
-		addq.w	#7,d6
-.hex_incr:	add.w	#"0",d6
-; 		add.w	(RAM_SetPrntVram).w,d6
-		add.w	d2,d6
-		subi.w	#$20,d6
-		move.w	d6,(a6)
-		addq.w	#2,d5
-		move.l	a4,d6
-		rts
 
 ; --------------------------------------------------------
 ; 8x16 version
@@ -2180,6 +2131,202 @@ Video_PrintW:
 		rol.l	#8,d4
 		move.b	(a5)+,d4	; $000000xx
 		move.l	d4,a4
+		bsr	vid_PrintTValW
+		bra	.loop
+
+; --------------------------------------------------------
+; Video_PrintVal, Video_PrintValW
+;
+; Prints a memory value
+;
+; Input:
+; a0   | Memory location to read
+; a1   | Type:
+;        0 - Byte
+;        1 - Word
+;        2 - Longword but as a 24-bit address
+;        3 - Full Longword
+;
+; d0.w | X position
+; d1.w | Y position
+; d2.w | Font VRAM location
+; d3.l | Screen width / Screen VRAM location:
+;        splitw(width,vram_out)
+;
+; * Font VRAM location
+; Default 8x8:  DEF_PrintVram
+; Default 8x16: DEF_PrintVramW
+;
+; * Screen VRAM
+; Foreground: DEF_VRAM_FG
+; Background: DEF_VRAM_BG
+; Window:     DEF_VRAM_WD
+;
+; * Screen Width
+; $040 (DEF_HSIZE_32)
+; $080 (DEF_HSIZE_64)
+; $100 (DEF_HSIZE_128)
+;
+; Notes:
+; - Initialize your graphics and VRAM location
+;   with Video_PrintInit
+; - Only Video_PrintW can be used in double-interlace
+;   mode.
+; --------------------------------------------------------
+
+Video_PrintVal:
+		movem.l	d4-d7/a4-a6,-(sp)
+		lea	(vdp_data).l,a6
+		move.w	d3,d7
+		move.w	d0,d5
+		add.w	d5,d5
+		move.w	d1,d4
+		swap	d3
+		mulu.w	d3,d4
+		add.w	d4,d5
+		add.w	d5,d7
+		move.w	d3,d6
+		swap	d3
+		moveq	#0,d5
+		move.w	d7,d5
+		andi.w	#$3FFF,d7
+		or.w	#$4000,d7
+		rol.w	#2,d5
+		andi.w	#%11,d5
+		swap	d5
+		move.l	a0,a5
+.loop:
+		move.w	d6,d4
+		subq.w	#1,d4
+		and.w	d4,d5
+
+		move.w	d7,d4
+		add.w	d5,d4
+		swap	d5
+		move.w	d4,4(a6)
+		move.w	d5,4(a6)
+		swap	d5
+.q_loop:
+		move.l	a0,a4
+		move.w	a1,d6
+		bsr	vid_PrintTVal
+		movem.l	(sp)+,d4-d7/a4-a6
+		rts
+
+; --------------------------------------------------------
+; 8x16 version
+; --------------------------------------------------------
+
+Video_PrintValW:
+		movem.l	d4-d7/a3-a6,-(sp)
+		lea	(vdp_data).l,a6
+; 		move.w	(RAM_SetPrntVramW).w,d6
+		move.w	d2,d6
+		subi.w	#$20*2,d6
+		move.w	(RAM_VdpRegSetC).w,d5
+		btst	#2,d5
+		beq.s	.no_dble_y
+		move.w	d6,d7
+		andi.w	#$F800,d7
+		andi.w	#$7FF,d6
+		lsr.w	#1,d6
+		or.w	d7,d6
+.no_dble_y:
+		swap	d6
+		move.w	d3,d7
+		move.w	d0,d5
+		add.w	d5,d5
+		move.w	d1,d4
+		swap	d3
+		mulu.w	d3,d4
+		add.w	d4,d5
+		add.w	d5,d7
+		move.w	d3,d6
+		swap	d3
+
+		moveq	#0,d5
+		move.w	d7,d5
+		andi.w	#$3FFF,d7
+		or.w	#$4000,d7
+		rol.w	#2,d5
+		andi.w	#%11,d5
+		swap	d5
+		move.l	a0,a5
+	; d7 -      TEMP       | VDP write left
+	; d6 -      TEMP       | Y next-line size
+	; d5 - VDP write right | X current pos
+	; d4 -                 | TEMP
+.loop:
+		move.w	d6,d4
+		subq.w	#1,d4
+		and.w	d4,d5
+		move.l	d6,a3
+		move.l	a0,a4
+		move.w	a1,d6
+		bsr	vid_PrintTValW
+		movem.l	(sp)+,d4-d7/a3-a6
+		rts
+
+; ------------------------------------------------
+; a4 - Memory value
+; d6 - Type
+
+vid_PrintTVal:
+		andi.w	#%11,d6
+		swap	d7
+		move.w	#1-1,d7
+		cmp.b	#$03,d6
+		beq.s	.show_long
+		cmp.b	#$02,d6
+		beq.s	.show_24
+		cmp.b	#$01,d6
+		beq.s	.show_word
+.show_byte:
+		move.b	(a4),d4
+		swap	d4
+		rol.l	#8,d4
+		bra.s	.mk_value
+.show_word:
+		move.w	(a4),d4
+		swap	d4
+		addq.w	#1,d7
+		bra.s	.mk_value
+.show_24:
+		move.l	(a4),d4
+		rol.l	#8,d4
+		addq.w	#2,d7
+		bra.s	.mk_value
+.show_long:
+		move.l	(a4),d4
+		addq.w	#3,d7
+.mk_value:
+		rol.l	#4,d4
+		bsr.s	.show_nibbl
+		rol.l	#4,d4
+		bsr.s	.show_nibbl
+		dbf	d7,.mk_value
+		swap	d6
+		swap	d7
+		rts
+.show_nibbl:
+		move.l	d6,a4
+		move.b	d4,d6
+		andi.w	#$0F,d6
+		cmpi.w	#$0A,d6
+		bcs.s	.hex_incr
+		addq.w	#7,d6
+.hex_incr:	add.w	#"0",d6
+; 		add.w	(RAM_SetPrntVram).w,d6
+		add.w	d2,d6
+		subi.w	#$20,d6
+		move.w	d6,(a6)
+		addq.w	#2,d5
+		move.l	a4,d6
+		rts
+
+; ------------------------------------------------
+
+vid_PrintTValW:
 		andi.w	#%11,d6
 		swap	d7
 		move.w	#1-1,d7
@@ -2221,7 +2368,7 @@ Video_PrintW:
 		dbf	d7,.mk_value
 		swap	d6
 		swap	d7
-		bra	.loop
+		rts
 
 	; d6 - Y next-line size | TEMP
 .show_nibbl:
@@ -2292,54 +2439,6 @@ Video_PrintW:
 .hex_incr:
 		add.w	#"0",d6
 		rts
-
-; ------------------------------------------------
-; Input:
-; d2.w | Layer:
-;        0 - Foreground
-;        1 - Background
-;        2 - WINDOW
-;
-; Returns:
-; d7 - VRAM location
-; d6 - Y jump size
-; ------------------------------------------------
-
-; vidSub_PickLayer:
-; 		move.w	d2,d7
-; 		lsl.w	#2,d7
-; 		lea	(RAM_VdpRegs+$02).w,a5
-; 		lea	.filter_data(pc),a4
-; 		adda	d7,a4
-; 		moveq	#0,d7
-; 		moveq	#0,d5
-; 		move.b	(a4),d7
-; 		adda	d7,a5
-; 		move.b	1(a4),d6
-; 		move.b	2(a4),d5
-; 		move.b	(a5),d7		; d7 - Reg
-; 		and.b	d6,d7		; filter
-; 		lsl.w	d5,d7		; shift left
-; 		move.w	#$40,d6
-; 		move.b	(RAM_VdpRegs+$10).w,d6
-; 		andi.w	#%00000011,d6
-; 		add.w	d6,d6
-; 		move.w	.jump_sizes(pc,d6.w),d6
-; 		rts
-; .filter_data:
-; 		dc.b $00		; Reg slot
-; 		dc.b %00111000		; Filter bits
-; 		dc.b 10,0		; shift left, 0
-; 		dc.b $02
-; 		dc.b %00000111
-; 		dc.b 13,0
-; 		dc.b $01
-; 		dc.b %00111110
-; 		dc.b 10,0
-; .jump_sizes:	dc.w $040
-; 		dc.w $080
-; 		dc.w $080
-; 		dc.w $100
 
 ; ====================================================================
 ; ----------------------------------------------------------------

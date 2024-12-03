@@ -71,7 +71,7 @@ HTAG_NOV_PICO	equ "Nikona PICO                                     "
 ; AI - Educative
 ;
 ; anything:
-; Your own serial format, there's no standard.
+; Your own serial format, there's no standard for this.
 ;
 ; vv:
 ; Version number: 00 to 99
