@@ -10,7 +10,7 @@
 ; Settings
 ; --------------------------------------------------------
 
-MAX_MDOBJ	equ 40		; Maximum Genesis objects/scripts
+MAX_MDOBJ	equ 40		; Maximum Genesis objects
 TAG_SRAMDATA	equ "SAVE"	; 4-letter savefile id
 
 ; ===================================================================
@@ -87,6 +87,7 @@ bitClickS	equ 3
 ; ------------------------------------------------
 ; Sega PICO
 ; Directons U/D/L/R use the same bits as Genesis.
+;
 ; For reading the pen position use
 ; mouse_x and mouse_y
 ; ------------------------------------------------
@@ -127,9 +128,9 @@ code			ds.l 1		; Object code, If 0 == blank slot
 x			ds.l 1		; Object X Position $xxxx.0000
 y			ds.l 1		; Object Y Position $yyyy.0000
 z			ds.l 1		; Object Z Position $zzzz.0000 (3D ONLY)
-size_x			ds.w 1		; Object size Left/Right
-size_y			ds.w 1		; Object size Up/Down
-size_z			ds.w 1		; Object size Zback/Zfront starting from object's X/Y pointer in 10mm's (3D ONLY)
+size_x			ds.w 1		; Object size Left/Right $llrr
+size_y			ds.w 1		; Object size Up/Down $uudd
+size_z			ds.w 1		; Object size Zback/Zfront $bbff starting from object's X/Y pointer in 10mm's (3D ONLY)
 x_spd			ds.w 1		; Object X Speed $xx.00 (object_Speed)
 y_spd			ds.w 1		; Object Y Speed $yy.00 ''
 z_spd			ds.w 1		; Object Z Speed $zz.00 '' (3D ONLY)
@@ -197,7 +198,7 @@ System_Init:
 		move.b	d0,(sys_ctrl_3).l	; Modem
 		move.w	#0,(z80_bus).l		; Enable Z80
 	endif
-		move.w	#$4EF9,d0		; JMP opcode for the Interrupt jumps
+		move.w	#$4EF9,d0		; JMP opcode
  		move.w	d0,(RAM_VBlankJump).w
 		move.w	d0,(RAM_HBlankJump).w
 		move.w	d0,(RAM_ExternalJump).w
@@ -221,15 +222,15 @@ System_Init:
 ; This will:
 ; - Drop a frame if we got late on VBlank
 ; - Process Palette fading buffers
-;   (Video_MdMars_RunFade, CPU-INTENSIVE IF PROCESSING
+;   (Video_MdMars_RunFade: CPU-INTENSIVE IF PROCESSING
 ;   BOTH VDP AND 32X SVDP Palettes)
 ; - Check the sound driver for any changes/requests
 ;   from Z80 (Sound_Update, several times)
 ; - 32X/CD32X only: Update the "DREQ RAM" section
 ;   to the SH2 using DREQ FIFO (System_MdMars_Update)
 ;
-; During VBlank:
-; - Read the Input data, (System_Input)
+; Then during VBlank:
+; - Read the Input data (System_Input)
 ; - Transfer the VDP Palette, Sprites and Scroll
 ;   from from RAM to VDP and process the DMA BLAST list.
 ;   (Video_Render)
@@ -259,8 +260,6 @@ System_Render:
 		beq.s	.mars_sync
 ; ----------------------------------------
 ; w/32X Framedrop
-; ----------------------------------------
-
 .mars_wait:
 		bsr	Sound_Update			; Update sound on wait
 		move.w	(a5),d7				; Sync bit cleared?
@@ -276,7 +275,6 @@ System_Render:
 		bra.s	.from_late
 ; ----------------------------------------
 ; w/32X Sync
-; ----------------------------------------
 .mars_sync:
 		bsr	Video_MdMars_WaitSync		; Wait DREQ-RAM normally
 		bsr	Sound_Update
@@ -284,7 +282,7 @@ System_Render:
 		bsr	System_MdMars_Update		; Send DREQ changes
 	endif
 ; ----------------------------------------
-		bsr	.wait_vblank			; <-- Genesis normal VBlank wait
+		bsr	.wait_vblank			; Genesis normal VBlank wait
 ; ----------------------------------------
 	if MARS|MARSCD
 		bsr	Sound_Update
@@ -303,6 +301,7 @@ System_Render:
 		bsr	Sound_Update
 .forgot_disp:
 		rts
+
 ; ----------------------------------------
 ; Wait until beam reaches VBlank
 ; ----------------------------------------
@@ -324,8 +323,8 @@ System_Render:
 ; FILL or COPY.
 ;
 ; This is where you put your Sound driver's Z80 stop
-; or pause calls here, SAVE THE REGISTERS THAT YOU
-; GONNA USE TO STACK.
+; or pause calls here
+; SAVE THE REGISTERS THAT YOU GONNA USE TO STACK.
 ; --------------------------------------------------------
 
 ; --------------------------------------------------------
@@ -381,7 +380,7 @@ System_DmaExit_RAM:
 
 ; ====================================================================
 ; --------------------------------------------------------
-; Update sound/sycronize with the Z80
+; Update sound/syncronize with the Z80
 ; --------------------------------------------------------
 
 Sound_Update:
@@ -545,7 +544,7 @@ System_Input:
 		dc.w .exit-.list
 		dc.w .exit-.list
 		dc.w .exit-.list	; $0C
-		dc.w .id_0D-.list	; $0D - Genesis controller (3 or 6 button)
+		dc.w .id_0D-.list	; $0D - Genesis controller 3 or 6 button
 		dc.w .exit-.list
 		dc.w .exit-.list	; $0F - No controller / Master System controller (Buttons 1 and 2)
 
@@ -638,8 +637,8 @@ System_Input:
 		move.b	#$00,(a5)	; Show SA|RLDU
 		nop
 		nop
-		move.b	(a5),d7		; The following flips are for
-		lsl.w	#2,d7		; the 6pad's internal counter:
+		move.b	(a5),d7
+		lsl.w	#2,d7
 		andi.w	#%11000000,d7
 		or.w	d5,d7
 		move.b	#$40,(a5)	; Show CB|RLDU (2)
@@ -703,11 +702,11 @@ System_Input:
 ;   save it into SRAM/BRAM.
 ;
 ; CD/CD32X ONLY:
+; - Call gemaStopAll FIRST if any track uses
+;   PCM samples
 ; - NO lowercase CHARACTERS, NO " "($20) SPACES.
 ; - BE CAREFUL CHOOSING YOUR FILENAME as it can
 ;   OVERWRITE without warning any other save.
-; - Call gemaStopAll FIRST if any track uses
-;   PCM samples
 ; --------------------------------------------------------
 
 System_SramInit:
@@ -1241,8 +1240,8 @@ System_MdMcd_Interrupt:
 ; 		andi.w	#$C0,d7
 ; 		cmpi.w	#$C0,d7
 ; 		beq.s	.wait_first
-; 		bset	#0,(sysmcd_reg).l		; Request Level 1
-		move.b	#$81,(sysmcd_reg).l
+; 		bset	#0,(sysmcd_reg).l
+		move.b	#%10000001,(sysmcd_reg).l		; Request Level 1
 		move.l	(sp)+,d7
 		rts
 
@@ -1301,10 +1300,10 @@ System_MdMcd_SubTask:
 .wait_first:
 		bsr	System_MdMcd_SubWait
 		move.b	(a6),d7
-		andi.w	#$C0,d7
-		cmpi.w	#$C0,d7
+		andi.w	#%11000000,d7
+		cmpi.w	#%11000000,d7
 		beq.s	.wait_first
-		moveq	#9-1,d6
+		moveq	#9-1,d6		; Retry times
 		move.b	d0,(a6)		; Set this command
 .make_sure:
 		move.b	(a6),d7
@@ -1313,8 +1312,8 @@ System_MdMcd_SubTask:
 		dbf	d6,.make_sure
 .wait_sub_i:	move.b	1(a6),d7	; Wait until SUB gets busy
 		bpl.s	.wait_sub_i
-		andi.w	#$C0,d7
-		cmp.w	#$C0,d7
+		andi.w	#%11000000,d7
+		cmp.w	#%11000000,d7
 		beq.s	.wait_first
 		move.b	#$00,(a6)
 		movem.w	(sp)+,d6-d7
@@ -1443,7 +1442,7 @@ System_MdMcd_RdFile_RAM:
 ; a1   | Output location
 ;
 ; Notes:
-; - STOP ALL tracks that use PCM samples (gemaStopAll)
+; - Uses ALL dcomm_m ports
 ; --------------------------------------------------------
 
 System_MdMcd_RdFile_WRAM:
@@ -1476,17 +1475,18 @@ System_MdMcd_RdFile_WRAM:
 ; System_MdMcd_CheckHome
 ;
 ; Checks if the player is holding A, B, C and
-; then presses the START button.
+; then presses the START button, check carry after
+; calling this
 ;
 ; Returns:
 ; bcc | Combo input not pressed
 ; bcs | User did the combo presses
 ;
 ; Notes:
-; If you call this from your Title Screen, carry
-; should JUMP (not call) to System_MdMcd_ExitShell,
-; for other modes change your Screen number to the
-; Title Screen and return.
+; If you call this from your Title Screen:
+; carry MUST JUMP to System_MdMcd_ExitShell,
+; for other screen modes carry jumps to Title
+; Screen.
 ; --------------------------------------------------------
 
 System_MdMcd_CheckHome:
@@ -1517,8 +1517,8 @@ System_MdMcd_CheckHome:
 
 ; jmp $0280: Hot restart, Stops PSG and Clears VDP
 ; jmp $0284: Entry point
-; jmp $0288: CD player
-; jmp $028C: CD player, resets SP (safer)
+; jmp $0288: CD player keeps SP (unsafe)
+; jmp $028C: CD player, resets SP (official method)
 
 System_MdMcd_ExitShell:
 	if MCD|MARSCD
@@ -1527,6 +1527,7 @@ System_MdMcd_ExitShell:
 	if MARSCD
 		bsr	Video_MdMars_VideoOff
 	endif
+		bsr	Video_DisplayOff
 		jmp	$028C		; Exit jump
 	else
 		rts
@@ -1656,7 +1657,7 @@ def_SaveInfo:
 ;
 ; Notes:
 ; - Call this during DISPLAY ONLY, NOT during VBlank.
-; - POPULAR 32X EMULATORS WILL GET STUCK HERE
+; - MOST 32X EMULATORS WILL GET STUCK HERE
 ; --------------------------------------------------------
 
 System_MdMars_SendData:
@@ -1836,7 +1837,7 @@ Object_Run:
 		move.w	#MAX_MDOBJ-1,d7
 .next_one:
 		move.l	obj_code(a6),d6
-		beq.s	.no_code	; Free slot
+		beq.s	.no_code
 		move.l	d7,-(sp)
 		move.l	d6,a5
 		jsr	(a5)
@@ -1942,8 +1943,8 @@ object_ResetVars:
 ; --------------------------------------------------------
 ; object_ResetAnim
 ;
-; Reset animation variables, call this BEFORE using
-; object_Animate.
+; Reset animation variables
+; call this BEFORE using object_Animate
 ;
 ; Input:
 ; a6 | This object
@@ -1959,7 +1960,7 @@ object_ResetAnim:
 ; object_Speed
 ;
 ; Moves the object using speed values set on
-; obj_x_spd and obj_y_spd, updates obj_x and obj_y.
+; obj_x_spd and obj_y_spd, updates obj_x and obj_y
 ;
 ; Input:
 ; a6 | This object
@@ -1989,7 +1990,7 @@ object_Speed:
 ; object_Animate
 ;
 ; Animates the sprite with a animation script,
-; modifies obj_frame with the frame to use.
+; modifies obj_frame with the frame to use
 ;
 ; Input:
 ; a6 | This object
@@ -2072,6 +2073,7 @@ object_Animate:
 ;
 ; Input:
 ; a6   | This object
+; d0.w | Start from slot
 ;
 ; Returns:
 ; d0.l | If Nothing: 0
@@ -2086,8 +2088,13 @@ object_Touch:
 		or.w	d5,d6
 		beq	.exit_this
 		lea	(RAM_Objects).w,a5
-		moveq	#MAX_MDOBJ-1,d7
+		move.w	d0,d6
+		mulu.w	#obj_len,d6
+		adda	d6,a5
+		move.w	d0,d7
 .next:
+		cmp.w	#MAX_MDOBJ,d7
+		bge.s	.ran_out
 		cmp.l	a6,a5			; If reading THIS object, skip
 		beq.s	.skip
 		tst.l	obj_code(a5)		; This object has code?
@@ -2097,6 +2104,7 @@ object_Touch:
 		bne.s	.exit_this
 .skip:		adda	#obj_len,a5
 		dbf	d7,.next
+.ran_out:
 		moveq	#0,d0
 .exit_this:
 		movem.l	(sp)+,d1-d7/a5
@@ -2205,21 +2213,21 @@ object_Touch:
 
 ; ============================================================
 ; --------------------------------------------------------
-; object_GetSprInfo
+; object_MdMars_GetSprInfo
 ;
-; Call this before using
-; Video_MdMars_MakeSpr2D or Video_MdMars_MakeSpr3D
+; Grabs info from the current object
+; for Video_MdMars_MakeSpr2D and Video_MdMars_MakeSpr3D
 ;
 ; Input:
 ; a6   | This object
 ; d0.l | X/Y center: splitw(center_x,center_y)
-;        - Set to 0 for 3D Sprites
+;        Set to 0 for 3D Sprites
 ; d1.w | Flags
 ;
 ; Output:
 ; d0.l | X and Y position
 ; d1.l | Flags and Z Position
-; d4.w | Current frame
+; d2.w | Current frame when using object_Animate
 ; --------------------------------------------------------
 
 object_MdMars_GetSprInfo:
@@ -2234,7 +2242,7 @@ object_MdMars_GetSprInfo:
 		move.w	obj_y(a6),d4		; d0 - Xpos | Ypos
 		sub.w	d0,d4
 		exg.l	d4,d0
-		moveq	#0,d4
-		move.w	obj_frame(a6),d4
+		moveq	#0,d2
+		move.w	obj_frame(a6),d2
 	endif
 		rts

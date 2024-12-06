@@ -15,13 +15,12 @@ MAX_SC0_OPTIONS		equ 4
 ; Structs
 ; ------------------------------------------------------
 
-; ----------------------------------------------
-; VRAM Setup
-; ----------------------------------------------
+			memory 2
+			ds.b 2
+thisVram_BG		ds.b $3B4
+thisVram_BG_e		ds.b 0
 
-; 			memory 2		; Cell $0002
-; vramLoc_Backgrnd	ds.b $4C2
-; 			endmemory
+			endmemory
 
 ; ====================================================================
 ; ------------------------------------------------------
@@ -59,8 +58,23 @@ RAM_SC0_OldOption	ds.w 1
 		bsr	Video_PrintInitW
 		bsr	Video_PrintDefPal_Fade
 	; ----------------------------------------------
+		move.l	#ART_TESTBG,d0
+		move.w	#cell_vram(thisVram_BG),d1
+		move.w	#cell_vram(thisVram_BG_e-thisVram_BG),d2
+		bsr	Video_LoadArt
+		lea	(MAP_TESTBG),a0
+		move.l	#splitw(0,0),d0
+		move.l	#splitw(320/8,224/8),d1
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_BG),d2
+		move.w	#thisVram_BG|$4000,d3
+		bsr	Video_LoadMap
+		lea	(PAL_TESTBG),a0
+		moveq	#32,d0
+		moveq	#16,d1
+		bsr	Video_FadePal
+	; ----------------------------------------------
 		lea	str_MenuText(pc),a0
-		moveq	#1,d0					; X/Y position 1,1
+		moveq	#1,d0					; X/Y position: 1,1
 		moveq	#1,d1
 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2		; FG VRAM location
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width
@@ -99,14 +113,11 @@ RAM_SC0_OldOption	ds.w 1
 .loop_print:
 		lea	(RAM_Framecount),a0			; Memory location to print
 		move.l	#3,a1					; Display type 3
-		moveq	#1,d0					; X pos: 1
-		moveq	#4,d1					; Y pos: 2
+		moveq	#31,d0
+		moveq	#1,d1
 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2		; VRAM ascii location w/attr
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; VRAM output location and width size
-		bsr	Video_PrintValW
-		move.w	#DEF_PrintVram|DEF_PrintPal,d2		; small VRAM ver
-		addi.w	#8+1,d0					; X pos + 9
-		bra	Video_PrintVal
+		bra	Video_PrintValW
 
 ; ------------------------------------------------------
 ; SCD ONLY

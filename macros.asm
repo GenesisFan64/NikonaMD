@@ -10,7 +10,7 @@
 ; AS Functions
 ; ------------------------------------------------------------
 
-splitw		function l,r,(((l))<<16&$FFFF0000|((r))&$FFFF)		; Two WORDS stored in a single LONG: $12341234
+splitw		function l,r,(((l))<<16&$FFFF0000|((r))&$FFFF)		; Two WORDS stored in a single LONG: $11112222
 
 ; Common functions
 cell_vram	function a,(a<<5)					; Cell position to real VRAM position
@@ -18,7 +18,7 @@ color_indx	function a,a<<1						; Applies to both VDP and SuperVDP
 pstr_mem	function a,b,((a|$80)<<24)|b&$FFFFFF			; PRINT memory: pstr_mem(type,mem_pos)
 full_loc	function a,-(-a)&$FFFFFFFF
 
-SET_WRAMSIZE	equ $3C000
+SET_WRAMSIZE	equ $3C000						; Maxium WRAM available to use
 
 ; ====================================================================
 ; ------------------------------------------------------------
@@ -32,7 +32,7 @@ SET_WRAMSIZE	equ $3C000
 ; 		memory RAM_Somewhere
 ; RAM_ThisLong	ds.l 1
 ; RAM_ThisWord	ds.w 1
-; RAM_ThisByte	ds.b 1		; <-- careful with alignment
+; RAM_ThisByte	ds.b 1				; <-- careful with alignment
 ; 		endmemory ; finish
 ; --------------------------------------------
 
@@ -117,7 +117,7 @@ fs_mkList	macro type,start,end
 		dc.b ((end-start)>>16&$FF),((end-start)>>24&$FF)
 		dc.l end-start					; Filesize, big endian
 		dc.b (2024-1900)+1				; Year
-		dc.b 0,0,0,0,0,0				; **never done**
+		dc.b 0,0,0,0,0,0				; (filler)
 		dc.b 2						; File flags
 		dc.b 0,0
 		dc.b 1,0					; Volume sequence number, little

@@ -119,10 +119,6 @@ sizeof_thisbuff		ds.l 0
 ; 		bsr	.show_cursor
 	; ----------------------------------------------
 		bsr	gemaReset				; Load default GEMA sound data
-; 		moveq	#1,d0
-; 		moveq	#%10,d1
-; 		bsr	Video_Resolution
-	; ----------------------------------------------
 		bsr	.show_me
 		bsr	.gema_view
 ; 		bsr	.steal_vars

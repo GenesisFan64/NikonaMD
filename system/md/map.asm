@@ -32,7 +32,7 @@ zym_ctrl_1	equ	$4000		; YM2612 reg 1
 zym_data_1	equ	$4001		; YM2612 reg 2
 zym_ctrl_2	equ	$4002		; YM2612 reg 1
 zym_data_2	equ	$4003		; YM2612 reg 2
-zbank		equ	$6000		; Z80 ROM BANK: %XXXXXXXX X0000000 00000000 (9 writes)
-; zvdp_data	equ	$7F00		; video data port
-; zvdp_ctrl	equ	$7F04		; video control port
+zbank		equ	$6000		; Z80 ROM BANK: %XXXXXXXX X0000000 00000000 (write 9 times)
+; zvdp_data	equ	$7F00		; VDP data port
+; zvdp_ctrl	equ	$7F04		; VDP control port
 zpsg_ctrl	equ	$7F11		; PSG control

@@ -9,7 +9,7 @@
 ; System tags
 ;
 ; First 4 letters MUST contain "SEGA" or " SEGA"
-; if not this will NOT boot on hardware.
+; or this will NOT boot on hardware
 ; --------------------------------------------------------
 
 HTAG_SYS_MD	equ "SEGA GENESIS    "
@@ -36,13 +36,13 @@ HTAG_CDVER	equ $0100|$02		; $0100|Version: $00-$FF
 ; --------------------------------------------------------
 ; Release date
 ;
-; "(C)name year.month"
+; "(C)NAME year.month"
 ; --------------------------------------------------------
 
 HTAG_DATEINFO	equ "(C)GF64 2024.???"
 
 ; --------------------------------------------------------
-; "Domestic" Name, Your game's name in your language
+; "Domestic" Name: Your game's name in your language
 ; --------------------------------------------------------
 
 HTAG_NDM_MD	equ "Nikona MD                                       "
@@ -52,7 +52,7 @@ HTAG_NDM_MARSCD	equ "Nikona CD32X                                    "
 HTAG_NDM_PICO	equ "Nikona PICO                                     "
 
 ; --------------------------------------------------------
-; "Overseas" Name, Your game's name in English
+; "Overseas" Name: Your game's name in English
 ; --------------------------------------------------------
 
 HTAG_NOV_MD	equ "Nikona GENESIS                                  "

@@ -25,11 +25,13 @@ DEF_MaxStampCOut	equ $60		; Maximum backup cells for the SCD Stamps
 ; Variables
 ; --------------------------------------------------------
 
-; VDPATT_PL0		equ $0000
-VDPATTR_PL1		equ $2000
-VDPATTR_PL2		equ $4000
-VDPATTR_PL3		equ $6000
-VDPATTR_HI		equ $8000
+; VATTR_PAL0		equ $0000
+VATTR_FLIPH		equ $0800
+VATTR_FLIPV		equ $1000
+VATTR_PAL1		equ $2000
+VATTR_PAL2		equ $4000
+VATTR_PAL3		equ $6000
+VATTR_HI		equ $8000
 
 ; ------------------------------------------------
 ; Use these if you are not planning changing
@@ -111,35 +113,36 @@ incr			ds.b 1
 target			ds.b 1
 timer			ds.b 1
 num			ds.w 1
-; len		ds.l 0
+; len			ds.l 0
 			endstruct
 
 ; ------------------------------------------------
 ; RAM_MdMcd_Stamps
 
-mdstmp		struct
-flags		ds.w 1		; Flags settings/status
-vramMain	ds.w 1		; Main VRAM output *full*
-vramSec		ds.w 1		; Secondary VRAM output *full*
-vramSize	ds.w 1
-vramLen		ds.w 1		; temporals
-vramIncr	ds.w 1		; ''
-stmpoutb	ds.w 1
-currOutFlip	ds.w 1
-fdrop		ds.w 1
-cellstorage	ds.l 1
-dotIncr		ds.l 1
-buffIncr	ds.l 1
-; len		ds.l 0
-		endstruct
+mdstmp			struct
+flags			ds.w 1		; Flags settings/status
+vramMain		ds.w 1		; Main VRAM output *full*
+vramSec			ds.w 1		; Secondary VRAM output *full*
+vramSize		ds.w 1
+vramLen			ds.w 1		; temporals
+vramIncr		ds.w 1		; ''
+stmpoutb		ds.w 1
+currOutFlip		ds.w 1
+fdrop			ds.w 1
+cellstorage		ds.l 1
+dotIncr			ds.l 1
+buffIncr		ds.l 1
+; len			ds.l 0
+			endstruct
 
 ; ====================================================================
 ; ----------------------------------------------------------------
 ; RAM section
 ; ----------------------------------------------------------------
+; Some 32X labels are in system/shared.asm
 
 			memory RAM_MdVideo
-	; Some 32X labels are in system/shared.asm
+	; *** Variables cleared when changing screen modes ***
 RAM_PalFadeList		ds.b palfd_len*MAX_PALFDREQ	; Pal-fade request and buffers
 RAM_SprMapList		ds.b $10*MAX_MDMAPSPR		; List of mapped-sprite data
 RAM_SprPzList		ds.b $08*80			; List of sprite pieces to build
@@ -148,14 +151,12 @@ RAM_VerScroll		ds.l 320/16			; DMA Vertical scroll data
 RAM_Sprites		ds.w 8*80			; DMA Sprites
 RAM_Palette		ds.w 64				; DMA Palette
 RAM_PaletteFade		ds.w 64				; Target MD palette for FadeIn/Out
-; RAM_VidPrntList		ds.w 3*24			; Video_Print list: Address, Type
 RAM_VdpDmaIndx		ds.w 1				; Current index in DMA BLAST list
 RAM_VdpDmaMod		ds.w 1				; Mid-write flag
 RAM_SprOffsetX		ds.w 1				; X spriteset position
 RAM_SprOffsetY		ds.w 1				; Y spriteset position
 RAM_MdVidClr_e		ds.l 0				; <-- END POINT for Video_Clear
-
-	; *** Variables NOT cleared DURING SCREEN CHANGES:
+	; *** Variables kept when changing screen modes ***
 RAM_VdpDmaList		ds.b $10*MAX_MDDMATSK		; DMA BLAST list for VBlank
 RAM_FrameCount		ds.l 1				; Frame-counter
 RAM_IndxPalFade		ds.w 1				; Current index in the pal-fade request list
@@ -175,7 +176,9 @@ sizeof_mdvid		ds.l 0
 
 ; ====================================================================
 ; ----------------------------------------------------------------
-; Initialize Genesis video
+; Video_Init
+;
+; Initialize Genesis video, call this once.
 ;
 ; Uses:
 ; d5-d7/a5-a6
@@ -188,7 +191,7 @@ Video_Init:
 .clr_ram:
 		move.b	d6,(a6)+
 		dbf	d7,.clr_ram
-		lea	(RAM_VdpDmaList).w,a6			; Reset the DMA blast list
+		lea	(RAM_VdpDmaList).w,a6			; Write base DMA registers
 		lea	.dma_entry(pc),a5
 		move.w	#MAX_MDDMATSK-1,d7
 .copy_dma:
@@ -197,7 +200,7 @@ Video_Init:
 		move.l	8(a5),(a6)+
 		move.l	$C(a5),(a6)+
 		dbf	d7,.copy_dma
-		lea	(RAM_SprMapList).w,a6
+		lea	(RAM_SprMapList).w,a6			; Delete Mapped sprite entries
 		move.w	#MAX_MDMAPSPR-1,d7
 .clr_d:
 		clr.l	(a6)+
@@ -205,8 +208,7 @@ Video_Init:
 		clr.l	(a6)+
 		clr.l	(a6)+
 		dbf	d7,.clr_d
-
-		clr.w	(RAM_IndxPalFade).w			; Reset all these indexes
+		clr.w	(RAM_IndxPalFade).w			; Reset all VDP palfade requests
 		lea	(RAM_PalFadeList).w,a6
 		move.w	#MAX_PALFDREQ-1,d7
 .clr_preq:
@@ -214,7 +216,7 @@ Video_Init:
 		clr.l	(a6)+
 		dbf	d7,.clr_preq
 	if MARS|MARSCD
-		clr.w	(RAM_MdMars_IndxPalFd).w
+		clr.w	(RAM_MdMars_IndxPalFd).w		; Reset all 32X palfade requests
 		lea	(RAM_MdMars_MPalFdList).w,a6
 		move.w	#MAX_PALFDREQ-1,d7
 .clr_mreq:
@@ -222,7 +224,7 @@ Video_Init:
 		clr.l	(a6)+
 		dbf	d7,.clr_mreq
 	endif
-		movem.w	.def_regset(pc),d0-d3
+		movem.w	.def_regset(pc),d0-d3			; Set default VDP regs $80,$81,$8B,$8C
 		movem.w	d0-d3,(RAM_VdpRegSet0).w
 		move.l	(RAM_VdpRegSet0).w,(vdp_ctrl).l
 		move.l	(RAM_VdpRegSetB).w,(vdp_ctrl).l
@@ -231,10 +233,10 @@ Video_Init:
 ; --------------------------------------------------------
 ; DMA blast base entry
 .dma_entry:
-		dc.w $9400,$9300		; Size
-		dc.w $9600,$9500,$9700		; Source
-		dc.l $40000080 			; VDP write with DMA
-		dc.w $0000			; Patch for the first 4 pixels (SCD/CD32X only)
+		dc.w $9400,$9300			; Size
+		dc.w $9600,$9500,$9700			; Source
+		dc.l $40000080 				; VDP write with DMA
+		dc.w $0000				; Patch for the first 4 pixels (SCD/CD32X only)
 		align 2
 .def_regset:
 		dc.w $8004,$8104,$8B00,$8C00
@@ -242,33 +244,24 @@ Video_Init:
 
 ; --------------------------------------------------------
 ; Video_Default
+;
+; Reset VDP settings to defaults
+; SCD: Clears ALL Stamps
 ; --------------------------------------------------------
 
 Video_Default:
-	if MCD|MARSCD
-		lea	(RAM_MdMcd_Stamps).w,a6
-		move.w	#MAX_MCDSTAMPS-1,d7
-.clr_stamps:
-	rept $20/4
-		clr.l	(a6)+
-	endm
-		dbf	d7,.clr_stamps
-	endif
-		move.l	#$91009200,(vdp_ctrl).l
-		move.w	#$8F00|$02,(vdp_ctrl).l			; VDP increment $02 (failsafe)
+		move.l	#$91009200,(vdp_ctrl).l			; Clear WINDOW
+		move.w	#$8F00|$02,(vdp_ctrl).l			; VDP increment $02
 		move.w	#DEF_VRAM_FG,(RAM_VdpVramFG).w
 		move.w	#DEF_VRAM_BG,(RAM_VdpVramBG).w
 		move.w	#DEF_VRAM_WD,(RAM_VdpVramWD).w
 		move.w	#DEF_VRAM_SPR,(RAM_VdpVramSpr).w
 		move.w	#DEF_VRAM_HSCRL,(RAM_VdpVramHScrl).w
-		move.w	#$1000,(RAM_VdpMapSize).w		; Map size for FG/BG
 		bsr	Video_UpdMapVram
 		bsr	Video_UpdSprHVram
-		moveq	#1,d0					; Size H64 V32
-		moveq	#0,d1
+		moveq	#%0001,d0				; Size H64 V32
 		bsr	Video_SetMapSize
-		moveq	#1,d0					; Resolution 320x224
-		moveq	#0,d1
+		moveq	#%0001,d0				; Resolution 320x224
 		bra	Video_Resolution
 
 ; ====================================================================
@@ -542,7 +535,6 @@ Video_BuildSprites:
 ; Reset slots
 ; --------------------------------------------------------
 
-.freeze:
 		lea	(RAM_SprPzList).w,a6
 		moveq	#80-1,d7
 		moveq	#$08,d6
@@ -606,7 +598,7 @@ vid_CheckLastSpr:
 ; --------------------------------------------------------
 ; Video_Clear
 ;
-; Clears VDP VRAM and other RAM sections
+; Clears ALL VDP VRAM and other RAM sections
 ;
 ; Breaks:
 ; ALL
@@ -635,7 +627,7 @@ Video_Clear:
 ; --------------------------------------------------------
 ; Video_ClearScreen
 ;
-; Clears ALL 3 map layers.
+; Clears ALL 3 map layers entirely
 ; --------------------------------------------------------
 
 Video_ClearScreen:
@@ -657,7 +649,7 @@ Video_ClearScreen:
 ; --------------------------------------------------------
 ; Video_DisplayOn, Video_DisplayOff
 ;
-; Enable/Disable VDP Display
+; Enable or Disable VDP Display
 ; --------------------------------------------------------
 
 Video_DisplayOn:
@@ -674,7 +666,10 @@ Video_DisplayOff:
 ; --------------------------------------------------------
 ; Video_DmaOn, Video_DmaOff
 ;
-; Enable/Disable DMA
+; Enable or Disable DMA
+;
+; Note:
+; Various routines that use DMA already call these
 ; --------------------------------------------------------
 
 Video_DmaOn:
@@ -703,7 +698,7 @@ vid_WrtReg01:
 ;
 ; Input:
 ; d0.b | Enable these interrupts generated by VDP:
-;      | %00000EHV
+;      | %00000ehv
 ;      | E - External
 ;      | H - HBlank
 ;      | V - VBlank
@@ -744,38 +739,39 @@ Video_IntEnable:
 ; Set video resolution
 ;
 ; Input:
-; d0.w | $00 - Horizontal 256
-;      | $01 - Horizontal 320
-;
-; d1.w | $00 - Vertical 224
-;      | $01 - Vertical 240 (PAL ONLY)
-;      | $02 - Double resolution mode
-;      | $03 - INVALID
+; d0.b | Vertical and Horizontal modes:
+;      | %0000iivh
+;      |
+;      | h:  Horizontal 256/320
+;      | v:  Vertical 224/240 (PAL ONLY, NTSC always 0)
+;      | ii: Interlace mode
+;      | %00 - None
+;      | %01 - Enable
+;      | %10 - INVALID
+;      | %11 - Double (Vertical 448/480)
 ; --------------------------------------------------------
 
 Video_Resolution:
 		movem.w	d6-d7,-(sp)
 		move.w	(RAM_VdpRegSet1).w,d7
 		andi.b	#%11110111,d7
-		move.w	d1,d6
-		and.w	#1,d6
-		lsl.w	#3,d6
+		move.w	d0,d6
+		and.w	#%0010,d6
+		lsl.w	#2,d6
 		or.w	d6,d7
 		move.w	d7,(vdp_ctrl).l
 		move.w	d7,(RAM_VdpRegSet1).w
 		move.w	(RAM_VdpRegSetC).w,d7
 		andi.b	#%01111000,d7
 		move.w	d0,d6
-		and.w	#$01,d6
+		and.w	#%0001,d6
 		beq.s	.ex_bit
-		or.w	#$81,d6
+		or.w	#%10000001,d6
 .ex_bit:
 		or.w	d6,d7
-		move.w	d1,d6
-		and.w	#%010,d6
-		beq.s	.double
-		or.w	#%100,d6
-.double:
+		move.w	d0,d6
+		andi.w	#%1100,d6
+		lsr.w	#1,d6
 		or.w	d6,d7
 		move.w	d7,(vdp_ctrl).l
 		move.w	d7,(RAM_VdpRegSetC).w
@@ -814,7 +810,6 @@ Video_UpdMapVram:
 		move.w	d7,(vdp_ctrl).l
 		movem.w	(sp)+,d6-d7
 		rts
-
 Video_UpdSprHVram:
 		movem.l	d6-d7,-(sp)
 		move.w	#$8500,d7
@@ -837,35 +832,41 @@ Video_UpdSprHVram:
 ; --------------------------------------------------------
 ; Video_SetMapSize
 ;
-; Set MAP size(s) to FG and BG
+; Set MAP size to FG and BG
 ;
 ; Input:
-; d0.w | Width: %00 - H32
-;      |        %01 - H40
-;      |        %11 - H128
-;
-; d1.w | Height: %00 - V32
-;      |         %01 - V40
-;      |         %11 - V128
-;
-; Notes:
-; Maximum size for a single layer size
-; is $1000
+; d0.b | Map size:
+;      | %0000vvhh
+;      |
+;      | both vv and hh
+;      | 00 - 32
+;      | 01 - 64
+;      | 10 - INVALID
+;      | 11 - 128
 ; --------------------------------------------------------
 
 Video_SetMapSize:
-		movem.w	d5-d7,-(sp)
-		move.w	#$9000,d7
-		move.w	d0,d6
-		move.w	d1,d5
-		andi.w	#%11,d6
-		andi.w	#%11,d5
-		lsl.w	#4,d5
-		or.w	d5,d6
+		movem.w	d6-d7,-(sp)
+		move.w	d0,d7
+		andi.w	#%1111,d7
+		add.w	d7,d7
+		move.w	.size_tbl(pc,d7.w),d7
+		move.w	d7,(RAM_VdpMapSize).w
+		move.w	d0,d7
+		move.w	d7,d6
+		andi.w	#%0011,d7
+		andi.w	#%1100,d6
+		lsl.w	#2,d6
+		or.w	#$9000,d7
 		or.w	d6,d7
 		move.w	d7,(vdp_ctrl).l
-		movem.w	(sp)+,d5-d7
+		movem.w	(sp)+,d6-d7
 		rts
+.size_tbl:
+		dc.w $0800,$1000,$1800,$2000
+		dc.w $1000,$2000,$3000,$4000
+		dc.w $1800,$3000,$4800,$6000
+		dc.w $2000,$4000,$6000,$8000
 
 ; --------------------------------------------------------
 ; Video_LoadArt
@@ -1281,22 +1282,22 @@ Video_MakeDmaEntry:
 ; Write map data to VDP
 ;
 ; _LoadMap:  Left to Right / Top to Bottom
-; _LoadMapV: Top to Bottom / Left to Right
+; _LoadMapV: Top to Bottom / Left to Right, double-res safe
 ;
 ; Input:
 ; a0   | Map data
 ; d0.l | X/Y Position: splitw(x_pos,y_pos)
 ; d1.l | Width/Height: splitw(width/8,height/8)
 ; d2.l | Screen Width/VRAM location:
-;        splitw(sw_size,vram_loc)
+;        splitw(sw_size,vram_map_loc)
 ; d3.w | VRAM-cell increment
 ;
 ; Notes:
-; - Data starts from 0, Map data $FFFF(-1) is
-;   used to place the BLANK tile, see SET_NullVram.
-; * SCD/CD32X ONLY:
-; - For making the dot-screen map see
-;   Video_MdMcd_StampDotMap
+; - Data starts from 0, tile $FFFF(-1) is
+;   used to place the BLANK tile (see SET_NullVram)
+; - SCD/CD32X NOTE:
+;   For making the dot-screen map for
+;   the Stamps use Video_MdMcd_StampDotMap
 ; --------------------------------------------------------
 
 Video_LoadMap:
@@ -1352,6 +1353,7 @@ Video_LoadMap:
 .bad_size:
 		movem.l	(sp)+,d4-d7/a4-a6
 		rts
+
 ; ------------------------------------------------
 ; d1.l | Width/Height: splitw(width/8,height/8)
 ; d2.l | Screen Width/VRAM location:
@@ -1420,14 +1422,12 @@ Video_LoadMapV:
 
 .dble_mode:
 		move.l	d1,-(sp)
-
 		lsr.w	#1,d1			; <-- lazy patch
 		move.w	d3,d4
 		andi.w	#$F800,d4
 		andi.w	#$7FF,d3
 		lsr.w	#1,d3
 		or.w	d4,d3
-
 		move.l	d1,d4
 		swap	d4
 		subq.w	#1,d4
@@ -2451,7 +2451,7 @@ vid_PrintTValW:
 ; Sets or Makes a VDP Sprite piece
 ;
 ; Input:
-; a0   | Slot (0-80)
+; a0   | Slot (0-80) for _SetSpr
 ; d0.w | X pos
 ; d1.w | Y pos
 ; d2.w | VRAM
@@ -2527,7 +2527,7 @@ vidMd_CFreeze:
 ; Sets or Makes a VDP Sprite with map data
 ;
 ; Input:
-; a0   | Slot (0-80)
+; a0   | Slot (0-80) for _SetSprMap/_SetSprMap_DMA
 ; a1   | Map data
 ; a2   | PLC data (_DMA/_DMA_Auto ONLY)
 ; a3   | Graphics data (_DMA/_DMA_Auto ONLY)
@@ -3069,10 +3069,10 @@ Video_MdMcd_StampDotMap:
 ; Input:
 ; a0   | Index slot (_SetStamp ONLY)
 ; a1   | Map slot to use
-; d0.l | X/Y position:       splitw(x_pos,y_pos)
+; d0.l | X/Y position: splitw(x_pos,y_pos)
 ; d1.l | Rotation and Scale: splitw(rot,scale)
-; d2.l | Width/Height:       split(width,height)
-; d3.l | Center X/Y:         splitw(cx,cy)
+; d2.l | Width/Height: split(width,height)
+; d3.l | Center X/Y: splitw(cx,cy)
 ;
 ; Returns:
 ; bcc | Wrote sucessfully
@@ -3161,6 +3161,27 @@ vidMdMcd_RdStmpSlot:
 ; --------------------------------------------------------
 
 Video_MdMcd_StampMap:
+		rts
+
+
+; --------------------------------------------------------
+; Video_MdMcd_StampReset
+;
+; Clear ALL Stamps
+; --------------------------------------------------------
+
+Video_MdMcd_StampReset:
+	if MCD|MARSCD
+		movem.l	d7/a6,-(sp)
+		lea	(RAM_MdMcd_Stamps).w,a6
+		move.w	#MAX_MCDSTAMPS-1,d7
+.clr_stamps:
+	rept $20/4
+		clr.l	(a6)+
+	endm
+		dbf	d7,.clr_stamps
+		movem.l	(sp)+,d7/a6
+	endif
 		rts
 
 ; ====================================================================
@@ -3462,16 +3483,16 @@ Video_MdMars_LoadMap:
 ; --------------------------------------------------------
 ; Video_MdMars_SetSpr2D, Video_MdMars_MakeSpr2D
 ;
-; Set or Make a Super Sprite
+; Set or Make a Super Sprite, 2D MODE ONLY.
 ;
 ; Input:
 ; a0   | Index slot (_SetSpr2D ONLY)
 ; a1   | Texture pointer (0-MAX_MarsVram or CS1-ROM location)
 ; d0.l | X/Y position: splitw(x_pos,y_pos)
 ; d1.l | Flags and Z position: splitw(flags,z_pos)
-; d2.l | Width/Height: splitw(width,height)
-; d3.l | Texture full_width+index: splitw(width,index)
-; d4.l | Frame X/Y: splitw(x_frame,y_frame)
+; d2.w | Frame number $nnnn
+; d3.l | Width/Height: splitw(width,height)
+; d4.l | Texture full_width+index: splitw(width,index)
 ;
 ; Returns:
 ; bcc | OK
@@ -3512,7 +3533,7 @@ vidMdMars_MkSpr2D:
 		swap	d7
 		move.w	d7,sspr_x_pos(a6)
 		move.w	d0,sspr_y_pos(a6)
-		move.l	d2,d7
+		move.l	d3,d7
 		lsr.w	#3,d7
 		subq.w	#1,d7
 		move.b	d7,sspr_size+1(a6)
@@ -3520,7 +3541,7 @@ vidMdMars_MkSpr2D:
 		lsr.w	#3,d7
 		subq.w	#1,d7
 		move.b	d7,sspr_size(a6)
-		move.w	d3,d7
+		move.w	d4,d7
 		andi.w	#$FF,d7
 		move.w	d7,sspr_indx(a6)
 		move.l	d1,d7
@@ -3530,7 +3551,7 @@ vidMdMars_MkSpr2D:
 		or.b	#$80,d7
 		or.b	d6,d7
 		move.b	d7,sspr_flags(a6)
-		move.w	d4,d7
+		move.w	d2,d7
 		andi.w	#$FF,d7
 		move.w	d7,sspr_frame(a6)
 .on_freeze:
@@ -3546,16 +3567,16 @@ vidMdMars_CError:
 ; --------------------------------------------------------
 ; Video_MdMars_SetSpr3D, Video_MdMars_MakeSpr3D
 ;
-; Set or Make a 3D Sprite
+; Set or Make a 3D Sprite, 3D MODE ONLY.
 ;
 ; Input:
 ; a0   | Index slot (_SetSpr3D ONLY)
 ; a1   | Texture pointer (0-MAX_MarsVram or CS1-ROM location)
 ; d0.l | X/Y position: splitw(x_pos,y_pos)
 ; d1.l | Flags and Z position: splitw(flags,z_pos)
-; d2.l | Width/Height: splitw(width,height)
-; d3.l | Texture full_width+index: splitw(width,index)
-; d4.l | Frame X/Y: splitw(x_frame,y_frame)
+; d2.w | Frame number: $xxyy
+; d3.l | Width/Height: splitw(width,height)
+; d4.l | Texture full_width+index: splitw(width,index)
 ;
 ;        flags: %000000ff
 ;        %00 - Normal 3D screen sprite
@@ -3610,20 +3631,20 @@ vidMdMars_MkSpr3D:
 		or.w	d6,d7
 		move.b	d7,mspr_flags(a6)
 		move.w	d1,mspr_z_pos(a6)
-		move.l	d2,d7
-		swap	d7
-		move.b	d7,mspr_size_w(a6)
-		move.b	d2,mspr_size_h(a6)
-		move.b	d7,mspr_src_w(a6)
-		move.b	d2,mspr_src_h(a6)
 		move.l	d3,d7
 		swap	d7
-		move.b	d7,mspr_srcwdth(a6)
-		move.b	d3,mspr_indx(a6)
+		move.b	d7,mspr_size_w(a6)
+		move.b	d3,mspr_size_h(a6)
+		move.b	d7,mspr_src_w(a6)
+		move.b	d3,mspr_src_h(a6)
 		move.l	d4,d7
 		swap	d7
+		move.b	d7,mspr_srcwdth(a6)
+		move.b	d4,mspr_indx(a6)
+		move.l	d2,d7
+		swap	d7
 		move.b	d7,mspr_frame_x(a6)
-		move.b	d4,mspr_frame_y(a6)
+		move.b	d2,mspr_frame_y(a6)
 		movem.l	(sp)+,d6-d7/a6
 		and	#%11110,ccr		; Return OK
 		rts

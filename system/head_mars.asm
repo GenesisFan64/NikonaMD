@@ -89,7 +89,7 @@
 ; 32X-cartidge jumps
 ; ----------------------------------------------------------------
 
-		jmp	($FFFD00).l			; Hotstart
+		jmp	($FFFD00).l			; Hotstart jump
 		jmp	($880000|MD_ErrBus).l		; Bus error
 		jmp	($880000|MD_ErrAddr).l		; Address error
 		jmp	($880000|MD_ErrIll).l		; ILLEGAL Instruction
@@ -190,7 +190,7 @@
 ;
 ; Carry: "MARS ID" and Self Check result
 ; 	| bcc: Test passed
-; 	| bcs: Test failed**
+; 	| bcs: Test failed (can trigger false positive)
 ; ----------------------------------------------------------------
 
 MARS_Entry:
@@ -234,7 +234,7 @@ MD_ErrorTrap:
 		move.w	#$2700,sr			; Disable interrupts
 		move.l	#$C0000000,(vdp_ctrl).l		; RED screen
 		move.w	#$000E,(vdp_data).l
-		bra.s	*
+		bra.s	*				; Infinite loop.
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -243,7 +243,7 @@ MD_ErrorTrap:
 
 MD_HotStRam:
 		move.w	#$2700,sr
-		lea	(RAM_Stack),sp		; HW: Set STACK manually, Pressing RESET moves it to 0
+		lea	(RAM_Stack),sp			; HW: Set STACK manually, Pressing RESET moves it to 0
 		lea	(vdp_data).l,a6
 		lea	(sysmars_reg).l,a5
 	; ------------------------------------------------
@@ -251,23 +251,23 @@ MD_HotStRam:
 	; it shuts itself OFF on reset, The SVDP will
 	; remain visible though.
 	; ------------------------------------------------
-		btst	#0,adapter+1(a5)	; 32X STILL enabled?
+		btst	#0,adapter+1(a5)		; 32X STILL enabled?
 		bne.s	MD_MarsStartOk
-		move.b	#%01,adapter+1(a5)	; Re-enable and Reset SH2
+		move.b	#%01,adapter+1(a5)		; Re-enable and Reset SH2
 MD_MarsRestart:
 		lea	($A10000).l,a5
 		move.l	#-64,a4
 		move.w	#3900,d7
-		lea	($880000+$6E4).l,a1	; Do the boot sequence again
-		jmp	(a1)			; starting from ?res_wait (icd_mars.prg)
+		lea	($880000+$6E4).l,a1		; Do the boot sequence again
+		jmp	(a1)				; starting from ?res_wait (icd_mars.prg)
 MD_MarsStartOk:
-		move.w	#%000,dreqctl(a5)	; Reset RV
-		move.w	#0,bankset(a5)		; Set $900000 block Bank 0
+		move.w	#%000,dreqctl(a5)		; Reset RV
+		move.w	#0,bankset(a5)			; Set $900000 block Bank 0
 ; .wait_mstr:	cmp.l	#"M_OK",comm0(a5)
 ; 		bne.s	.wait_mstr
 ; .wait_slv:	cmp.l	#"S_OK",comm4(a5)
 ; 		bne.s	.wait_slv
-		jmp	($880000|MD_HotStart).l	; Jump to Hot start as normal
+		jmp	($880000|MD_HotStart).l		; Jump to Hot start as normal
 MD_HotStRam_e:
 		align 2
 
@@ -279,7 +279,7 @@ MD_HotStRam_e:
 MD_Init:
 		move.w	#$2700,sr
 		lea	MD_HotStRam(pc),a0		; Copy HotStart RAM jump
-		lea	($FFFFFD00).w,a1		; <-- RAM section used in SegaCD
+		lea	($FFFFFD00).w,a1
 		move.w	#((MD_HotStRam_e-MD_HotStRam)/2)-1,d0
 .copy_code:
 		move.w	(a0)+,(a1)+
@@ -297,7 +297,7 @@ MD_Init:
 
 MD_HotStart:
 		lea	($FFFF0000).l,a0		; Clean our "work" RAM
-		move.l	#sizeof_mdram,d1
+		move.l	#sizeof_mdram,d1		; <-- until here
 		moveq	#0,d0
 .loop_ram:	move.w	d0,(a0)+
 		cmp.l	d1,a0
@@ -310,7 +310,6 @@ MD_HotStart:
 		dbf	d7,.palclear
 		moveq	#0,d0				; Clear both Master and Slave comm's
 		move.l	d0,comm12(a5)
-; 	if EMU=0
 		move.w	#$1FF,d7			; Delay until SH2 gets first.
 .wait_sh2:
 		move.w	#$FF,d6

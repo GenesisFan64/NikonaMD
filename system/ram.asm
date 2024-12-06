@@ -3,16 +3,15 @@
 ; Genesis/Pico 68000 RAM section (SCD: "MAIN-CPU")
 ;
 ; RESERVED RAM areas:
-; $FFF700-$FFFC00 | Buffer data used by Boot ROM
-;                   * FREE on Cartridge
+; $FFF700-$FFFC00 | Buffers used by BIOS Boot ROM*
 ; $FFFC00-$FFFD00 | Stack area a7
-; $FFFD00-$FFFDFF | RESERVED for the Sega CD Vector jumps
-;                   * FREE on Cartridge
-; $FFFE00-$FFFFFF | USED by the BIOS as temporals
-;                   * FREE on Cartridge
+; $FFFD00-$FFFDFF | RESERVED for the Sega CD Vector jumps*
+; $FFFE00-$FFFFFF | USED by the BIOS as temporals*
+;
+; * FREE on Cartridge
 ; ----------------------------------------------------------------
 
-SET_RAMLIMIT		equ $FFFC00
+SET_RAMLIMIT		equ $00FFFC00
 
 ; --------------------------------------------------------
 ; MAIN USER RAM

@@ -369,14 +369,14 @@ MARS_RAMCODE_EOF:
 
 ; ====================================================================
 ; --------------------------------------------------------
-; CODE BLOCK (banks)
+; CODE
 ; --------------------------------------------------------
 
 		include "game/incl_code.asm"
 
 ; ====================================================================
 ; ----------------------------------------------------------------
-; DATA BLOCK (banks)
+; DATA
 ; ----------------------------------------------------------------
 
 		include "game/incl_data.asm"
@@ -391,10 +391,16 @@ MARS_RAMCODE_EOF:
 	if MCD|MARSCD=0
 
 ; --------------------------------------------------------
-; ROM only DMA graphics data
+; ROM-only DATA
 ; --------------------------------------------------------
 
-		include "game/data/ROM_dma_vdp.asm"
+		include "game/data/md/ROM_bank0.asm"
+
+; --------------------------------------------------------
+; ROM-only DMA-graphics
+; --------------------------------------------------------
+
+		include "game/data/md/ROM_dma_vdp.asm"
 
 ; --------------------------------------------------------
 ; ROM-only 32X data
@@ -405,11 +411,10 @@ MARS_RAMCODE_EOF:
 ; --------------------------------------------------------
 
 		phase CS1+*
-; ------------------------------------------------
 		align 4
-		include "game/data/mars/objects/list_ROM.asm"	; 3D objects
+		include "game/data/mars/ROM_mars.asm"		; 32X-only data
+		include "game/data/mars/objects/ROM_list.asm"	; 3D objects
 		include "sound/ROM_smpl_pwm.asm"		; PWM samples
-; ------------------------------------------------
 		dephase
 
 ; ----------------------------------------------------------------

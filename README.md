@@ -58,11 +58,11 @@ This is a custom sound driver, tracker-based that supports all the sound channel
 ## NOTES
 
 * All the user code goes to `/game`, DO NOT MODIFY `/system` as it will get updated with the latest changes and fixes
-* To keep compatibilty to all systems CODE and DATA are separated: game code is stored as "screen modes" (ex. Title, Level...) and the DATA is stored as "banks" and loaded manually depending of the system, this is for SCD, 32X and CD32X.
+* To keep compatibilty to all systems CODE and DATA are separated: game code is stored as "screen modes" (ex. Title, Level...) and the DATA is stored as "banks" and loaded manually depending of the system (Picking a ROM location or loading data from Disc)
 
 ## CURRENT ISSUES
 
-* This is NOT finished at all and no documentation.
+* No documentation as I keep changing things.
 * (SCD) Stamps support is unstable/unfinished
 * (32X) 2D-mode might break on hardware if placing too many Super-Sprites
 

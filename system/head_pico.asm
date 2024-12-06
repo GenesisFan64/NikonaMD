@@ -122,8 +122,8 @@ Pico_UnkInt:
 
 Pico_Entry:
 		move	#$2700,sr		; Disable interrputs
-		lea	($800019),a0
-		move.l	#"SEGA",d0		; Activate PICO system by
+		lea	($800019).l,a0
+		move.l	($100),d0		; Activate PICO system by
 		movep.l	d0,(a0)			; writing this string to $800019 in odd writes
 		tst.w	(vdp_ctrl).l		; Test VDP to unlock Video
 	; --------------------------------

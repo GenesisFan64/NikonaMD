@@ -67,32 +67,18 @@ def chk_cell(XPOS,YPOS,COLOR):
 	global IMG_WDTH
 	XPOS = XPOS * 8
 	YPOS = (IMG_WDTH * YPOS) * 8
-	a = 0
 	d = IMG_POS+XPOS+YPOS
-
-	x = 0
-	y = 0
-	z = 0
-
+	a = 0
 	c = 8
 	while c:
 		input_file.seek(d)
 		b = 8
 		while b:
-			f = (ord(input_file.read(1)) & 0xFF)
-
-			g = f >> 4
-			if g == COLOR:
-				a += a + (f & 0x0F)
-
-			x += 1
+			i = (ord(input_file.read(1)) & 0xFF)
+			a += (b+c)+i | a
 			b -= 1
-
-		x = 0
-		y += 1
 		c -= 1
 		d += IMG_WDTH
-
 	return a
 
 def make_map():

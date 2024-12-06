@@ -109,7 +109,8 @@ vram		ds.l 1		; Graphics VRAM position (in RAM_Mars_VramData)
 ; ----------------------------------------
 ; RAM_MdMars_Models
 ;
-; X/Y/Z are in 10mm steps (1meter = $100)
+; X/Y/Z pixels are in 10mm steps
+; (1 meter = $100)
 ;
 ; Maximum size: $20 bytes
 ; ----------------------------------------
@@ -130,7 +131,8 @@ y_rot		ds.l 1		; Z rotation
 ; ----------------------------------------
 ; RAM_MdMars_MSprites
 ;
-; X/Y/Z are in 10mm steps (1meter = $100)
+; X/Y/Z pixels are in 10mm steps
+; (1 meter = $100)
 ;
 ; Maximum size: $20 bytes
 ; ----------------------------------------
@@ -165,7 +167,8 @@ vram		ds.l 1		; VRAM texture location
 ; ----------------------------------------
 ; RAM_MdMars_MdlCamera
 ;
-; X/Y/Z are in 10mm steps (1meter = $100)
+; X/Y/Z pixels are in 10mm steps
+; (1 meter = $100)
 ;
 ; Maximum size: $20 bytes
 ; ----------------------------------------
@@ -183,14 +186,14 @@ z_rot		ds.l 1		; Z rotation
 ; ----------------------------------------------------------------
 ; DREQ RAM section
 ;
-; To read these labels:
+; To read these labels...
 ;
 ; On the Genesis:
-; 	lea	(RAM_MdMars_Comm+DREQ_LABEL).w,aX
+; 	lea	(RAM_MdMars_Comm+DREQ_LABEL).w,aN
 ; On the 32X:
-; 	mov	#DREQ_LABEL,rX
+; 	mov	#DREQ_LABEL,rN
 ; 	mov	@(marsGbl_DreqRead,gbr),r0
-;	add	r0,rX
+;	add	r0,rN
 ;
 ; List MUST be aligned by 8bytes.
 ; ----------------------------------------------------------------
