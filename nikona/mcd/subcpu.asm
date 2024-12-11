@@ -7,7 +7,6 @@
 
 SET_PCMBLK		equ $100	; $100 or $80
 SET_PCMLAST		equ $F00	;
-
 SET_STAMPPOV		equ 256
 ; MAX_MCDSTAMPS		equ 64		; see shared.asm
 
@@ -16,7 +15,6 @@ SET_STAMPPOV		equ 256
 ; Trace data: $2000 ($800 bytes * 4)
 ; Stamp list: ($20*MAX_MCDSTAMPS)
 ; Dot-screen: $9600 320x240 max
-
 WRAM_DotOutput_0	equ $20000
 WRAM_DotOutput_1	equ $28000
 WRAM_MdMapTable		equ $30000
@@ -24,7 +22,8 @@ WRAM_MdStampList	equ $3A000
 WRAM_TraceBuff		equ $3B000	; Size $780*2 ($F00)
 WRAM_StampsDone		equ $3BFFC
 WRAM_StampCurrFlip	equ $3BFFE
-WRAM_PcmTable		equ $3A000	; TODO
+
+; without Stamps:
 WRAM_SaveDataCopy	equ $3C000	; ** DONT Overwrite THIS **
 
 ; ====================================================================
@@ -104,7 +103,7 @@ flags		ds.w 1
 ; Includes
 ; ----------------------------------------------------------------
 
-		include "system/mcd/cdbios.asm"
+		include "nikona/mcd/cdbios.asm"
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -146,7 +145,7 @@ SCPU_Init:
 		lea	.drv_init(pc),a0
 		move.w	#DRVINIT,d0
 		jsr	_CDBIOS
-		bsr	spInitFS			; Init ISO Filesystem
+		bsr	spInitFS			; Init ISO Filenikona
 		lea	.sub_file(pc),a0		; Search and load the PCM samples
 		bsr	spSearchFile
 		lea	(SCPU_DATA),a0
@@ -1478,7 +1477,7 @@ CdSub_SineWave:
 ; ------------------------------------------------
 
 .sine_data:
-		binclude "system/md/data/sine_data.bin"
+		binclude "nikona/md/data/sine_data.bin"
 		align 2
 
 ; =====================================================================

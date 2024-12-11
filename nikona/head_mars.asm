@@ -165,7 +165,7 @@
 		dc.l SH2_S_Entry			; Slave SH2 PC (SH2 map)
 		dc.l SH2_Master				; Master SH2 default VBR (SH2 map)
 		dc.l SH2_Slave				; Slave SH2 default VBR (SH2 map)
-		binclude "system/mars/data/security.bin"; Securty/Boot code
+		binclude "nikona/mars/data/security.bin"; Securty/Boot code
 
 ; ====================================================================
 ; ----------------------------------------------------------------

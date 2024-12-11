@@ -18,7 +18,7 @@ color_indx	function a,a<<1						; Applies to both VDP and SuperVDP
 pstr_mem	function a,b,((a|$80)<<24)|b&$FFFFFF			; PRINT memory: pstr_mem(type,mem_pos)
 full_loc	function a,-(-a)&$FFFFFFFF
 
-SET_WRAMSIZE	equ $3C000						; Maxium WRAM available to use
+SET_WRAMSIZE	equ $3B800						; Maxium WRAM available to use + $120
 
 ; ====================================================================
 ; ------------------------------------------------------------
@@ -208,18 +208,22 @@ lblend label *
 ; --------------------------------------------
 
 data_dset macro startlbl
-	if MCD|MARSCD
+	if MCD|MARSCD			; Alignment
 		align $800
+	elseif MARS
+		align 4
 	endif
-; MCD_DBANK0:
-startlbl label *
-	if MCD|MARSCD
+
+startlbl label *			; Register label
+
+	if MCD|MARSCD			; Set PHASE
 		phase sysmcd_wram
 	elseif MARS
 		phase $900000+(startlbl&$0FFFFF)
-		align 4
 	endif
+
 GLBL_MDATA_ST := *
+
 	endm
 
 ; --------------------------------------------
@@ -227,28 +231,24 @@ GLBL_MDATA_ST := *
 data_dend macro endlbl
 GLBL_MDATA_RP := *-GLBL_MDATA_ST	; save size for _dend
 
-	if MCD|MARSCD
-	if MOMPASS>2
-		if GLBL_MDATA_RP > SET_WRAMSIZE
-			warning "SCD/CD32X: THIS BANK SIZE IS TOO LARGE for WORD-RAM"
-		endif
-	endif
-	endif
-
+	; Set 32X bank end
 	if MARS
-		if * >= $900000+$100000
-			warning "32X: THIS DATA BANK IS TOO LARGE for $900000"
+		if GLBL_MDATA_RP >= $900000+$100000
+			error "32X: THIS DATA BANK IS TOO LARGE"
 		endif
-
 		dephase
+
+	; Set MCD/CD32X data end
 	elseif MCD|MARSCD
 		dephase
-
 mlastpos := *	; <-- CD/CD32X ONLY
 mpadlbl	:= (mlastpos&$FFF800)+$800
 		rompad mpadlbl
 endlbl label *	; <-- CD/CD32X ONLY
-		erreport "68K DATA BANK",GLBL_MDATA_RP,SET_WRAMSIZE	; <- Lowest size compatible for ALL
+
+		if GLBL_MDATA_RP > SET_WRAMSIZE
+			error "SCD/CD32X: THIS BANK SIZE IS TOO LARGE for WORD-RAM"
+		endif
 	endif
 	endm
 
@@ -272,6 +272,8 @@ GLBL_ENDPHDMA	set *-GLBL_PHASEDMA
 	endif
 		endm
 
+; --------------------------------------------
+
 binclude_dma_e	macro lblstart,lblend,file
 	if MARS
 GLBL_LASTPHDMA	set *
@@ -292,7 +294,7 @@ GLBL_ENDPHDMA	set *-GLBL_PHASEDMA
 		endm
 
 ; --------------------------------------------
-; 32X graphics pack Enter/Exit
+; 32X graphics data Enter/Exit
 ; --------------------------------------------
 
 mars_VramStart	macro thelabel

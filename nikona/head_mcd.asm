@@ -46,11 +46,11 @@
 
 IP_Start:
 	if CDREGION == 0
-		binclude "system/mcd/region/jap.bin"
+		binclude "nikona/mcd/region/jap.bin"
 	elseif CDREGION == 2
-		binclude "system/mcd/region/eur.bin"
+		binclude "nikona/mcd/region/eur.bin"
 	else
-		binclude "system/mcd/region/usa.bin"	; <-- Default
+		binclude "nikona/mcd/region/usa.bin"	; <-- Default
 	endif
 		move.w	#$0100,(z80_bus).l		; Get Z80 bus
 		move.w	#$0100,(z80_reset).l		; Z80 reset
@@ -74,7 +74,7 @@ IP_End:
 
 		align $800
 SP_Start:
-		include "system/mcd/subcpu.asm"
+		include "nikona/mcd/subcpu.asm"
 SP_End:
 		align 2
 

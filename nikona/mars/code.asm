@@ -2415,10 +2415,10 @@ Mars_SetWatchdog:
 ; ----------------------------------------------------------------
 
 		align 4
-		include "system/mars/sound.asm"
-		include "system/mars/video.asm"
-		include "system/mars/cache/cache_mstr.asm"
-		include "system/mars/cache/cache_slv.asm"
+		include "nikona/mars/sound.asm"
+		include "nikona/mars/video.asm"
+		include "nikona/mars/cache/cache_mstr.asm"
+		include "nikona/mars/cache/cache_slv.asm"
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -2426,7 +2426,7 @@ Mars_SetWatchdog:
 ; ----------------------------------------------------------------
 
 		align 4
-sin_table	binclude "system/mars/data/sinedata.bin"
+sin_table	binclude "nikona/mars/data/sinedata.bin"
 		align 4
 
 ; ====================================================================

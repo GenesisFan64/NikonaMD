@@ -1111,7 +1111,7 @@ sys_SineWave:
 		rts
 
 .sine_data:
-		binclude "system/md/data/sine_data.bin"
+		binclude "nikona/md/data/sine_data.bin"
 		align 2
 
 ; --------------------------------------------------------

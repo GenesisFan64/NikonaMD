@@ -25,7 +25,7 @@ MAX_ScrnBuff	equ $1000	; Current Screen's variables
 ; ----------------------------------------------------
 ; SCD, 32X and CD32X ONLY
 ;
-; These sections are unused(free) on Genesis/Pico
+; These sections are unused/free on Genesis/Pico
 MAX_SysCode	equ $2C00	; SCD/32X/CD32X: Nikona lib
 MAX_UserCode	equ $8400	; SCD/32X/CD32X: Current SCREEN's CODE+small DATA
 
@@ -46,12 +46,12 @@ MAX_UserCode	equ $8400	; SCD/32X/CD32X: Current SCREEN's CODE+small DATA
 ; ----------------------------------------------------------------
 
 		include	"rominfo.asm"		; ROM info
-		include	"macros.asm"		; Assembler macros
-		include	"system/shared.asm"	; Shared variables and specials
-		include	"system/mcd/map.asm"	; Sega CD hardware map (shared with Sub-CPU)
-		include	"system/mars/map.asm"	; 32X hardware map (shared with SH2)
-		include	"system/md/map.asm"	; Genesis hardware map and other areas
-		include	"system/ram.asm"	; Genesis RAM sections
+		include	"nikona/macros.asm"	; Assembler macros
+		include	"nikona/shared.asm"	; Shared variables and specials
+		include	"nikona/mcd/map.asm"	; Sega CD hardware map (shared with Sub-CPU)
+		include	"nikona/mars/map.asm"	; 32X hardware map (shared with SH2)
+		include	"nikona/md/map.asm"	; Genesis hardware map and other areas
+		include	"nikona/ram.asm"	; Genesis RAM sections
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -96,7 +96,7 @@ sizeof_SaveInfo	ds.l 0
 ; ---------------------------------------------
 
 	if MARS
-		include	"system/head_mars.asm"			; 32X header
+		include	"nikona/head_mars.asm"			; 32X header
 		lea	($880000|Md_SysCode),a0			; Copy SYSTEM routines
 		lea	(RAM_SystemCode),a1
 		move.w	#((Md_SysCode_e-Md_SysCode))-1,d0
@@ -114,7 +114,7 @@ sizeof_SaveInfo	ds.l 0
 ; ---------------------------------------------
 
 	elseif MCD|MARSCD
-		include	"system/head_mcd.asm"			; Sega CD header
+		include	"nikona/head_mcd.asm"			; Sega CD header
 		lea	Md_SysCode(pc),a0			; Copy SYSTEM routines
 		lea	(RAM_SystemCode),a1
 		move.w	#((Md_SysCode_e-Md_SysCode))-1,d0
@@ -124,7 +124,7 @@ sizeof_SaveInfo	ds.l 0
 	if MARSCD						; CD32X boot code
 		lea	filen_marscode(pc),a0			; Load SH2 code from disc to WORD-RAM
 		jsr	(System_MdMcd_RdFile_WRAM).l
-		include "system/mcd/marscd.asm"
+		include "nikona/mcd/marscd.asm"
 	endif
 		lea	filen_z80file(pc),a0			; Load Z80 data to Word-RAM
 		jsr	(System_MdMcd_RdFile_WRAM).l		; Sound_Init will read from there.
@@ -151,7 +151,7 @@ filen_marscode:	dc.b "NKNAMARS.BIN",0
 ; This recycles the MD's routines.
 ; ---------------------------------------------
 	elseif PICO
-		include	"system/head_pico.asm"			; Pico header
+		include	"nikona/head_pico.asm"			; Pico header
 		bsr	Sound_init				; Init Sound driver FIRST
 		bsr	Video_init				;  ''  Video
 		bsr	System_Init				;  ''  Values
@@ -162,7 +162,7 @@ filen_marscode:	dc.b "NKNAMARS.BIN",0
 ; MD
 ; ---------------------------------------------
 	else
-		include	"system/head_md.asm"			; Genesis header
+		include	"nikona/head_md.asm"			; Genesis header
 		bsr	Sound_init				; Init Sound driver FIRST
 		bsr	Video_init				;  ''  Video
 		bsr	System_Init				;  ''  Values
@@ -190,8 +190,8 @@ Md_SysCode:
 
 		include	"sound/drv/gema_macros.asm"
 		include	"sound/drv/gema.asm"
-		include	"system/md/video.asm"
-		include	"system/md/system.asm"
+		include	"nikona/md/video.asm"
+		include	"nikona/md/system.asm"
 
 ; --------------------------------------------------------
 ; SCREEN MODE MAIN LOOP
@@ -278,7 +278,7 @@ Md_SysCode_e:
 
 	if MCD|MARSCD
 		align $8000
-		binclude "system/mcd/fshead.bin"		; Pre-generated ISO header
+		binclude "nikona/mcd/fshead.bin"		; Pre-generated ISO header
 		fs_mkList 0,IsoFileList,IsoFileList_e		; TWO pointers to the filelist
 		fs_mkList 1,IsoFileList,IsoFileList_e
 IsoFileList:
@@ -356,7 +356,7 @@ MCD_SMPDATA_E:
 MARS_RAMCODE:
 	if MARS|MARSCD
 	; ------------------------------------------------
-		include "system/mars/code.asm"
+		include "nikona/mars/code.asm"
 	; ------------------------------------------------
 	else
 		align 4

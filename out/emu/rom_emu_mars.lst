@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 1 - 12/06/2024 03:30:59 AM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 1 - 12/10/2024 05:46:11 PM
 
 
        1/       0 :                     ; ===========================================================================
@@ -28,7 +28,7 @@
       25/       0 :                     ; ----------------------------------------------------
       26/       0 :                     ; SCD, 32X and CD32X ONLY
       27/       0 :                     ;
-      28/       0 :                     ; These sections are unused(free) on Genesis/Pico
+      28/       0 :                     ; These sections are unused/free on Genesis/Pico
       29/       0 : =$2C00               MAX_SysCode	equ $2C00	; SCD/32X/CD32X: Nikona lib
       30/       0 : =$8400               MAX_UserCode	equ $8400	; SCD/32X/CD32X: Current SCREEN's CODE+small DATA
       31/       0 :                     
@@ -53,7 +53,7 @@
 (1)    2/       0 :                     ; ----------------------------------------------------------------
 (1)    3/       0 :                     ; ROM/DISC Info
 (1)    4/       0 :                     ;
-(1)    5/       0 :                     ; DO NOT CHANGE THE SIZE OF THE STRINGS
+(1)    5/       0 :                     ; ** DO NOT CHANGE THE SIZE OF THE STRINGS **
 (1)    6/       0 :                     ; ----------------------------------------------------------------
 (1)    7/       0 :                     
 (1)    8/       0 :                     ; --------------------------------------------------------
@@ -142,11 +142,11 @@
 (1)   91/       0 :                     ; Only UPPERCASE and _ are allowed.
 (1)   92/       0 :                     ; --------------------------------------------------------
 (1)   93/       0 :                     
-(1)   94/       0 : =$100                SET_SRAMSIZE	equ $100		; SRAM/BRAM filesize, must be "blocks" of $40 bytes ($20 w/Protection)
+(1)   94/       0 : =$100                SET_SRAMSIZE	equ $100		; SRAM/BRAM filesize, must be "blocks" of $40 bytes ($20 w/Protection) *Affects RAM size too
 (1)   95/       0 : ="NIKONACD___"       HTAG_CDSAVE	equ "NIKONACD___"	; SCD internal save name
 (1)   96/       0 : ="NIKONACD32X"       HTAG_MARSCDSAV	equ "NIKONACD32X"	; CD32X internal save name
 (1)   97/       0 :                     
-      49/       0 :                     		include	"macros.asm"		; Assembler macros
+      49/       0 :                     		include	"nikona/macros.asm"	; Assembler macros
 (1)    1/       0 :                     ; ===========================================================================
 (1)    2/       0 :                     ; -------------------------------------------------------------------
 (1)    3/       0 :                     ; MACROS Section
@@ -167,7 +167,7 @@
 (1)   18/       0 :                     pstr_mem	function a,b,((a|$80)<<24)|b&$FFFFFF			; PRINT memory: pstr_mem(type,mem_pos)
 (1)   19/       0 :                     full_loc	function a,-(-a)&$FFFFFFFF
 (1)   20/       0 :                     
-(1)   21/       0 : =$3C000              SET_WRAMSIZE	equ $3C000						; Maxium WRAM available to use
+(1)   21/       0 : =$3B800              SET_WRAMSIZE	equ $3B800						; Maxium WRAM available to use + $120
 (1)   22/       0 :                     
 (1)   23/       0 :                     ; ====================================================================
 (1)   24/       0 :                     ; ------------------------------------------------------------
@@ -357,47 +357,47 @@
 (1)  208/       0 :                     ; --------------------------------------------
 (1)  209/       0 :                     
 (1)  210/       0 :                     data_dset macro startlbl
-(1)  211/       0 :                     	if MCD|MARSCD
+(1)  211/       0 :                     	if MCD|MARSCD			; Alignment
 (1)  212/       0 :                     		align $800
-(1)  213/       0 :                     	endif
-(1)  214/       0 :                     ; MCD_DBANK0:
-(1)  215/       0 :                     startlbl label *
-(1)  216/       0 :                     	if MCD|MARSCD
-(1)  217/       0 :                     		phase sysmcd_wram
-(1)  218/       0 :                     	elseif MARS
-(1)  219/       0 :                     		phase $900000+(startlbl&$0FFFFF)
-(1)  220/       0 :                     		align 4
-(1)  221/       0 :                     	endif
-(1)  222/       0 :                     GLBL_MDATA_ST := *
-(1)  223/       0 :                     	endm
+(1)  213/       0 :                     	elseif MARS
+(1)  214/       0 :                     		align 4
+(1)  215/       0 :                     	endif
+(1)  216/       0 :                     
+(1)  217/       0 :                     startlbl label *			; Register label
+(1)  218/       0 :                     
+(1)  219/       0 :                     	if MCD|MARSCD			; Set PHASE
+(1)  220/       0 :                     		phase sysmcd_wram
+(1)  221/       0 :                     	elseif MARS
+(1)  222/       0 :                     		phase $900000+(startlbl&$0FFFFF)
+(1)  223/       0 :                     	endif
 (1)  224/       0 :                     
-(1)  225/       0 :                     ; --------------------------------------------
+(1)  225/       0 :                     GLBL_MDATA_ST := *
 (1)  226/       0 :                     
-(1)  227/       0 :                     data_dend macro endlbl
-(1)  228/       0 :                     GLBL_MDATA_RP := *-GLBL_MDATA_ST	; save size for _dend
-(1)  229/       0 :                     
-(1)  230/       0 :                     	if MCD|MARSCD
-(1)  231/       0 :                     	if MOMPASS>2
-(1)  232/       0 :                     		if GLBL_MDATA_RP > SET_WRAMSIZE
-(1)  233/       0 :                     			warning "SCD/CD32X: THIS BANK SIZE IS TOO LARGE for WORD-RAM"
-(1)  234/       0 :                     		endif
-(1)  235/       0 :                     	endif
-(1)  236/       0 :                     	endif
-(1)  237/       0 :                     
-(1)  238/       0 :                     	if MARS
-(1)  239/       0 :                     		if * >= $900000+$100000
-(1)  240/       0 :                     			warning "32X: THIS DATA BANK IS TOO LARGE for $900000"
-(1)  241/       0 :                     		endif
-(1)  242/       0 :                     
+(1)  227/       0 :                     	endm
+(1)  228/       0 :                     
+(1)  229/       0 :                     ; --------------------------------------------
+(1)  230/       0 :                     
+(1)  231/       0 :                     data_dend macro endlbl
+(1)  232/       0 :                     GLBL_MDATA_RP := *-GLBL_MDATA_ST	; save size for _dend
+(1)  233/       0 :                     
+(1)  234/       0 :                     	; Set 32X bank end
+(1)  235/       0 :                     	if MARS
+(1)  236/       0 :                     		if GLBL_MDATA_RP >= $900000+$100000
+(1)  237/       0 :                     			error "32X: THIS DATA BANK IS TOO LARGE"
+(1)  238/       0 :                     		endif
+(1)  239/       0 :                     		dephase
+(1)  240/       0 :                     
+(1)  241/       0 :                     	; Set MCD/CD32X data end
+(1)  242/       0 :                     	elseif MCD|MARSCD
 (1)  243/       0 :                     		dephase
-(1)  244/       0 :                     	elseif MCD|MARSCD
-(1)  245/       0 :                     		dephase
-(1)  246/       0 :                     
-(1)  247/       0 :                     mlastpos := *	; <-- CD/CD32X ONLY
-(1)  248/       0 :                     mpadlbl	:= (mlastpos&$FFF800)+$800
-(1)  249/       0 :                     		rompad mpadlbl
-(1)  250/       0 :                     endlbl label *	; <-- CD/CD32X ONLY
-(1)  251/       0 :                     		erreport "68K DATA BANK",GLBL_MDATA_RP,SET_WRAMSIZE	; <- Lowest size compatible for ALL
+(1)  244/       0 :                     mlastpos := *	; <-- CD/CD32X ONLY
+(1)  245/       0 :                     mpadlbl	:= (mlastpos&$FFF800)+$800
+(1)  246/       0 :                     		rompad mpadlbl
+(1)  247/       0 :                     endlbl label *	; <-- CD/CD32X ONLY
+(1)  248/       0 :                     
+(1)  249/       0 :                     		if GLBL_MDATA_RP > SET_WRAMSIZE
+(1)  250/       0 :                     			error "SCD/CD32X: THIS BANK SIZE IS TOO LARGE for WORD-RAM"
+(1)  251/       0 :                     		endif
 (1)  252/       0 :                     	endif
 (1)  253/       0 :                     	endm
 (1)  254/       0 :                     
@@ -421,70 +421,72 @@
 (1)  272/       0 :                     	endif
 (1)  273/       0 :                     		endm
 (1)  274/       0 :                     
-(1)  275/       0 :                     binclude_dma_e	macro lblstart,lblend,file
-(1)  276/       0 :                     	if MARS
-(1)  277/       0 :                     GLBL_LASTPHDMA	set *
-(1)  278/       0 :                     	dephase
-(1)  279/       0 :                     GLBL_PHASEDMA	set *
-(1)  280/       0 :                     		endif
-(1)  281/       0 :                     
-(1)  282/       0 :                     		align 2
-(1)  283/       0 :                     lblstart	label *
-(1)  284/       0 :                     		binclude file
-(1)  285/       0 :                     lblend		label *
-(1)  286/       0 :                     		align 2
-(1)  287/       0 :                     
-(1)  288/       0 :                     	if MARS
-(1)  289/       0 :                     GLBL_ENDPHDMA	set *-GLBL_PHASEDMA
-(1)  290/       0 :                     		phase GLBL_LASTPHDMA+GLBL_ENDPHDMA
-(1)  291/       0 :                     	endif
-(1)  292/       0 :                     		endm
-(1)  293/       0 :                     
-(1)  294/       0 :                     ; --------------------------------------------
-(1)  295/       0 :                     ; 32X graphics pack Enter/Exit
+(1)  275/       0 :                     ; --------------------------------------------
+(1)  276/       0 :                     
+(1)  277/       0 :                     binclude_dma_e	macro lblstart,lblend,file
+(1)  278/       0 :                     	if MARS
+(1)  279/       0 :                     GLBL_LASTPHDMA	set *
+(1)  280/       0 :                     	dephase
+(1)  281/       0 :                     GLBL_PHASEDMA	set *
+(1)  282/       0 :                     		endif
+(1)  283/       0 :                     
+(1)  284/       0 :                     		align 2
+(1)  285/       0 :                     lblstart	label *
+(1)  286/       0 :                     		binclude file
+(1)  287/       0 :                     lblend		label *
+(1)  288/       0 :                     		align 2
+(1)  289/       0 :                     
+(1)  290/       0 :                     	if MARS
+(1)  291/       0 :                     GLBL_ENDPHDMA	set *-GLBL_PHASEDMA
+(1)  292/       0 :                     		phase GLBL_LASTPHDMA+GLBL_ENDPHDMA
+(1)  293/       0 :                     	endif
+(1)  294/       0 :                     		endm
+(1)  295/       0 :                     
 (1)  296/       0 :                     ; --------------------------------------------
-(1)  297/       0 :                     
-(1)  298/       0 :                     mars_VramStart	macro thelabel
-(1)  299/       0 :                     thelabel label *
-(1)  300/       0 :                     		phase 0
-(1)  301/       0 :                     		endm
-(1)  302/       0 :                     
-(1)  303/       0 :                     mars_VramEnd	macro thelabel
-(1)  304/       0 :                     		align 8
-(1)  305/       0 :                     .end:
-(1)  306/       0 :                     ; 		if MOMPASS == 1
-(1)  307/       0 :                     			erreport "32X VRAM DATA",.end,$18000
-(1)  308/       0 :                     ; 		endif
-(1)  309/       0 :                     		dephase
-(1)  310/       0 :                     thelabel label *
-(1)  311/       0 :                     		endm
-(1)  312/       0 :                     
-(1)  313/       0 :                     ; --------------------------------------------
-(1)  314/       0 :                     ; Fill CD sectors
+(1)  297/       0 :                     ; 32X graphics data Enter/Exit
+(1)  298/       0 :                     ; --------------------------------------------
+(1)  299/       0 :                     
+(1)  300/       0 :                     mars_VramStart	macro thelabel
+(1)  301/       0 :                     thelabel label *
+(1)  302/       0 :                     		phase 0
+(1)  303/       0 :                     		endm
+(1)  304/       0 :                     
+(1)  305/       0 :                     mars_VramEnd	macro thelabel
+(1)  306/       0 :                     		align 8
+(1)  307/       0 :                     .end:
+(1)  308/       0 :                     ; 		if MOMPASS == 1
+(1)  309/       0 :                     			erreport "32X VRAM DATA",.end,$18000
+(1)  310/       0 :                     ; 		endif
+(1)  311/       0 :                     		dephase
+(1)  312/       0 :                     thelabel label *
+(1)  313/       0 :                     		endm
+(1)  314/       0 :                     
 (1)  315/       0 :                     ; --------------------------------------------
-(1)  316/       0 :                     
-(1)  317/       0 :                     fillSectors macro num
-(1)  318/       0 :                     	rept num
-(1)  319/       0 :                     		align $800-1
-(1)  320/       0 :                     		dc.b 0
-(1)  321/       0 :                     	endm
-(1)  322/       0 :                     	endm
-(1)  323/       0 :                     
-(1)  324/       0 :                     ; ====================================================================
-(1)  325/       0 :                     ; ------------------------------------------------------------
-(1)  326/       0 :                     ; Nikona CODE macros
+(1)  316/       0 :                     ; Fill CD sectors
+(1)  317/       0 :                     ; --------------------------------------------
+(1)  318/       0 :                     
+(1)  319/       0 :                     fillSectors macro num
+(1)  320/       0 :                     	rept num
+(1)  321/       0 :                     		align $800-1
+(1)  322/       0 :                     		dc.b 0
+(1)  323/       0 :                     	endm
+(1)  324/       0 :                     	endm
+(1)  325/       0 :                     
+(1)  326/       0 :                     ; ====================================================================
 (1)  327/       0 :                     ; ------------------------------------------------------------
-(1)  328/       0 :                     
-(1)  329/       0 :                     ; --------------------------------------------
-(1)  330/       0 :                     ; VDP color debug
+(1)  328/       0 :                     ; Nikona CODE macros
+(1)  329/       0 :                     ; ------------------------------------------------------------
+(1)  330/       0 :                     
 (1)  331/       0 :                     ; --------------------------------------------
-(1)  332/       0 :                     
-(1)  333/       0 :                     vdp_showme	macro color
-(1)  334/       0 :                     		move.l	#$C0000000,(vdp_ctrl).l
-(1)  335/       0 :                     		move.w	#color,(vdp_data).l
-(1)  336/       0 :                     		endm
-(1)  337/       0 :                     
-      50/       0 :                     		include	"system/shared.asm"	; Shared variables and specials
+(1)  332/       0 :                     ; VDP color debug
+(1)  333/       0 :                     ; --------------------------------------------
+(1)  334/       0 :                     
+(1)  335/       0 :                     vdp_showme	macro color
+(1)  336/       0 :                     		move.l	#$C0000000,(vdp_ctrl).l
+(1)  337/       0 :                     		move.w	#color,(vdp_data).l
+(1)  338/       0 :                     		endm
+(1)  339/       0 :                     
+      50/       0 :                     		include	"nikona/shared.asm"	; Shared variables and specials
 (1)    1/       0 :                     ; ===========================================================================
 (1)    2/       0 :                     ; -------------------------------------------------------------------
 (1)    3/       0 :                     ; Shared variables
@@ -698,7 +700,7 @@
 (1)  240/       0 :                     ; ============================================================
 (1)  241/       0 :                     
 (1)  243/       0 :                     
-      51/       0 :                     		include	"system/mcd/map.asm"	; Sega CD hardware map (shared with Sub-CPU)
+      51/       0 :                     		include	"nikona/mcd/map.asm"	; Sega CD hardware map (shared with Sub-CPU)
 (1)    1/       0 :                     ; ===========================================================================
 (1)    2/       0 :                     ; -------------------------------------------------------------------
 (1)    3/       0 :                     ; SEGA CD SUB-CPU MAP
@@ -734,7 +736,7 @@
 (1)   33/       0 :                     
 (1)   34/       0 :                     ; ====================================================================
 (1)   35/       0 :                     
-      52/       0 :                     		include	"system/mars/map.asm"	; 32X hardware map (shared with SH2)
+      52/       0 :                     		include	"nikona/mars/map.asm"	; 32X hardware map (shared with SH2)
 (1)    1/       0 :                     ; ===========================================================================
 (1)    2/       0 :                     ; -------------------------------------------------------------------
 (1)    3/       0 :                     ; SH2 MAP
@@ -889,7 +891,7 @@
 (1)  152/       0 : =$FFFFFFB4           _DMAREQACK0	equ	$FFFFFFB4	; DMA request/ack select control 0
 (1)  153/       0 : =$FFFFFFB8           _DMAREQACK1	equ	$FFFFFFB8	; DMA request/ack select control 1
 (1)  154/       0 :                     
-      53/       0 :                     		include	"system/md/map.asm"	; Genesis hardware map and other areas
+      53/       0 :                     		include	"nikona/md/map.asm"	; Genesis hardware map and other areas
 (1)    1/       0 :                     ; ===========================================================================
 (1)    2/       0 :                     ; ----------------------------------------------------------------
 (1)    3/       0 :                     ; Genesis / Pico 68000 map
@@ -929,7 +931,7 @@
 (1)   37/       0 :                     ; zvdp_ctrl	equ	$7F04		; VDP control port
 (1)   38/       0 : =$7F11               zpsg_ctrl	equ	$7F11		; PSG control
 (1)   39/       0 :                     
-      54/       0 :                     		include	"system/ram.asm"	; Genesis RAM sections
+      54/       0 :                     		include	"nikona/ram.asm"	; Genesis RAM sections
 (1)    1/       0 :                     ; ===========================================================================
 (1)    2/       0 :                     ; ----------------------------------------------------------------
 (1)    3/       0 :                     ; Genesis/Pico 68000 RAM section (SCD: "MAIN-CPU")
@@ -1130,7 +1132,7 @@
       95/       0 :                     ; SEGA 32X
       96/       0 :                     ; ---------------------------------------------
       97/       0 :                     
-      99/       0 :                     		include	"system/head_mars.asm"			; 32X header
+      99/       0 :                     		include	"nikona/head_mars.asm"			; 32X header
 (1)    1/       0 :                     ; ===========================================================================
 (1)    2/       0 :                     ; -------------------------------------------------------------------
 (1)    3/       0 :                     ; SEGA 32X header
@@ -1324,7 +1326,7 @@
 (1)  165/     3E4 : 0600 0E50           		dc.l SH2_S_Entry			; Slave SH2 PC (SH2 map)
 (1)  166/     3E8 : 0600 0000           		dc.l SH2_Master				; Master SH2 default VBR (SH2 map)
 (1)  167/     3EC : 0600 0128           		dc.l SH2_Slave				; Slave SH2 default VBR (SH2 map)
-(1)  168/     3F0 :                     		binclude "system/mars/data/security.bin"; Securty/Boot code
+(1)  168/     3F0 :                     		binclude "nikona/mars/data/security.bin"; Securty/Boot code
 (1)  169/     800 :                     
 (1)  170/     800 :                     ; ====================================================================
 (1)  171/     800 :                     ; ----------------------------------------------------------------
@@ -2224,7 +2226,7 @@
 (1)  472/FFFFFFFFFFFF028E : 6100 FED2           		bsr	sndReq_sword
 (1)  473/FFFFFFFFFFFF0292 : 6000 FE9C           		bra 	sndReq_Exit
 (1)  474/FFFFFFFFFFFF0296 :                     
-     193/FFFFFFFFFFFF0296 :                     		include	"system/md/video.asm"
+     193/FFFFFFFFFFFF0296 :                     		include	"nikona/md/video.asm"
 (1)    1/FFFFFFFFFFFF0296 :                     ; ===========================================================================
 (1)    2/FFFFFFFFFFFF0296 :                     ; ----------------------------------------------------------------
 (1)    3/FFFFFFFFFFFF0296 :                     ; Genesis VDP section
@@ -5758,7 +5760,7 @@
 (1) 3925/FFFFFFFFFFFF196A :                     ; ====================================================================
 (1) 3926/FFFFFFFFFFFF196A :                     
 (1) 3928/FFFFFFFFFFFF196A :                     
-     194/FFFFFFFFFFFF196A :                     		include	"system/md/system.asm"
+     194/FFFFFFFFFFFF196A :                     		include	"nikona/md/system.asm"
 (1)    1/FFFFFFFFFFFF196A :                     ; ===========================================================================
 (1)    2/FFFFFFFFFFFF196A :                     ; ----------------------------------------------------------------
 (1)    3/FFFFFFFFFFFF196A :                     ; Genesis system routines
@@ -6708,7 +6710,7 @@
 (1) 1111/FFFFFFFFFFFF1E50 : 4E75                		rts
 (1) 1112/FFFFFFFFFFFF1E52 :                     
 (1) 1113/FFFFFFFFFFFF1E52 :                     .sine_data:
-(1) 1114/FFFFFFFFFFFF1E52 :                     		binclude "system/md/data/sine_data.bin"
+(1) 1114/FFFFFFFFFFFF1E52 :                     		binclude "nikona/md/data/sine_data.bin"
 (1) 1115/FFFFFFFFFFFF1F52 :                     		align 2
 (1) 1116/FFFFFFFFFFFF1F54 :                     
 (1) 1117/FFFFFFFFFFFF1F54 :                     ; --------------------------------------------------------
@@ -12228,7 +12230,7 @@
      354/    4D9C :                     		align 4
      356/    4D9C :                     MARS_RAMCODE:
      358/    4D9C :                     	; ------------------------------------------------
-     359/    4D9C :                     		include "system/mars/code.asm"
+     359/    4D9C :                     		include "nikona/mars/code.asm"
 (1)    1/    4D9C :                     ; ===========================================================================
 (1)    2/    4D9C :                     ; -------------------------------------------------------------------
 (1)    3/    4D9C :                     ; MARS SH2 SDRAM section, CODE is shared for both SH2 CPUs
@@ -14662,7 +14664,7 @@
 (1) 2415/ 6000FF4 :                     ; ----------------------------------------------------------------
 (1) 2416/ 6000FF4 :                     
 (1) 2417/ 6000FF4 :                     		align 4
-(1) 2418/ 6000FF4 :                     		include "system/mars/sound.asm"
+(1) 2418/ 6000FF4 :                     		include "nikona/mars/sound.asm"
 (2)    1/ 6000FF4 :                     ; ===========================================================================
 (2)    2/ 6000FF4 :                     ; -------------------------------------------------------------------
 (2)    3/ 6000FF4 :                     ; 32X Sound, Slave CPU side
@@ -14745,7 +14747,7 @@
           600102A : 6130 2600 6270 
           6001030 : 0105 059F 0200    
 (2)   80/ 6001036 :                     
-(1) 2419/ 6001036 :                     		include "system/mars/video.asm"
+(1) 2419/ 6001036 :                     		include "nikona/mars/video.asm"
 (2)    1/ 6001036 :                     ; ===========================================================================
 (2)    2/ 6001036 :                     ; ----------------------------------------------------------------
 (2)    3/ 6001036 :                     ; 32X Video, Master CPU side.
@@ -17203,7 +17205,7 @@
           6001DAA : 0498 FE80 A518 
           6001DB0 : 5A00             
 (2) 2331/ 6001DB2 :                     
-(1) 2420/ 6001DB2 :                     		include "system/mars/cache/cache_mstr.asm"
+(1) 2420/ 6001DB2 :                     		include "nikona/mars/cache/cache_mstr.asm"
 (2)    1/ 6001DB2 :                     ; ====================================================================
 (2)    2/ 6001DB2 :                     ; ----------------------------------------------------------------
 (2)    3/ 6001DB2 :                     ; CACHE code
@@ -17262,7 +17264,7 @@
 (2)   42/ 6001DB4 :                     CACHE_MASTER_E:
 (2)   43/ 6001DB4 : (MACRO)              	erreport "SH2 SLAVE CACHE",CACHE_MASTER_E-CACHE_MASTER,$800
 (2)   44/ 6001DB4 :                     
-(1) 2421/ 6001DB4 :                     		include "system/mars/cache/cache_slv.asm"
+(1) 2421/ 6001DB4 :                     		include "nikona/mars/cache/cache_slv.asm"
 (2)    1/ 6001DB4 :                     ; ====================================================================
 (2)    2/ 6001DB4 :                     ; ----------------------------------------------------------------
 (2)    3/ 6001DB4 :                     ; CACHE code
@@ -18367,7 +18369,7 @@
 (1) 2426/ 6002448 :                     ; ----------------------------------------------------------------
 (1) 2427/ 6002448 :                     
 (1) 2428/ 6002448 :                     		align 4
-(1) 2429/ 6002448 :                     sin_table	binclude "system/mars/data/sinedata.bin"
+(1) 2429/ 6002448 :                     sin_table	binclude "nikona/mars/data/sinedata.bin"
 (1) 2430/ 6004C48 :                     		align 4
 (1) 2431/ 6004C48 :                     
 (1) 2432/ 6004C48 :                     ; ====================================================================
@@ -18759,7 +18761,7 @@
 (2)  134/FFFFFFFFFFFF2CD8 :                     ; ------------------------------------------------------
 (2)  135/FFFFFFFFFFFF2CD8 :                     
 (2)  136/FFFFFFFFFFFF2CD8 :                     file_scrn1_main:
-(2)  137/FFFFFFFFFFFF2CD8 : 0003 B886           		dc.l DATA_BANK0
+(2)  137/FFFFFFFFFFFF2CD8 : 0003 B888           		dc.l DATA_BANK0
 (2)  138/FFFFFFFFFFFF2CDC : 424E 4B5F 4D41      		dc.b "BNK_MAIN.BIN",0
          FFFFFFFFFFFF2CE2 : 494E 2E42 494E 00 
 (2)  139/FFFFFFFFFFFF2CE9 :                     		align 2
@@ -19415,7 +19417,7 @@
 (2)  688/FFFFFFFFFFFF2F0C :                     ; ------------------------------------------------------
 (2)  689/FFFFFFFFFFFF2F0C :                     
 (2)  690/FFFFFFFFFFFF2F0C :                     file_tscrn_main:
-(2)  691/FFFFFFFFFFFF2F0C : 0003 B886           		dc.l DATA_BANK0
+(2)  691/FFFFFFFFFFFF2F0C : 0003 B888           		dc.l DATA_BANK0
 (2)  692/FFFFFFFFFFFF2F10 : 424E 4B5F 4D41      		dc.b "BNK_MAIN.BIN",0
          FFFFFFFFFFFF2F16 : 494E 2E42 494E 00 
 (2)  693/FFFFFFFFFFFF2F1D :                     		align 2
@@ -19850,49 +19852,43 @@
      382/   3B886 :                     		include "game/incl_data.asm"
 (1)    1/   3B886 :                     ; ===========================================================================
 (1)    2/   3B886 :                     ; ----------------------------------------------------------------
-(1)    3/   3B886 :                     ; 68K DATA BANKS
+(1)    3/   3B886 :                     ; DATA BANKS
 (1)    4/   3B886 :                     ;
-(1)    5/   3B886 :                     ; Size limitations:
-(1)    6/   3B886 :                     ;  $40000 for SegaCD's Word-RAM
-(1)    7/   3B886 :                     ;  $80000 for Sega-Mapper(SSF2) bank *not tested*
-(1)    8/   3B886 :                     ; $100000 for 32X Cartridge
-(1)    9/   3B886 :                     ; All 4MB for Genesis/Pico
-(1)   10/   3B886 :                     ;
-(1)   11/   3B886 :                     ; SCD/CD32:
-(1)   12/   3B886 :                     ; Add your BANK entries and filenames on iso_files.asm
+(1)    5/   3B886 :                     ; MACRO Usage:
+(1)    6/   3B886 :                     ;	data_dset LABEL_START
+(1)    7/   3B886 :                     ;	; your data
+(1)    8/   3B886 :                     ;	data_dend LABEL_END
+(1)    9/   3B886 :                     ;
+(1)   10/   3B886 :                     ; - For including VDP graphics:
+(1)   11/   3B886 :                     ;	binclude_dma   LABEL_START,filepath		; Single label
+(1)   12/   3B886 :                     ;	binclude_dma_e LABEL_START,LABEL_END,filepath	; Start and End labels
 (1)   13/   3B886 :                     ;
-(1)   14/   3B886 :                     ; MACRO Usage:
-(1)   15/   3B886 :                     ;	data_dset LABEL_START
-(1)   16/   3B886 :                     ;	; your data
-(1)   17/   3B886 :                     ;	data_dend LABEL_END
-(1)   18/   3B886 :                     ; ----------------------------------------------------------------
-(1)   19/   3B886 :                     ; - For including VDP graphics:
-(1)   20/   3B886 :                     ;	binclude_dma LABEL_START,filepath		; Single label
-(1)   21/   3B886 :                     ;	binclude_dma_e LABEL_START,LABEL_END,filepath	; Start and End labels
-(1)   22/   3B886 :                     ;
-(1)   23/   3B886 :                     ; - For the SVDP graphics:
-(1)   24/   3B886 :                     ; 	mars_VramStart Label_test			; Start label
-(1)   25/   3B886 :                     ; example_0:
-(1)   26/   3B886 :                     ; 	include "your_svdp_graphics.bin"
-(1)   27/   3B886 :                     ; 	align 4						; Don't forget align by 4
-(1)   28/   3B886 :                     ; example_1:
-(1)   29/   3B886 :                     ; 	include "more_svdp.bin"
-(1)   30/   3B886 :                     ;	align 4
-(1)   31/   3B886 :                     ;	mars_VramEnd Label_end				; End label
-(1)   32/   3B886 :                     ; ----------------------------------------------------------------
-(1)   33/   3B886 :                     
-(1)   34/   3B886 :                     ; ============================================================
-(1)   35/   3B886 :                     ; --------------------------------------------------------
-(1)   36/   3B886 :                     ; MAIN bank
-(1)   37/   3B886 :                     ; --------------------------------------------------------
-(1)   38/   3B886 :                     
-(1)   39/   3B886 : (MACRO)              	data_dset DATA_BANK0
-(1)   39/   3B886 :                     ; MCD_DBANK0:
-(1)   39/   3B886 : =$3B886              DATA_BANK0 label *
-(1)   39/  93B886 :                                     phase $900000+(DATA_BANK0&$0FFFFF)
-(1)   39/  93B886 :                                     align 4
-(1)   39/  93B888 : =$93B888             GLBL_MDATA_ST := *
-(1)   40/  93B888 :                     		include "sound/data.asm"		; GEMA sound data
+(1)   14/   3B886 :                     ; - For the SVDP graphics:
+(1)   15/   3B886 :                     ; 	mars_VramStart Label_test			; Set the Start label
+(1)   16/   3B886 :                     ; example_0:
+(1)   17/   3B886 :                     ; 	include "your_svdp_graphics.bin"
+(1)   18/   3B886 :                     ; 	align 4						; ** Don't forget to align by 4 at the end
+(1)   19/   3B886 :                     ; example_1:
+(1)   20/   3B886 :                     ; 	include "more_svdp.bin"
+(1)   21/   3B886 :                     ;	align 4
+(1)   22/   3B886 :                     ;	mars_VramEnd Label_end				; Set the End label
+(1)   23/   3B886 :                     ; ----------------------------------------------------------------
+(1)   24/   3B886 :                     
+(1)   25/   3B886 :                     ; ============================================================
+(1)   26/   3B886 :                     ; --------------------------------------------------------
+(1)   27/   3B886 :                     ; MAIN bank
+(1)   28/   3B886 :                     ; --------------------------------------------------------
+(1)   29/   3B886 :                     
+(1)   30/   3B886 : (MACRO)              	data_dset DATA_BANK0
+(1)   30/   3B886 :                                     align 4
+(1)   30/   3B888 :                     
+(1)   30/   3B888 : =$3B888              DATA_BANK0 label *                        ; Register label
+(1)   30/   3B888 :                     
+(1)   30/  93B888 :                                     phase $900000+(DATA_BANK0&$0FFFFF)
+(1)   30/  93B888 :                     
+(1)   30/  93B888 : =$93B888             GLBL_MDATA_ST := *
+(1)   30/  93B888 :                     
+(1)   31/  93B888 :                     		include "sound/data.asm"		; GEMA sound data
 (2)    1/  93B888 :                     ; ===========================================================================
 (2)    2/  93B888 :                     ; -------------------------------------------------------------------
 (2)    3/  93B888 :                     ; Main sound data
@@ -20417,7 +20413,7 @@
 (2)  341/  955DD8 :                     ; 		gSmplData DacIns_wegot_kick,"sound/ins/smpl/wegot_kick.wav",0
 (2)  342/  955DD8 :                     ; 		gSmplData DacIns_wegot_crash,"sound/ins/smpl/wegot_crash.wav",0
 (2)  343/  955DD8 :                     
-(1)   41/  955DD8 :                     		include "game/data/bank_main.asm"
+(1)   32/  955DD8 :                     		include "game/data/bank_main.asm"
 (2)    1/  955DD8 :                     ; ===========================================================================
 (2)    2/  955DD8 :                     ; ----------------------------------------------------------------
 (2)    3/  955DD8 :                     ; BANK data
@@ -20512,13 +20508,14 @@
 (2)   26/  9612E0 :                     objMap_Fifi:	binclude "game/data/md/sprites/fifi/map.bin"
 (2)   27/  96131C :                     		align 2
 (2)   28/  96131C :                     
-(1)   42/  96131C : (MACRO)              	data_dend DATA_BANK0_e
-(1)   42/  96131C : =$25A94              GLBL_MDATA_RP := *-GLBL_MDATA_ST        ; save size for _dend
-(1)   42/  96131C :                     
-(1)   42/  96131C :                     
-(1)   42/  96131C :                     
-(1)   42/   6131C :                                     dephase
-(1)   43/   6131C :                     
+(1)   33/  96131C : (MACRO)              	data_dend DATA_BANK0_e
+(1)   33/  96131C : =$25A94              GLBL_MDATA_RP := *-GLBL_MDATA_ST        ; save size for _dend
+(1)   33/  96131C :                     
+(1)   33/  96131C :                             ; Set 32X bank end
+(1)   33/   6131C :                                     dephase
+(1)   33/   6131C :                     
+(1)   33/   6131C :                             ; Set MCD/CD32X data end
+(1)   34/   6131C :                     
      383/   6131C :                     
      384/   6131C :                     ; ====================================================================
      385/   6131C :                     ; ----------------------------------------------------------------
@@ -20780,7 +20777,7 @@
      430/   95668 : 00                  		dc.b 0
      431/   95669 :                     		align $8000
      432/   98000 :                     
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 2 - 12/06/2024 03:30:59 AM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 2 - 12/10/2024 05:46:11 PM
 
 
   Symbol Table (* = unused):
@@ -20866,8 +20863,8 @@
  DAC_ON :                      1306 C |  DAC_PLAY :                    1330 C |
  DAC_REFILL :                  1364 C |  DAC_REFILL.DACFILL_END :      1423 C |
  DAC_REFILL.DACFILL_LOOP :     13DC C |  DAC_REFILL.DACFILL_RET :      1426 C |
- DAC_REFILL.DAC_OVER :         13B2 C |  DATA_BANK0 :                 3B886 C |
-*DATE :                "12/06/2024" - |  DDACCNTR :                    18D4 C |
+ DAC_REFILL.DAC_OVER :         13B2 C |  DATA_BANK0 :                 3B888 C |
+*DATE :                "12/10/2024" - |  DDACCNTR :                    18D4 C |
  DDACFIFOMID :                   37 C |  DDACPNTR :                    18D1 C |
 *DEF_HSIZE_128 :                100 - | *DEF_HSIZE_32 :                  40 - |
  DEF_HSIZE_64 :                  80 - | *DEF_MAXSTAMPCOUT :              60 - |
@@ -21042,7 +21039,7 @@
  GET_TICK :                    10AC C |  GET_TICK.CTNOTICK :           10C9 C |
  GLBL_ENDPHDMA :               7460 - |  GLBL_LASTORG :    FFFFFFFFFFFFB800 - |
  GLBL_LASTPC :     FFFFFFFFFFFF2C00 - |  GLBL_LASTPHDMA :            959358 - |
-*GLBL_MDATA_RP :              25A94 - |  GLBL_MDATA_ST :             93B888 - |
+ GLBL_MDATA_RP :              25A94 - |  GLBL_MDATA_ST :             93B888 - |
  GLBL_PHASEDMA :              59358 - |  GO_DRWSLD_UPDLINE_TEX :    6001B10 C |
  GO_DRWTEX_GONXTPZ :        6001B14 C |  GTRK_SFXALL :               93B8C8 C |
  GTRK_SFXALL.BLK :           93B8D6 C |  GTRK_SFXALL.INS :           93B983 C |
@@ -21638,7 +21635,7 @@
  SET_RIGHT :                6001850 C |  SET_RIGHT.RGT_OK :         6001872 C |
  SET_RIGHT.RGT_SKIP :       60018D2 C | *SET_SNDVIEWY :                  10 - |
  SET_SRAMSIZE :                 100 - |  SET_TILEMAX :                  200 - |
-*SET_WRAMSIZE :               3C000 - |  SH2_DEBUG :                      1 - |
+*SET_WRAMSIZE :               3B800 - |  SH2_DEBUG :                      1 - |
  SH2_END :                  6036120 C |  SH2_MASTER :               6000000 C |
  SH2_M_ENTRY :              60007AC C |  SH2_M_ERRADDR :            600032C C |
  SH2_M_ERRCODE :            600033C C |  SH2_M_ERRDMA :             6000330 C |
@@ -21815,7 +21812,7 @@
  TBLPWM :                      1C58 C |  TBLZ_CLEAR :                   F92 C |
  TBLZ_CLEAR.CLR_ALL :           F9C C |  TH :                      20000000 - |
  TICKCNT :                     1CF8 C |  TICKFLAG :                    1CF7 C |
- TICKSPSET :                   1CF6 C | *TIME :               "03:30:58 AM" - |
+ TICKSPSET :                   1CF6 C | *TIME :               "05:46:11 PM" - |
  TIMERCTL :                      30 - |  TRACK_OUT :                    5B3 C |
  TRACK_OUT.INDX_DEL :           5C8 C |  TRACK_OUT.NOTHIN :             5F5 C |
  TRACK_OUT.VALID :              5C7 C |  TRKBLKS_0 :                   17EE C |
@@ -22151,9 +22148,9 @@
 *_TOCR :                          7 - |  _VDPREG :                 20004100 - |
 
    2246 symbols
-    426 unused symbols
+    425 unused symbols
 
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 3 - 12/06/2024 03:30:59 AM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 3 - 12/10/2024 05:46:11 PM
 
 
   Defined Macros:
@@ -22177,7 +22174,7 @@ SCREEN_CODE                           | VDP_SHOWME
 
      30 macros
 
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 4 - 12/06/2024 03:30:59 AM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 4 - 12/10/2024 05:46:11 PM
 
 
   Defined Structures/Unions:
@@ -22346,7 +22343,7 @@ SSPR
   A      (I16) Y_POS
   C      (I32) VRAM
 13 structures
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 5 - 12/06/2024 03:30:59 AM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 5 - 12/10/2024 05:46:11 PM
 
 
   Defined Functions:
@@ -22356,7 +22353,7 @@ FULL_LOC                              | PSTR_MEM
 COLOR_INDX                            | CELL_VRAM                            
 SPLITW                                |
 
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 6 - 12/06/2024 03:30:59 AM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 6 - 12/10/2024 05:46:11 PM
 
 
   Code Pages:
@@ -22366,10 +22363,10 @@ STANDARD (0 changed characters)
 
 1 code page
 
-0.38 seconds assembly time
+0.35 seconds assembly time
 
-  20919 lines source file
-  22284 lines incl. macro expansions
+  20912 lines source file
+  22277 lines incl. macro expansions
       6 passes
       0 errors
       0 warnings
