@@ -44,7 +44,7 @@ RAM_SC0_OldOption	ds.w 1
 	; ----------------------------------------------
 	; Init/Load save
 		bsr	System_SramInit				; Init/Load
-		addq.l	#1,(RAM_Save_Counter).w			; Temporal counter
+		addq.l	#1,(RAM_Save_Counter).w
 		bsr	System_SramSave				; Save to SRAM/BRAM
 	; ----------------------------------------------
 	; Init Print
@@ -79,6 +79,13 @@ RAM_SC0_OldOption	ds.w 1
 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2		; FG VRAM location
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width
 		bsr	Video_PrintW
+		lea	(RAM_Save_Counter).w,a0
+		move.l	#3,a1
+		moveq	#1,d0
+		moveq	#3,d1
+		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
+		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
+		bsr	Video_PrintValW
 		bsr	.loop_print				; Draw counter
 	; ----------------------------------------------
 		bsr	Video_DisplayOn				; Enable VDP Display

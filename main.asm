@@ -4,6 +4,9 @@
 ;
 ; A devkit for developing software on the SEGA 16-bit family
 ; of systems: Genesis, Sega CD, Sega 32X, Sega CD32X and Sega Pico.
+;
+; DO NOT MODIFY THE nikona FOLDER AS IT WILL GET UPDATED
+; WITHOUT INTERFERING YOUR GAME CODE (IF required)
 ; ===========================================================================
 
 ; ====================================================================
@@ -66,7 +69,7 @@ sizeof_MdGlbl	ds.l 0
 	if (sizeof_MdGlbl&1 == 1)
 		error "GLOBALS ARE MISALIGNED"
 	endif
-; 		erreport "USER Globals",(sizeof_MdGlbl-RAM_MdGlobal),MAX_Globals	; Report error if ran out
+		erreport "USER Globals",(sizeof_MdGlbl-RAM_MdGlobal),MAX_Globals	; Report error if ran out
 		endmemory
 
 ; ====================================================================
@@ -76,7 +79,7 @@ sizeof_MdGlbl	ds.l 0
 
 		memory RAM_SaveData
 	; ------------------------------------------------
-		include "game/savemem.asm"
+		include "game/savestruct.asm"
 	; ------------------------------------------------
 sizeof_SaveInfo	ds.l 0
 	if (sizeof_MdGlbl&1 == 1)
@@ -91,13 +94,14 @@ sizeof_SaveInfo	ds.l 0
 ; ----------------------------------------------------------------
 
 		!org 0						; Start at 0
+
 ; ---------------------------------------------
 ; SEGA 32X
 ; ---------------------------------------------
 
 	if MARS
 		include	"nikona/head_mars.asm"			; 32X header
-		lea	($880000|Md_SysCode),a0			; Copy SYSTEM routines
+		lea	($880000|Md_SysCode),a0			; Copy NIKONA code to RAM
 		lea	(RAM_SystemCode),a1
 		move.w	#((Md_SysCode_e-Md_SysCode))-1,d0
 .copy_code:
@@ -115,16 +119,17 @@ sizeof_SaveInfo	ds.l 0
 
 	elseif MCD|MARSCD
 		include	"nikona/head_mcd.asm"			; Sega CD header
-		lea	Md_SysCode(pc),a0			; Copy SYSTEM routines
+		lea	Md_SysCode(pc),a0			; Copy NIKONA code to RAM
 		lea	(RAM_SystemCode),a1
 		move.w	#((Md_SysCode_e-Md_SysCode))-1,d0
 .copy_code:
 		move.b	(a0)+,(a1)+
 		dbf	d0,.copy_code
-	if MARSCD						; CD32X boot code
-		lea	filen_marscode(pc),a0			; Load SH2 code from disc to WORD-RAM
+	; ** CD32X boot code **
+	if MARSCD
+		lea	filen_marscode(pc),a0			; Load SH2 from disc to WORD-RAM
 		jsr	(System_MdMcd_RdFile_WRAM).l
-		include "nikona/mcd/marscd.asm"
+		include "nikona/mcd/marscd.asm"			; Initialize 32X side
 	endif
 		lea	filen_z80file(pc),a0			; Load Z80 data to Word-RAM
 		jsr	(System_MdMcd_RdFile_WRAM).l		; Sound_Init will read from there.
@@ -134,7 +139,7 @@ sizeof_SaveInfo	ds.l 0
 .loop_ram:	move.w	d0,(a0)+
 		cmp.l	d1,a0
 		bcs.s	.loop_ram
-		jsr	(System_MdMcd_SubWait).l		; Wait Sub-CPU first.
+		jsr	(System_MdMcd_SubWait).l		; Wait until Sub-CPU finishes
 		jsr	(Sound_Init).l				; Init Sound driver (FIRST)
 		jsr	(Video_Init).l				; Init Video
 		jsr	(System_Init).l				; Init System
@@ -147,8 +152,6 @@ filen_marscode:	dc.b "NKNAMARS.BIN",0
 
 ; ---------------------------------------------
 ; SEGA PICO
-;
-; This recycles the MD's routines.
 ; ---------------------------------------------
 	elseif PICO
 		include	"nikona/head_pico.asm"			; Pico header
@@ -177,9 +180,8 @@ filen_marscode:	dc.b "NKNAMARS.BIN",0
 ; SYSTEM routines
 ;
 ; MD/PICO:  Normal ROM locations
-; 32X:      Loaded into RAM to prevent bus-conflicts
-;           with the SH2's view of ROM
-; CD/CD32X: Loaded into RAM for safe access.
+; 32X:      Loaded into RAM to prevent problems with SH2
+; CD/CD32X: Loaded into RAM normally
 ; --------------------------------------------------------
 
 	if MCD|MARS|MARSCD
@@ -200,12 +202,13 @@ Md_SysCode:
 ; CD/CD32X: Reads file from DISC and
 ;           transfers code to RAM
 ;      32X: Code is stored on ROM but runs in
-;           RAM to prevent bus-conflicts with the
-;           SH2's view of ROM at CS1
+;           RAM to prevent conflicts with the
+;           SH2
 ;
-; - Returning in your current screen code loops here
-; - 32X/CD32X:
-;   This will turn OFF the 32X's current video mode
+; - Returning(rts) in your current screen code return
+;   here
+; - CD/32X/CD32X:
+;   This will turn OFF ALL special features
 ; --------------------------------------------------------
 
 Md_ReadModes:
@@ -220,7 +223,7 @@ Md_ReadModes:
 		moveq	#0,d0
 		move.w	(RAM_ScreenMode).w,d0		; Read current screen number
 		and.w	#$7F,d0				; <-- CURRENT LIMIT
-		lsl.w	#4,d0				; number*$10
+		lsl.w	#4,d0				; number * $10
 		lea	.pick_mode(pc,d0.w),a0		; Read list
 	; SCD/CD32X
 	if MCD|MARSCD					; CD/CD32X:
@@ -282,12 +285,11 @@ Md_SysCode_e:
 		fs_mkList 0,IsoFileList,IsoFileList_e		; TWO pointers to the filelist
 		fs_mkList 1,IsoFileList,IsoFileList_e
 IsoFileList:
+	; MAX 8 sectors of file pointers
 		fs_file "NKNA_SUB.BIN",MCD_SMPDATA,MCD_SMPDATA_e
 		fs_file "NKNAMARS.BIN",MARS_RAMCODE,MARS_RAMCODE_EOF
 		fs_file "GEMA_Z80.BIN",Z80_CODE_FILE,Z80_CODE_FILE_E
-	; ******
-		include "game/iso_files.asm"
-	; ******
+		include "game/iso_files.asm"			; User files
 		fs_end
 IsoFileList_e:
 	endif

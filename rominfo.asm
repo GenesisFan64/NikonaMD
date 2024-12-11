@@ -91,6 +91,6 @@ HTAG_REGIONS	equ "F               "
 ; Only UPPERCASE and _ are allowed.
 ; --------------------------------------------------------
 
-SET_SRAMSIZE	equ $100		; SRAM/BRAM filesize, must be "blocks" of $40 bytes ($20 w/Protection) *Affects RAM size too
+SET_SRAMSIZE	equ $100		; SRAM/BRAM filesize, must be "blocks" of $40 bytes ($20 w/Protection) *Affects RAM size too, max $1000
 HTAG_CDSAVE	equ "NIKONACD___"	; SCD internal save name
 HTAG_MARSCDSAV	equ "NIKONACD32X"	; CD32X internal save name

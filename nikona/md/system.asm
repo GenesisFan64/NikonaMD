@@ -713,7 +713,6 @@ System_SramInit:
 	if PICO
 		nop						; Pico can't use save data
 	elseif MCD|MARSCD
-
 	; ------------------------------------------------
 	; CD BRAM
 	; ------------------------------------------------
@@ -784,87 +783,9 @@ System_SramInit:
 		rts
 
 ; --------------------------------------------------------
-; System_SramSave
-;
-; Returns:
-; bcc | Save OK
-; bcs | Save failed
-; --------------------------------------------------------
-
-System_SramSave:
-	if PICO
-		nop			; Pico can't use save data
-	elseif MCD|MARSCD
-
-	; ------------------------------------------------
-	; CD BRAM
-	; ------------------------------------------------
-		tst.w	(RAM_SaveEnable).w
-		beq.s	.cant_use
-		move.w	sr,-(sp)
-		movem.l	d6-d7/a5-a6,-(sp)
-		lea	(RAM_SaveData).w,a6
-		lea	(sysmcd_wram+WRAM_SaveDataCopy).l,a5
-		move.w	#(SET_SRAMSIZE/2)-1,d7
-.copy_save:	move.w	(a6)+,d6
-		move.w	d6,(a5)+
-		dbf	d7,.copy_save
-; 	if MARSCD
-; 		bset	#0,(sysmars_reg+dreqctl+1).l	; Set RV=1
-; 	endif
-		moveq	#$0A,d0
-		bsr	System_MdMcd_SubTask
-		bsr	System_MdMcd_GiveWRAM
-		bsr	System_MdMcd_WaitWRAM
-; 	if MARSCD
-; 		bclr	#0,(sysmars_reg+dreqctl+1).l	; Set RV=0
-; 	endif
-		move	#0,ccr
-		move.w	(sysmcd_reg+mcd_dcomm_s).l,d7	; Get status
-		bpl.s	.save_good
-		move	#1,ccr
-.save_good:
-		movem.l	(sp)+,d6-d7/a5-a6
-		move.w	(sp)+,sr
-.cant_use:
-	; ------------------------------------------------
-	else
-
-	; ------------------------------------------------
-	; Cartridge SRAM
-	; ------------------------------------------------
-		tst.w	(RAM_SaveEnable).w
-		beq.s	.cant_use_c
-		move.w	sr,-(sp)
-		movem.l	d6-d7/a5-a6,-(sp)
-	if MARS
-		bset	#0,(sysmars_reg+dreqctl+1).l	; Set RV=1
-	endif
-		move.b	#1,(md_bank_sram).l
-		lea	(RAM_SaveData).w,a6
-		lea	($200003).l,a5
-		move.w	#((SET_SRAMSIZE-1))-1,d7
-.save:		move.b	(a6)+,d6
-		move.b	d6,(a5)
-		adda	#2,a5
-		dbf	d7,.save
-		move.b	#0,(md_bank_sram).l
-	if MARS
-		bclr	#0,(sysmars_reg+dreqctl+1).l	; Set RV=0
-	endif
-		movem.l	(sp)+,d6-d7/a5-a6
-		move.w	(sp)+,sr
-.cant_use_c:
-	; ------------------------------------------------
-	endif
-		rts
-
-; --------------------------------------------------------
 ; System_SramLoad
 ;
-; Returns:
-; bcc | Save OK
-; bcs | Save not found
+; Load the SRAM/BRAM to the SAVE data buffer
 ; --------------------------------------------------------
 
 System_SramLoad:
@@ -875,26 +796,45 @@ System_SramLoad:
 	; CD BRAM
 	; ------------------------------------------------
 		tst.w	(RAM_SaveEnable).w
-		beq.s	.cant_use
+		beq	.cant_use
 		move.w	sr,-(sp)
-		movem.l	d6-d7/a5-a6,-(sp)
-; 	if MARSCD
-; 		bset	#0,(sysmars_reg+dreqctl+1).l	; Set RV=1
-; 	endif
+		movem.l	d0/d6-d7/a4-a6,-(sp)
+		bsr	System_MdMcd_SubWait
 		moveq	#$09,d0
 		bsr	System_MdMcd_SubTask
-		bsr	System_MdMcd_GiveWRAM
-		bsr	System_MdMcd_WaitWRAM
-; 	if MARSCD
-; 		bclr	#0,(sysmars_reg+dreqctl+1).l	; Set RV=0
-; 	endif
-		lea	(sysmcd_wram+WRAM_SaveDataCopy).l,a6
-		lea	(RAM_SaveData).w,a5
-		move.w	#(SET_SRAMSIZE/2)-1,d7
-.copy_save:	move.w	(a6)+,d6
-		move.w	d6,(a5)+
-		dbf	d7,.copy_save
-		movem.l	(sp)+,d6-d7/a5-a6
+		move	#1,ccr
+		cmp.w	#-1,(sysmcd_reg+mcd_dcomm_s).l	; Got -1
+		beq.s	.set_bad
+.wait_sub:	btst	#4,(sysmcd_reg+mcd_comm_s).l	; Wait clean SIGNAL
+		bne.s	.wait_sub
+		bclr	#4,(sysmcd_reg+mcd_comm_m).l	; Set PASS
+		bset	#7,(sysmcd_reg+mcd_comm_m).l	; Set LOCK
+		lea	(RAM_SaveData).w,a6
+		lea	(sysmcd_reg+mcd_dcomm_s).l,a5
+		move.w	#(SET_SRAMSIZE/$10)-1,d7
+.get_data:	btst	#7,(sysmcd_reg+mcd_comm_s).l	; SUB finished?
+		beq.s	.exit_now
+		btst	#4,(sysmcd_reg+mcd_comm_s).l	; Wait SIGNAL set
+		beq.s	.get_data
+		move.l	a5,a4
+		move.w	(a4)+,(a6)+
+		move.w	(a4)+,(a6)+
+		move.w	(a4)+,(a6)+
+		move.w	(a4)+,(a6)+
+		move.w	(a4)+,(a6)+
+		move.w	(a4)+,(a6)+
+		move.w	(a4)+,(a6)+
+		move.w	(a4)+,(a6)+
+		bset	#4,(sysmcd_reg+mcd_comm_m).l	; Set PASS
+.wait_signo:	btst	#4,(sysmcd_reg+mcd_comm_s).l	; Wait SIGNAL clear
+		bne.s	.wait_signo
+		bclr	#4,(sysmcd_reg+mcd_comm_m).l	; Clear PASS
+		bra.s	.get_data
+.exit_now:
+		bclr	#7,(sysmcd_reg+mcd_comm_m).l	; Clear LOCK
+		move	#0,ccr
+.set_bad:
+		movem.l	(sp)+,d0/d6-d7/a4-a6
 		move.w	(sp)+,sr
 .cant_use:
 	; ------------------------------------------------
@@ -921,6 +861,96 @@ System_SramLoad:
 		adda	#2,a5
 		dbf	d7,.load
 .dont_reset:
+		move.b	#0,(md_bank_sram).l
+	if MARS
+		bclr	#0,(sysmars_reg+dreqctl+1).l	; Set RV=0
+	endif
+		movem.l	(sp)+,d6-d7/a5-a6
+		move.w	(sp)+,sr
+.cant_use_c:
+	; ------------------------------------------------
+	endif
+		rts
+
+; --------------------------------------------------------
+; System_SramSave
+;
+; Write the SAVE data buffer to SRAM/BRAM
+;
+; NOTE SCD/CD32X:
+; Uses ALL mcd_dcomm_m PORTS
+;
+; Stop or Pause All GEMA Sequences that use PCM samples
+; (TODO: a PCM-block flag)
+; --------------------------------------------------------
+
+System_SramSave:
+	if PICO
+		nop			; Pico can't use save data
+	elseif MCD|MARSCD
+
+	; ------------------------------------------------
+	; CD BRAM
+	; ------------------------------------------------
+		tst.w	(RAM_SaveEnable).w
+		beq	.cant_use
+		move.w	sr,-(sp)
+		movem.l	d0/d6-d7/a4-a6,-(sp)
+		bsr	System_MdMcd_SubWait
+		moveq	#$0A,d0
+		bsr	System_MdMcd_SubTask
+		move	#1,ccr
+		cmp.w	#-1,(sysmcd_reg+mcd_dcomm_s).l	; Got -1
+		beq.s	.set_bad
+.wait_sub:	btst	#4,(sysmcd_reg+mcd_comm_s).l	; Wait clean SIGNAL
+		bne.s	.wait_sub
+		bset	#7,(sysmcd_reg+mcd_comm_m).l	; Set LOCK
+		lea	(RAM_SaveData).w,a6
+		lea	(sysmcd_reg+mcd_dcomm_m).l,a5
+		move.w	#(SET_SRAMSIZE/$10)-1,d7
+.send_data:	move.l	a5,a4
+		move.w	(a6)+,(a4)+
+		move.w	(a6)+,(a4)+
+		move.w	(a6)+,(a4)+
+		move.w	(a6)+,(a4)+
+		move.w	(a6)+,(a4)+
+		move.w	(a6)+,(a4)+
+		move.w	(a6)+,(a4)+
+		move.w	(a6)+,(a4)+
+		bset	#4,(sysmcd_reg+mcd_comm_m).l	; Set PASS
+.wait_signi:	btst	#4,(sysmcd_reg+mcd_comm_s).l	; Wait SIGNAL set
+		beq.s	.wait_signi
+		bclr	#4,(sysmcd_reg+mcd_comm_m).l
+.wait_signo:	btst	#4,(sysmcd_reg+mcd_comm_s).l	; Wait SIGNAL clear
+		bne.s	.wait_signo
+		dbf	d7,.send_data
+		bclr	#7,(sysmcd_reg+mcd_comm_m).l	; Clear LOCK
+		move	#0,ccr
+.set_bad:
+		movem.l	(sp)+,d0/d6-d7/a4-a6
+		move.w	(sp)+,sr
+.cant_use:
+	; ------------------------------------------------
+	else
+
+	; ------------------------------------------------
+	; Cartridge SRAM
+	; ------------------------------------------------
+		tst.w	(RAM_SaveEnable).w
+		beq.s	.cant_use_c
+		move.w	sr,-(sp)
+		movem.l	d6-d7/a5-a6,-(sp)
+	if MARS
+		bset	#0,(sysmars_reg+dreqctl+1).l	; Set RV=1
+	endif
+		move.b	#1,(md_bank_sram).l
+		lea	(RAM_SaveData).w,a6
+		lea	($200003).l,a5
+		move.w	#((SET_SRAMSIZE-1))-1,d7
+.save:		move.b	(a6)+,d6
+		move.b	d6,(a5)
+		adda	#2,a5
+		dbf	d7,.save
 		move.b	#0,(md_bank_sram).l
 	if MARS
 		bclr	#0,(sysmars_reg+dreqctl+1).l	; Set RV=0

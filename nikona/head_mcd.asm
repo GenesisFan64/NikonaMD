@@ -157,3 +157,4 @@ MCD_Main:
 .cleanup:
 		move.w	d6,(a0)+
 		dbf	d7,.cleanup
+		move.b	#0,(sysmcd_reg+mcd_comm_m).l	; Clear MAIN comm

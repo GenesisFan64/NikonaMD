@@ -18,7 +18,7 @@ color_indx	function a,a<<1						; Applies to both VDP and SuperVDP
 pstr_mem	function a,b,((a|$80)<<24)|b&$FFFFFF			; PRINT memory: pstr_mem(type,mem_pos)
 full_loc	function a,-(-a)&$FFFFFFFF
 
-SET_WRAMSIZE	equ $3B800						; Maxium WRAM available to use + $120
+SET_WRAMSIZE	equ $3F800						; Maxium WRAM available to use + filler $120
 
 ; ====================================================================
 ; ------------------------------------------------------------
@@ -116,7 +116,7 @@ fs_mkList	macro type,start,end
 		dc.b ((end-start)&$FF),((end-start)>>8&$FF)	; Filesize, little endian
 		dc.b ((end-start)>>16&$FF),((end-start)>>24&$FF)
 		dc.l end-start					; Filesize, big endian
-		dc.b (2024-1900)+1				; Year
+		dc.b (2025-1900)+1				; Year
 		dc.b 0,0,0,0,0,0				; (filler)
 		dc.b 2						; File flags
 		dc.b 0,0
@@ -139,7 +139,7 @@ fs_file		macro filename,start,end
 		dc.b ((end-start)&$FF),((end-start)>>8&$FF)	; Filesize, little
 		dc.b ((end-start)>>16&$FF),((end-start)>>24&$FF)
 		dc.l end-start					; Filesize, big
-		dc.b (2024-1900)+1				; Year
+		dc.b (2025-1900)+1				; Year
 		dc.b 0,0,0,0,0,0				; (filler)
 		dc.b 0						; File flags
 		dc.b 0,0

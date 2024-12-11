@@ -23,8 +23,7 @@ WRAM_TraceBuff		equ $3B000	; Size $780*2 ($F00)
 WRAM_StampsDone		equ $3BFFC
 WRAM_StampCurrFlip	equ $3BFFE
 
-; without Stamps:
-WRAM_SaveDataCopy	equ $3C000	; ** DONT Overwrite THIS **
+WRAM_TempData		equ $3C000	; ** DONT Overwrite THIS **
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -336,7 +335,7 @@ SubTask_cmnd01:
 		bcs	SubTask_RetErr_NoFile
 		tst.l	d1
 		beq	SubTask_RetErr_NoFile
-		lea	(ISO_Output).l,a0		; Temporal OUTPUT location
+		lea	(RAM_CdSub_GotData).l,a0		; Temporal OUTPUT location
 		move.l	a0,-(sp)
 		bsr	spReadSectorsN
 		move.l	(sp)+,a0			; a0 - Read temporal location
@@ -499,9 +498,8 @@ SubTask_cmnd07:
 ; Returns:
 ; mcd_dcomm_s | $00.w:  0 | OK
 ;             |        -1 | File not found
-;             |        -2 | Format error /
-;             |             Not enough space
-;             |
+;             |        -2 | Format error or
+;             |             No enough space
 ;             | $02.w: Back-up size
 ;             | $04.w: Flags
 ; --------------------------------------------------------
@@ -509,27 +507,26 @@ SubTask_cmnd07:
 SubTask_cmnd08:
 		bsr	SubTsk_BramCall
 		bcs	.big_fail
-		lea	(SCPU_reg+mcd_dcomm_m).w,a0
+		lea	(SCPU_reg+mcd_dcomm_m).w,a0	; Copy Info
 		lea	(RAM_CdSub_CurrSaveInfo).l,a1
 		moveq	#($10/2)-1,d7
 .copy_paste:
 		move.w	(a0)+,(a1)+
 		dbf	d7,.copy_paste
-		lea	(RAM_CdSub_BramStrings).l,a1
+		lea	(RAM_CdSub_BramStrings).l,a1	; Get string data
 		moveq	#BRMSTAT,d0
 		jsr	_BURAM
 		move.w	(SCPU_reg+mcd_dcomm_m+$0C).w,d7
-		cmp.w	d7,d0				; Enough space?
+		cmp.w	d7,d0				; Enough space to save in BRAM?
 		blt.s	.big_fail
-
 		lea	(RAM_CdSub_CurrSaveInfo).l,a0
-		move.w	#BRMSERCH,d0			; "SERCH"
+		move.w	#BRMSERCH,d0			; Search our file ("SERCH")
 		jsr	_BURAM
-		bcs	SubTsk_ReturnFail
+		bcs	SubTsk_ReturnFail		; If not found return -1
 		lea	(SCPU_reg+mcd_dcomm_s).w,a6
 		andi.w	#$FF,d1
 		move.w	#0,(a6)				; Report OK
-		move.w	d0,2(a6)			; Number of block of this save
+		move.w	d0,2(a6)			; Number of blocks of this save
 		move.w	d1,4(a6)			; Mode: 0=normal -1=Protected
 		rts
 
@@ -543,31 +540,63 @@ SubTask_cmnd08:
 ; --------------------------------------------------------
 ; Command $09
 ;
-; READ Save data, requires Word-RAM permission.
+; READ Save data
+;
+; Uses:
+; mcd_comm_m  | bits 7 and 4
+; mcd_comm_s  | bit 4
+; mcd_dcomm_s | Data packets to send
 ;
 ; Returns:
 ; mcd_dcomm_s | $00.w:
 ;             |  0 - OK
 ;             | -1 - Not found / Fatal error
+;             | ** Overwriten later on
 ; --------------------------------------------------------
 
 SubTask_cmnd09:
+		move.w	#0,(SCPU_reg+mcd_dcomm_s).w
 		bsr	SubTsk_BramCall
 		bcs	SubTsk_ReturnFail
-.wait_dmna:	btst	#1,(SCPU_reg+mcd_memory).l		; Word-RAM Allowed (DMNA)?
-		beq	.wait_dmna
 		lea	(RAM_CdSub_CurrSaveInfo).l,a0
-		lea	(SCPU_wram+WRAM_SaveDataCopy).l,a1
+		lea	(RAM_CdSub_SramCopy).l,a1
 		moveq	#0,d1
 		move.w	#BRMREAD,d0
 		jsr	_BURAM
 		bcs	SubTsk_ReturnFail
-		bra	SubTask_cmnd07
+		bclr	#4,(SCPU_reg+mcd_comm_s).w	; Clear SIGNAL
+.wait_lock:	btst	#4,(SCPU_reg+mcd_comm_m).w	; Wait LOCK
+		bne.s	.wait_lock
+		lea	(SCPU_reg+mcd_dcomm_s).w,a0
+		lea	(RAM_CdSub_SramCopy).l,a1
+		move.w	#(SET_SRAMSIZE/$10)-1,d0
+.send_data:	move.l	a0,a2
+		move.w	(a1)+,(a2)+
+		move.w	(a1)+,(a2)+
+		move.w	(a1)+,(a2)+
+		move.w	(a1)+,(a2)+
+		move.w	(a1)+,(a2)+
+		move.w	(a1)+,(a2)+
+		move.w	(a1)+,(a2)+
+		move.w	(a1)+,(a2)+
+		bset	#4,(SCPU_reg+mcd_comm_s).w
+.wait_signi:	btst	#4,(SCPU_reg+mcd_comm_m).w
+		beq.s	.wait_signi
+		bclr	#4,(SCPU_reg+mcd_comm_s).w
+.wait_signo:	btst	#4,(SCPU_reg+mcd_comm_m).w
+		bne.s	.wait_signo
+		dbf	d0,.send_data
+		rts
 
 ; --------------------------------------------------------
 ; Command $0A
 ;
-; WRITE Save data, requires Word-RAM permission.
+; WRITE Save data
+;
+; Uses:
+; mcd_comm_m  | bits 7 and 4
+; mcd_comm_s  | bit 4
+; mcd_dcomm_m | Data packets to recieve
 ;
 ; Returns:
 ; mcd_dcomm_s | $00.w:
@@ -576,17 +605,41 @@ SubTask_cmnd09:
 ; --------------------------------------------------------
 
 SubTask_cmnd0A:
+		move.w	#0,(SCPU_reg+mcd_dcomm_s).w
 		bsr	SubTsk_BramCall
 		bcs	SubTsk_ReturnFail
-.wait_dmna:	btst	#1,(SCPU_reg+mcd_memory).l		; Word-RAM Allowed (DMNA)?
-		beq	.wait_dmna
+
+		bclr	#4,(SCPU_reg+mcd_comm_s).w	; Clean SIGNAL
+.wait_lock:	btst	#7,(SCPU_reg+mcd_comm_m).w	; Wait LOCK
+		beq.s	.wait_lock
+		lea	(SCPU_reg+mcd_dcomm_m).w,a0
+		lea	(RAM_CdSub_SramCopy).l,a1
+.main_loop:	btst	#7,(SCPU_reg+mcd_comm_m).w	; LOCKED?
+		beq.s	.exit_now
+		btst	#4,(SCPU_reg+mcd_comm_m).w	; PASS?
+		beq.s	.main_loop
+		move.l	a0,a2
+		move.w	(a2)+,(a1)+
+		move.w	(a2)+,(a1)+
+		move.w	(a2)+,(a1)+
+		move.w	(a2)+,(a1)+
+		move.w	(a2)+,(a1)+
+		move.w	(a2)+,(a1)+
+		move.w	(a2)+,(a1)+
+		move.w	(a2)+,(a1)+
+		bset	#4,(SCPU_reg+mcd_comm_s).w	; Set SIGNAL
+.wait_pass:	btst	#4,(SCPU_reg+mcd_comm_m).w	; Wait PASS clear
+		bne.s	.wait_pass
+		bclr	#4,(SCPU_reg+mcd_comm_s).w	; Clear SIGNAL
+		bra.s	.main_loop
+.exit_now:
 		lea	(RAM_CdSub_CurrSaveInfo).l,a0
-		lea	(SCPU_wram+WRAM_SaveDataCopy).l,a1
+		lea	(RAM_CdSub_SramCopy).l,a1
 		moveq	#0,d1
 		move.w	#BRMWRITE,d0
 		jsr	_BURAM
 		bcs	SubTsk_ReturnFail
-		bra	SubTask_cmnd07
+		rts
 
 ; --------------------------------------------------------
 
@@ -594,8 +647,8 @@ SubTsk_BramCall:
 		lea	(RAM_CdSub_BramWork).l,a0
 		lea	(RAM_CdSub_BramStrings).l,a1
 		moveq	#BRMINIT,d0
-		jsr	_BURAM
-		rts
+		jmp	_BURAM
+
 SubTsk_ReturnFail:
 		move.w	#-1,(SCPU_reg+mcd_dcomm_s).w
 		rts
@@ -605,7 +658,6 @@ SubTsk_ReturnFail:
 
 SubTask_RetErr_NoFile:
 		move.b	#%00000001,(SCPU_reg+mcd_comm_s).w	; SET ERROR %0001
-
 ; 	; *** REMOVE THIS ON RELEASE ***
 ; 		move.w	#4,d1					; READY off | ACCESS blink
 ; 		move.w	#LEDSET,d0
@@ -834,7 +886,7 @@ spInitFS:
 		movem.l	d0-d7/a0-a6,-(a7)
 		moveq	#$10,d0			; Read sector number $10 (At $8000)
 		moveq	#8,d1			; Read 8 sectors
-		lea	(ISO_Filelist).l,a0
+		lea	(RAM_CdSub_IsoFiles).l,a0
 		move.l	a0,-(sp)
 		bsr	spReadSectorsN
 		move.l	(sp)+,a0		; Now use the actual output
@@ -874,7 +926,7 @@ spInitFS:
 ; --------------------------------------------------------
 
 spSearchFile:
-		lea	(ISO_Filelist).l,a4	; a4 - Root filelist
+		lea	(RAM_CdSub_IsoFiles).l,a4	; a4 - Root filelist
 		moveq	#0,d0
 		moveq	#0,d1
 		moveq	#0,d2
@@ -1967,22 +2019,27 @@ RAM_CdSub_StampReqUpd	ds.b 1
 RAM_CdSub_PcmMkNew	ds.b 1
 			align 2
 
-; ====================================================================
 ; ----------------------------------------------------------------
 ; Buffers after $8000
-; ----------------------------------------------------------------
 
 RAM_CdSub_StampProc	ds.b stmpc_len
 RAM_CdSub_StampOutBox	ds.b stmpi_len
 RAM_CdSub_StampList	ds.l 2*MAX_MCDSTAMPS		; Location and Z sort pos
+RAM_CdSub_PcmBuff	ds.b 8*cdpcm_len		; PCM Streaming buffer
+RAM_CdSub_PcmTable	ds.b 8*8			; PCM table recieved from Z80
+RAM_CdSub_IsoFiles	ds.b $800*(8+1)			; 8 sectors + dummy $120
+RAM_CdSub_GotData	ds.b $800*($10+1)		; 10 sectors + dummy $120
+
+; ====================================================================
+; ----------------------------------------------------------------
+; BIOS call input/output buffers
+; ----------------------------------------------------------------
+
+RAM_CdSub_FsBuff	ds.l $20
 RAM_CdSub_CurrSaveInfo	ds.b $10
 RAM_CdSub_BramWork	ds.b $640
 RAM_CdSub_BramStrings	ds.b $C
-RAM_CdSub_PcmBuff	ds.b 8*cdpcm_len		; PCM Streaming buffer
-RAM_CdSub_PcmTable	ds.b 8*8			; PCM table recieved from Z80
-ISO_Filelist		ds.b $800*(8+1)
-ISO_Output		ds.b $800*($10+1)
-RAM_CdSub_FsBuff	ds.l $20
+RAM_CdSub_SramCopy	ds.b SET_SRAMSIZE
 sizeof_subcpu		ds.l 0
 			endmemory
 			erreport "SUB-CPU IP",sizeof_subcpu,$20000
