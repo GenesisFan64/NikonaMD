@@ -2,11 +2,12 @@
 ; NikonaMD
 ; by GenesisFan64 2023-2024
 ;
-; A devkit for developing software on the SEGA 16-bit family
-; of systems: Genesis, Sega CD, Sega 32X, Sega CD32X and Sega Pico.
+; A devkit in assembly for developing software on the SEGA 16-bit
+; family of systems:
+; Genesis, Sega CD, Sega 32X, Sega CD32X and Sega Pico.
 ;
-; DO NOT MODIFY THE nikona FOLDER AS IT WILL GET UPDATED
-; WITHOUT INTERFERING YOUR GAME CODE (IF required)
+; DO NOT MODIFY THE nikona FOLDER AS IT WILL GET UPDATED WITH THE
+; LATEST BUGFIXES AND CHANGES WITHOUT INTERFERING YOUR GAME CODE
 ; ===========================================================================
 
 ; ====================================================================
@@ -15,6 +16,7 @@
 ; ----------------------------------------------------------------
 
 SET_INITMODE	equ 0		; Starting screen mode number on boot
+
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -25,12 +27,14 @@ MAX_StackSize	equ $0200	; Maximum Stack a7
 MAX_Globals	equ $0800	; USER Global variables
 MAX_ScrnBuff	equ $1000	; Current Screen's variables
 
+
 ; ----------------------------------------------------
 ; SCD, 32X and CD32X ONLY
 ;
 ; These sections are unused/free on Genesis/Pico
 MAX_SysCode	equ $2C00	; SCD/32X/CD32X: Nikona lib
 MAX_UserCode	equ $8400	; SCD/32X/CD32X: Current SCREEN's CODE+small DATA
+
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -64,6 +68,7 @@ MAX_UserCode	equ $8400	; SCD/32X/CD32X: Current SCREEN's CODE+small DATA
 		memory RAM_MdGlobal
 	; ------------------------------------------------
 		include "game/globals.asm"
+		align 2
 	; ------------------------------------------------
 sizeof_MdGlbl	ds.l 0
 	if (sizeof_MdGlbl&1 == 1)
@@ -80,12 +85,13 @@ sizeof_MdGlbl	ds.l 0
 		memory RAM_SaveData
 	; ------------------------------------------------
 		include "game/savestruct.asm"
+		align 2
 	; ------------------------------------------------
 sizeof_SaveInfo	ds.l 0
-	if (sizeof_MdGlbl&1 == 1)
+	if (sizeof_SaveInfo&1 == 1)
 		error "SAVE STRUCT IS MISALIGNED"
 	endif
-; 		erreport "USER Globals",(sizeof_SaveInfo-RAM_SaveData),SET_SRAMSIZE	; Report error if ran out
+; 		erreport "SAVE struct",(sizeof_SaveInfo-RAM_SaveData),SET_SRAMSIZE	; Report error if ran out
 		endmemory
 
 ; ====================================================================
@@ -407,7 +413,7 @@ MARS_RAMCODE_EOF:
 ; --------------------------------------------------------
 ; ROM-only 32X data
 ;
-; In the case of RV bit (during DMA):
+; In the case of RV bit during DMA:
 ; Only the PWM samples are protected, everything else
 ; will be trashed.
 ; --------------------------------------------------------

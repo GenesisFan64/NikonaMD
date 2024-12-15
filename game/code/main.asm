@@ -43,7 +43,6 @@ RAM_SC0_OldOption	ds.w 1
 		bsr	System_Default				; Default system settings
 	; ----------------------------------------------
 	; Init/Load save
-		bsr	System_SramInit				; Init/Load
 		addq.l	#1,(RAM_Save_Counter).w
 		bsr	System_SramSave				; Save to SRAM/BRAM
 	; ----------------------------------------------

@@ -19,13 +19,11 @@ HTAG_SYS_MARSCD	equ "SEGA GENESIS    "	; Same as cartridge
 HTAG_SYS_PICO	equ "SEGA PICO       "
 
 ; --------------------------------------------------------
-; SCD/CD32X ONLY
-;
-; Volume and System(SDK/Engine) name
+; SCD/CD32X ONLY: Volume and System(SDK/Engine) name
 ;
 ; Note:
-; Leave HTAG_SYSNAME as is if you haven't modified
-; any of the Nikona SDK files (/system folder)
+; Leave the names as is if you haven't modified
+; any of the Nikona SDK files (/nikona folder)
 ; --------------------------------------------------------
 
 HTAG_DISCID	equ "NIKONACD   "	; SCD Disc Volume name
@@ -52,7 +50,7 @@ HTAG_NDM_MARSCD	equ "Nikona CD32X                                    "
 HTAG_NDM_PICO	equ "Nikona PICO                                     "
 
 ; --------------------------------------------------------
-; "Overseas" Name: Your game's name in English
+; "Overseas" Name: Your game's name in english
 ; --------------------------------------------------------
 
 HTAG_NOV_MD	equ "Nikona GENESIS                                  "
@@ -86,11 +84,17 @@ HTAG_SERIAL	equ "GM HOMEBREW-02"
 HTAG_REGIONS	equ "F               "
 
 ; --------------------------------------------------------
-; Save data settings
+; Save data settings, applies to both
+; Cartridge and CD
 ;
-; Only UPPERCASE and _ are allowed.
+; For compatibility the size must be in sizes of $40
+; (or $20 w/BRAM's protection)
+; Size also affects the save copy stored on RAM
+;
+; BRAM name note: Only UPPERCASE and _ are allowed.
 ; --------------------------------------------------------
 
-SET_SRAMSIZE	equ $100		; SRAM/BRAM filesize, must be "blocks" of $40 bytes ($20 w/Protection) *Affects RAM size too, max $1000
+SET_ENBLSAVE	equ True		; Disable/Enable saving support
+SET_SRAMSIZE	equ $200		; SRAM/BRAM filesize
 HTAG_CDSAVE	equ "NIKONACD___"	; SCD internal save name
 HTAG_MARSCDSAV	equ "NIKONACD32X"	; CD32X internal save name

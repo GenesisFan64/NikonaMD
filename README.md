@@ -20,8 +20,8 @@ A code-base in pure assembly for developing on these SEGA systems: Genesis, Sega
 ### Genesis
 
 * Basic PRINT text functions, text sizes 8x8 and 8x16
-* Multipurpose Object system for easily making your characters/enemies/misc.
-* Sprites engine (VDP side)
+* Multipurpose object system for easily making your characters/enemies/misc.
+* Sprites w/Map data (VDP side)
 * Z80 sound driver
 * SRAM Support
 * Inputs: 3 button, 6 button and Mouse
@@ -52,13 +52,13 @@ All the SCD and 32X features can be used at the same time although for the 32X t
 
 ## GEMA Sound Driver
 
-This is a custom sound driver, tracker-based that supports all the sound channels: PSG, FM, FM3 special, FM6 DAC, Sega CD PCM and 32X PWM all at the same time, you can check the progress here: https://github.com/GenesisFan64/GEMA-drv <br>
+This is a custom sound driver, tracker-based that supports all the sound channels: PSG, FM, FM3 special, FM6 DAC, Sega CD PCM and 32X PWM all at the same time, the latest version of this driver is located here: https://github.com/GenesisFan64/GEMA-drv <br>
 <br>
 
 ## NOTES
 
-* All the user code goes to `/game`, DO NOT MODIFY `/system` as it will get updated with the latest changes and fixes
-* To keep compatibilty to all systems CODE and DATA are separated: game code is stored as "screen modes" (ex. Title, Level...) and the DATA is stored as "banks" and loaded manually depending of the system (Picking a ROM location or loading data from Disc)
+* All the user code goes to `/game`, DO NOT MODIFY `/nikona` as it will get updated with the latest changes and fixes
+* To keep compatibilty to all systems the CODE and DATA are separated: game code is stored as "screen modes" (ex. Title, Level...) and the DATA is stored as "banks" and loaded manually on each screen, depending of the system. (Picking a ROM location or loading data from Disc)
 
 ## CURRENT ISSUES
 
@@ -66,7 +66,7 @@ This is a custom sound driver, tracker-based that supports all the sound channel
 * (SCD) Stamps support is unstable/unfinished
 * (32X) 2D-mode might break on hardware if placing too many Super-Sprites
 
-## PLANNED
+## TODO
 
-* Support for the Sega Mapper "SSF2" (Genesis and 32X only)
+* Add support for the Sega Mapper "SSF2" (Genesis and 32X only)
 * Convert the entire Z80 driver to 68K for Pico

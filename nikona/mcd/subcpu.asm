@@ -23,8 +23,6 @@ WRAM_TraceBuff		equ $3B000	; Size $780*2 ($F00)
 WRAM_StampsDone		equ $3BFFC
 WRAM_StampCurrFlip	equ $3BFFE
 
-WRAM_TempData		equ $3C000	; ** DONT Overwrite THIS **
-
 ; ====================================================================
 ; ----------------------------------------------------------------
 ; Variables
@@ -173,8 +171,8 @@ SCPU_Stamp:
 ; ----------------------------------------------------------------
 ; Level 2 IRQ
 ;
-; WARNING: The SEGA screen before starting calls this on
-; every frame.
+; WARNING:
+; The SEGA screen calls this on every frame
 ; ----------------------------------------------------------------
 
 SCPU_IRQ:

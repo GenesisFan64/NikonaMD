@@ -3,31 +3,28 @@
 ; DATA BANKS
 ;
 ; MACRO Usage:
-;	data_dset LABEL_START
-;	; your data
-;	data_dend LABEL_END
+;	data_bank LABEL_START
+;	include "game/data/your_bank.asm"
+;	dend_bank LABEL_END
 ;
-; - For including VDP graphics:
-;	binclude_dma   LABEL_START,filepath		; Single label
-;	binclude_dma_e LABEL_START,LABEL_END,filepath	; Start and End labels
+; Load banks with:
+; 	lea	bank_info(pc),a0
+; 	bsr	System_SetDataBank
+; 	; mode code
 ;
-; - For the SVDP graphics:
-; 	mars_VramStart Label_test			; Set the Start label
-; example_0:
-; 	include "your_svdp_graphics.bin"
-; 	align 4						; ** Don't forget to align by 4 at the end
-; example_1:
-; 	include "more_svdp.bin"
-;	align 4
-;	mars_VramEnd Label_end				; Set the End label
+; bank_info:
+; 	dc.l DATA_BANK0		; ROM label for Cartridge
+; 	dc.b "BNK_MAIN.BIN",0	; ISO filename for CD
+; 	align 2
+;
+; You MUST use the banks for compatibility on all systems
+; even if the standard Genesis doesn't use require it.
 ; ----------------------------------------------------------------
 
-; ============================================================
-; --------------------------------------------------------
-; MAIN bank
-; --------------------------------------------------------
+	data_bank DATA_BANK0
+	include "game/data/bank_main.asm"
+	dend_bank DATA_BANK0_e
 
-	data_dset DATA_BANK0
-		include "sound/data.asm"		; GEMA sound data
-		include "game/data/bank_main.asm"
-	data_dend DATA_BANK0_e
+	data_bank DATA_BANK1
+	include "game/data/stamps_0.asm"
+	dend_bank DATA_BANK1_e

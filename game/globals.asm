@@ -21,14 +21,14 @@
 ; during build
 ; ----------------------------------------------------------------
 
-SET_DEBUGMODE		equ False
+SET_EXAMPLE		equ False
 
 ; ====================================================================
 ; ----------------------------------------------------------------
 ; RAM memory (RAM_Global)
 ;
-; Your Score, Lives, Level number, etc. go here, for
-; storing temporals on your current screen use RAM_ScrnBuff
+; Your Score, Lives, Level number, etc. go here
+; for storing temporals on your current screen use RAM_ScrnBuff
 ;
 ; Examples:
 ;
@@ -36,13 +36,11 @@ SET_DEBUGMODE		equ False
 ; RAM_Glbl_ExmpW ds.w 5 ; Reserve 5 WORDS ($0A bytes)
 ; RAM_Glbl_ExmpB ds.b 6 ; Reserve 6 BYTES
 ;
-; Careful with BYTES, everything needs to be even-aligned
-; or your will get an ADDRESS ERROR.
+; Eeverything needs to be even-aligned
+; or your will get an ADDRESS ERROR, do not set ODD
+; sizes on bytes
 ; ----------------------------------------------------------------
 
 RAM_Glbl_Example_L	ds.l 1		; 1 long (4 bytes)
 RAM_Glbl_Example_W	ds.w 1		; 1 word (2 bytes)
 RAM_Glbl_Example_B	ds.b 1		; 1 byte
-
-; --------------------------------------------------------
-			align 2

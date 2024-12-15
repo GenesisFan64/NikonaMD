@@ -6,6 +6,5 @@
 ; DO NOT USE LABELS HERE
 ; ----------------------------------------------------------------
 
-		bsr	Mode_Init
 		move.w	#0,(RAM_ScreenMode).w
 		rts

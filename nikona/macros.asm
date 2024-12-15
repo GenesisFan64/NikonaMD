@@ -5,6 +5,8 @@
 ; *** THIS MUST BE INCLUDED AT START OF THE CODE ***
 ; -------------------------------------------------------------------
 
+MAX_WramBank	equ $3F800	; Maxium WRAM available to use + filler $120
+
 ; ====================================================================
 ; ------------------------------------------------------------
 ; AS Functions
@@ -18,22 +20,20 @@ color_indx	function a,a<<1						; Applies to both VDP and SuperVDP
 pstr_mem	function a,b,((a|$80)<<24)|b&$FFFFFF			; PRINT memory: pstr_mem(type,mem_pos)
 full_loc	function a,-(-a)&$FFFFFFFF
 
-SET_WRAMSIZE	equ $3F800						; Maxium WRAM available to use + filler $120
-
 ; ====================================================================
 ; ------------------------------------------------------------
 ; Macros
 ; ------------------------------------------------------------
 
 ; --------------------------------------------
-; Memory reference labels
+; Memory reserve
 ;
 ; Example:
 ; 		memory RAM_Somewhere
 ; RAM_ThisLong	ds.l 1
 ; RAM_ThisWord	ds.w 1
 ; RAM_ThisByte	ds.b 1				; <-- careful with alignment
-; 		endmemory ; finish
+; 		endmemory 			; finish
 ; --------------------------------------------
 
 memory		macro thisinput			; Reserve memory address
@@ -155,6 +155,8 @@ fs_file		macro filename,start,end
 ; Make filler sector at the end-of-file
 ; ------------------------------------------------------------
 
+; TODO: check if this actually works
+
 fs_end		macro
 		dc.b 0
 		align $800			; Filler sector
@@ -162,7 +164,7 @@ fs_end		macro
 
 ; ====================================================================
 ; ------------------------------------------------------------
-; Nikona storage macros
+; Nikona macros
 ; ------------------------------------------------------------
 
 ; --------------------------------------------
@@ -178,138 +180,104 @@ screen_code macro lblstart,lblend,path
 		phase $880000+*		; 32X ROM-area
 		align 4
 	endif
-lblstart label *
+lblstart label *			; Register start label
 	if MARS
-		dephase
+		dephase			; 32X dephase
 	endif
-
 mctopscrn:
 	if MARS|MCD|MARSCD
-		phase RAM_UserCode	; SCD/32X/CD32X code area
+		phase RAM_UserCode	; Phase code to RAM area
 	endif
 mcscrn_s:
 	include path;"game/screenX/code.asm"
 mcscrn_e:
 	if MARS
-		dephase	; dephase RAM section
-		dephase ; dephase $880000+ section
+		dephase			; dephase RAM section
 	elseif MCD|MARSCD
 		dephase
-		phase mctopscrn+(mcscrn_e-RAM_UserCode)
+		phase mctopscrn+(mcscrn_e-RAM_UserCode)	; Add the used bytes
 		align $800
 	endif
-; Md_Screen00_e:
 lblend label *
 	erreport "SCREEN CODE: lblstart",mcscrn_e-mcscrn_s,MAX_UserCode
 	endm
 
 ; --------------------------------------------
-; Data bank
+; Data bank START
 ; --------------------------------------------
 
-data_dset macro startlbl
-	if MCD|MARSCD			; Alignment
-		align $800
+data_bank macro startlbl
+	if MCD|MARSCD
+		align $800		; Sector alignment
 	elseif MARS
-		align 4
+		align 4			; 32X alignment
 	endif
-
 startlbl label *			; Register label
-
 	if MCD|MARSCD			; Set PHASE
 		phase sysmcd_wram
 	elseif MARS
 		phase $900000+(startlbl&$0FFFFF)
 	endif
-
-GLBL_MDATA_ST := *
-
+GLBL_MDATA_ST := *			; Save current pos globally
 	endm
 
 ; --------------------------------------------
+; Data bank END
+; --------------------------------------------
 
-data_dend macro endlbl
-GLBL_MDATA_RP := *-GLBL_MDATA_ST	; save size for _dend
+dend_bank macro endlbl
+GLBL_MDATA_RP := *-GLBL_MDATA_ST	; Get used size to report
 
 	; Set 32X bank end
 	if MARS
 		if GLBL_MDATA_RP >= $900000+$100000
-			error "32X: THIS DATA BANK IS TOO LARGE"
+			error "32X: RAN OUT OF MEMORY FOR A SINGLE 1MB BANK"
 		endif
-		dephase
+		dephase			; Dephase $900000
 
 	; Set MCD/CD32X data end
 	elseif MCD|MARSCD
-		dephase
+		dephase			; Dephase WRAM
 mlastpos := *	; <-- CD/CD32X ONLY
-mpadlbl	:= (mlastpos&$FFF800)+$800
+mpadlbl	:= (mlastpos&$FFF800)+$800	; Fill sectors
 		rompad mpadlbl
 endlbl label *	; <-- CD/CD32X ONLY
 
-		if GLBL_MDATA_RP > SET_WRAMSIZE
+		if GLBL_MDATA_RP > MAX_WramBank
 			error "SCD/CD32X: THIS BANK SIZE IS TOO LARGE for WORD-RAM"
 		endif
 	endif
 	endm
 
 ; --------------------------------------------
+; SCD Stamp Start/End
+; --------------------------------------------
 
-binclude_dma	macro lblstart,file
-	if MARS
-GLBL_LASTPHDMA	set *
-	dephase
-GLBL_PHASEDMA	set *
-		endif
+mcdStampData	macro
+		phase 0
+		ds.b $80
+		endm
 
+mcdStampDEnd	macro
 		align 2
-lblstart	label *
-		binclude file
-		align 2
-
-	if MARS
-GLBL_ENDPHDMA	set *-GLBL_PHASEDMA
-		phase GLBL_LASTPHDMA+GLBL_ENDPHDMA
-	endif
+.end:
+		erreport "This SCD Stamp data",.end,$3F800
+		dephase
 		endm
 
 ; --------------------------------------------
-
-binclude_dma_e	macro lblstart,lblend,file
-	if MARS
-GLBL_LASTPHDMA	set *
-	dephase
-GLBL_PHASEDMA	set *
-		endif
-
-		align 2
-lblstart	label *
-		binclude file
-lblend		label *
-		align 2
-
-	if MARS
-GLBL_ENDPHDMA	set *-GLBL_PHASEDMA
-		phase GLBL_LASTPHDMA+GLBL_ENDPHDMA
-	endif
-		endm
-
-; --------------------------------------------
-; 32X graphics data Enter/Exit
+; 32X graphics data Start/End
 ; --------------------------------------------
 
-mars_VramStart	macro thelabel
-thelabel label *
+marsVramData	macro
 		phase 0
 		endm
 
-mars_VramEnd	macro thelabel
+marsVramDEnd	macro
 		align 8
 .end:
-; 		if MOMPASS == 1
-			erreport "32X VRAM DATA",.end,$18000
-; 		endif
+		erreport "This 32X graphics data",.end,$18000
 		dephase
-thelabel label *
 		endm
 
 ; --------------------------------------------
@@ -322,6 +290,52 @@ fillSectors macro num
 		dc.b 0
 	endm
 	endm
+
+; --------------------------------------------
+; binclude VDP graphics
+; --------------------------------------------
+
+binclude_dma	macro lblstart,file
+	; 32X: Temporally show ROM position
+	if MARS
+GLBL_LASTPHDMA	set *
+	dephase
+GLBL_PHASEDMA	set *
+		endif
+
+		align 2
+lblstart	label *
+		binclude file
+		align 2
+	; 32X: Return to last phase
+	if MARS
+GLBL_ENDPHDMA	set *-GLBL_PHASEDMA
+		phase GLBL_LASTPHDMA+GLBL_ENDPHDMA
+	endif
+		endm
+
+; --------------------------------------------
+; binclude VDP graphics w/End label
+; --------------------------------------------
+
+binclude_dma_e	macro lblstart,lblend,file
+	; 32X: Temporally show ROM position
+	if MARS
+GLBL_LASTPHDMA	set *
+	dephase
+GLBL_PHASEDMA	set *
+		endif
+		align 2
+lblstart	label *
+		binclude file
+lblend		label *
+		align 2
+	; 32X: Return to last phase
+	if MARS
+GLBL_ENDPHDMA	set *-GLBL_PHASEDMA
+		phase GLBL_LASTPHDMA+GLBL_ENDPHDMA
+	endif
+		endm
 
 ; ====================================================================
 ; ------------------------------------------------------------

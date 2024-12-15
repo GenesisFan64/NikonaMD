@@ -2,20 +2,13 @@
 ; ----------------------------------------------------------------
 ; BANK data for STAMPS ONLY
 ;
-; GRAPHICS go first, first $80 bytes are blank/free
+; GRAPHICS go first, first $80 bytes are unused with 0
 ; ----------------------------------------------------------------
 
-		phase 0		; Labels start at 0
-; ===================================================================
-; ----------------------------------------------------------------
-; STAMP GRAPHICS GO FIRST
-; ----------------------------------------------------------------
-
+		mcdStampData
+; --------------------------------------------------------
+; 		dc.b "CD STAMP DATA GOES HERE"
 		dc.b 0
-		align $80
-		binclude "game/data/mcd/stamps/test/art.bin"
-; 		binclude "game/data/mcd/stamps/haruna/art.bin"
-
-; ===================================================================
-		dephase
+; --------------------------------------------------------
+		mcdStampDEnd
 

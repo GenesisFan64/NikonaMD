@@ -106,16 +106,16 @@ bitJoyPEN	equ 7
 ; RAM_InputData
 
 ; *** MANUAL VARIABLES ***
-pad_id			equ $00;ds.b 1			; Controller ID
-pad_ver			equ $01;ds.b 1			; Controller type/revision
-on_hold			equ $02;ds.w 1			; User HOLD bits
-on_press		equ $04;ds.w 1			; User PRESSED bits
-on_release		equ $06;ds.w 1			; User RELEASED bits
-mouse_x			equ $08;ds.w 1			; Mouse/Pen X speed
-mouse_y			equ $0A;ds.w 1			; Mouse/pen Y speed
-ext_3			equ $0C;ds.w 1
-ext_4			equ $0E;ds.w 1
-sizeof_input		equ $10
+pad_id		equ $00;ds.b 1			; Controller ID
+pad_ver		equ $01;ds.b 1			; Controller type/revision
+on_hold		equ $02;ds.w 1			; User HOLD bits
+on_press	equ $04;ds.w 1			; User PRESSED bits
+on_release	equ $06;ds.w 1			; User RELEASED bits
+mouse_x		equ $08;ds.w 1			; Mouse/Pen X speed
+mouse_y		equ $0A;ds.w 1			; Mouse/pen Y speed
+ext_3		equ $0C;ds.w 1
+ext_4		equ $0E;ds.w 1
+sizeof_input	equ $10
 
 ; ------------------------------------------------
 ; RAM_Objects
@@ -123,30 +123,30 @@ sizeof_input		equ $10
 ; Size must end as even
 ; ------------------------------------------------
 
-obj			struct
-code			ds.l 1		; Object code, If 0 == blank slot
-x			ds.l 1		; Object X Position $xxxx.0000
-y			ds.l 1		; Object Y Position $yyyy.0000
-z			ds.l 1		; Object Z Position $zzzz.0000 (3D ONLY)
-size_x			ds.w 1		; Object size Left/Right $llrr
-size_y			ds.w 1		; Object size Up/Down $uudd
-size_z			ds.w 1		; Object size Zback/Zfront $bbff starting from object's X/Y pointer in 10mm's (3D ONLY)
-x_spd			ds.w 1		; Object X Speed $xx.00 (object_Speed)
-y_spd			ds.w 1		; Object Y Speed $yy.00 ''
-z_spd			ds.w 1		; Object Z Speed $zz.00 '' (3D ONLY)
-index			ds.b 1		; Object current code index, mostly for init(0) and main(1)
-subid			ds.b 1		; Object Sub-ID for custom placement settings
-status			ds.b 1		; General purpose USER status: Falling, Floating, etc.
-attr			ds.b 1		; Quick attribute bits for VRAM (depending of the type)
-					; ** object_Animate ONLY:
-frame			ds.w 1		; ** Current frame, object_Animate outputs here
-anim_num		ds.w 1		; ** Animation number to use
-anim_indx		ds.w 1		; ** Animation script index
-anim_icur		ds.b 1		; ** Current animation id
-anim_spd		ds.b 1		; ** Animation delay set on animation script
-ram			ds.b $40	; Object's own RAM
-; obj_len		ds.l 0
-			endstruct
+obj		struct
+code		ds.l 1		; Object code, If 0 == blank slot
+x		ds.l 1		; Object X Position $xxxx.0000
+y		ds.l 1		; Object Y Position $yyyy.0000
+z		ds.l 1		; Object Z Position $zzzz.0000 (3D ONLY)
+size_x		ds.w 1		; Object size Left/Right $llrr
+size_y		ds.w 1		; Object size Up/Down $uudd
+size_z		ds.w 1		; Object size Zback/Zfront $bbff starting from object's X/Y pointer in 10mm's (3D ONLY)
+x_spd		ds.w 1		; Object X Speed $xx.00 (object_Speed)
+y_spd		ds.w 1		; Object Y Speed $yy.00 ''
+z_spd		ds.w 1		; Object Z Speed $zz.00 '' (3D ONLY)
+index		ds.b 1		; Object current code index, mostly for init(0) and main(1)
+subid		ds.b 1		; Object Sub-ID for custom placement settings
+status		ds.b 1		; General purpose USER status: Falling, Floating, etc.
+attr		ds.b 1		; Quick attribute bits for VRAM (depending of the type)
+				; ** object_Animate ONLY:
+frame		ds.w 1		; ** Current frame, object_Animate outputs here
+anim_num	ds.w 1		; ** Animation number to use
+anim_indx	ds.w 1		; ** Animation script index
+anim_icur	ds.b 1		; ** Current animation id
+anim_spd	ds.b 1		; ** Animation delay set on animation script
+ram		ds.b $40	; Object's own RAM
+; obj_len	ds.l 0
+		endstruct
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -159,6 +159,7 @@ RAM_InputData		ds.b sizeof_input*4		; Input data section
 RAM_Objects		ds.b obj_len*MAX_MDOBJ		; Objects buffer
 RAM_SysRandVal		ds.l 1				; Random value
 RAM_SysRandom		ds.l 1				; Randomness seed
+RAM_SysLastBank		ds.l 1
 RAM_VBlankJump		ds.w 3				; VBlank jump (JMP xxxx xxxx)
 RAM_HBlankJump		ds.w 3				; HBlank jump (JMP xxxx xxxx)
 RAM_ExternalJump	ds.w 3				; External jump (JMP xxxx xxxx)
@@ -209,9 +210,13 @@ System_Init:
 		lea	(RAM_InputData).w,a0	; Clear input data buffer
 		move.w	#(sizeof_input/2)-1,d1
 		moveq	#0,d0
+		move.l	d0,(RAM_SysLastBank).l
 .clrinput:
 		move.w	d0,(a0)+
 		dbf	d1,.clrinput
+	if SET_ENBLSAVE
+		bsr	System_SramInit				; Init/Load SRAM
+	endif
 		andi.w	#$F8FF,sr
 		rts
 
@@ -762,6 +767,7 @@ System_SramInit:
 		tst.w	(RAM_SaveEnable).w
 		bne.s	.cant_use
 		move.w	#1,(RAM_SaveEnable).w
+
 	; Make SAVE template
 		bsr	System_SramLoad
 		cmpi.l	#TAG_SRAMDATA,(RAM_SaveData).w
@@ -881,7 +887,7 @@ System_SramLoad:
 ; Uses ALL mcd_dcomm_m PORTS
 ;
 ; Stop or Pause All GEMA Sequences that use PCM samples
-; (TODO: a PCM-block flag)
+; before calling this (TODO: a PCM-block flag)
 ; --------------------------------------------------------
 
 System_SramSave:
@@ -1801,7 +1807,7 @@ sys_MSendData:
 ; --------------------------------------------------------
 ; System_SetDataBank
 ;
-; Sets the data bank depending of the system
+; Sets the current DATA bank depending of the system
 ;
 ; Input:
 ; a0   | Pointer and filename:
@@ -1812,18 +1818,24 @@ sys_MSendData:
 ; a4-a5,d5-d7
 ;
 ; Notes:
-; - ONLY call this if you have the opportunity to
-;   do it.
-; - SEGA CD / CD32X: This sets the WORD-RAM
-;   to load from disc
-;   * DO NOT USE THIS WHEN STAMPS ARE ACTIVE
-;   Call Video_Mcd_StampDisable If neeeded. *
+; - This code is shared to all systems, on CD/CD32X
+;   this will load from DISC so transfer will be
+;   slow.
+; - CD/CD32X: DO NOT USE THIS WHEN STAMPS ARE ACTIVE
+;   Load the stamp data with this BEFORE enabling them.
 ; --------------------------------------------------------
 
 System_SetDataBank:
 	if MCD|MARSCD
-		adda	#4,a0
+		move.l	d7,-(sp)
+		move.l	(a0)+,d7
+		cmp.l	(RAM_SysLastBank).l,d7
+		beq.s	.same_bank
+		move.l	d7,(RAM_SysLastBank).l
 		bsr	System_MdMcd_RdFile_WRAM
+.same_bank:
+		move.l	(sp)+,d7
+		; rts
 	elseif MARS
 		move.l	d7,-(sp)
 	rept 3
@@ -1836,6 +1848,7 @@ System_SetDataBank:
 		andi.w	#%11,d7
 		move.w	d7,(sysmars_reg+bankset).l
 		move.l	(sp)+,d7
+		; rts
 	endif
 		rts
 
