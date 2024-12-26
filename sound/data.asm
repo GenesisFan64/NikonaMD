@@ -4,11 +4,11 @@
 ; -------------------------------------------------------------------
 
 MainGemaSeqList:
+	gemaTrk 1,3,gtrk_Test0
+	gemaTrk 0,6,gtrk_Test0	; $0F
 	gemaTrk 1,6,gtrk_Test0
-	gemaTrk 0,6,gtrk_SfxAll	; $0F
-	gemaTrk 1,6,gtrk_Test1
-	gemaTrk 1,3,gtrk_Test2
-	gemaTrk 1,3,gtrk_Test3
+	gemaTrk 1,3,gtrk_Test0
+	gemaTrk 1,3,gtrk_Test0
 	gemaTrk 1,6,gtrk_Test0
 	gemaTrk 1,6,gtrk_Test0
 	gemaTrk 1,6,gtrk_Test0
@@ -19,116 +19,32 @@ MainGemaSeqList:
 	gemaTrk 1,6,gtrk_Test0
 	gemaTrk 1,6,gtrk_Test0
 	gemaTrk 1,6,gtrk_Test0
-	gemaTrk 0,6,gtrk_SfxAll	; $0F
-
-; ----------------------------------------------------
-
-gtrk_SfxAll:
-	gemaHead .blk,.pat,.ins,4
-.blk:	binclude "sound/seq/sfxall_blk.bin"
-.pat:	binclude "sound/seq/sfxall_patt.bin"
-.ins:
-	gInsFm -12,FmIns_sfx_smash
-	gInsFm -12,FmIns_sfx_smash
-	gInsFm -12,FmIns_sfx_explode
-	gInsFm 0,FmIns_Bell_low13
+	gemaTrk 0,6,gtrk_Test0	; $0F
 
 ; ----------------------------------------------------
 gtrk_Test0:
-; 	gemaHead .blk,.pat,.ins,4
-; .blk:	binclude "sound/seq/test_2_blk.bin"
-; .pat:	binclude "sound/seq/test_2_patt.bin"
-; .ins:
-; 	gInsDac 0,DacIns_sxbeats,0
-; 	gInsDac 0,DacIns_sxbeats2,0
-; 	gInsDac 0,DacIns_drumsetA,0
-
 	gemaHead .blk,.pat,.ins,10
-.blk:	binclude "sound/seq/carillon_blk.bin"
-.pat:	binclude "sound/seq/carillon_patt.bin"
+.blk:	binclude "sound/seq/axe_blk.bin"
+.pat:	binclude "sound/seq/axe_patt.bin"
 .ins:
-	gInsFm -12,FmIns_Guitar_bball
-	gInsNull;gInsFm -24,FmIns_Bell_mid36
-	gInsFm 0,FmIns_Trumpet_carnival
-	gInsFm -12,FmIns_Trumpet_bus
-	gInsDac 0,DacIns_Kick_2,0
-	gInsDac +12,DacIns_Snare_2,0
-	gInsFm 0,FmIns_Hats_1
-	gInsFm3 0,FmIns_Sp_OpenHat
-
-; ----------------------------------------------------
-gtrk_Test1:
-	gemaHead .blk,.pat,.ins,4
-.blk:	binclude "sound/seq/sauron_blk.bin"
-.pat:	binclude "sound/seq/sauron_patt.bin"
-.ins:
-	gInsPcm -12,PcmIns_sauron_01,0
-	gInsPcm -12,PcmIns_sauron_02,0
-	gInsPcm -12,PcmIns_sauron_03,0
-	gInsPcm -12,PcmIns_sauron_04,0
-	gInsPcm -12,PcmIns_sauron_05,1
-	gInsPcm -12,PcmIns_sauron_06,0
-	gInsPcm -12,PcmIns_sauron_07,0
-	gInsPcm -12,PcmIns_sauron_08,0
-	gInsPcm -12,PcmIns_sauron_09,0
-	gInsPcm -12,PcmIns_sauron_10,0
-	gInsPcm -12,PcmIns_sauron_11,0
-	gInsPcm -12,PcmIns_sauron_12,0
-	gInsNull
-
-; 		gemaHead .blk,.pat,.ins,10
-; .blk:		binclude "sound/seq/test_blk.bin"
-; .pat:		binclude "sound/seq/test_patt.bin"
-; .ins:
-; 		gInsPcm 0,PcmIns_TEST,0
-
-; ----------------------------------------------------
-gtrk_Test2:
-	gemaHead .blk,.pat,.ins,16
-.blk:	binclude "sound/seq/trnthem_blk.bin"
-.pat:	binclude "sound/seq/trnthem_patt.bin"
-.ins:
-	gInsPwm -12,PwmIns_trnthem_01,1
-	gInsFm -24,FmIns_Hats_1
-	gInsFm3 0,FmIns_Sp_OpenHat
-	gInsFm -24,FmIns_Trumpet_1
-	gInsPcm -12,PcmIns_trnthem_05,0
-	gInsPcm -12,PcmIns_trnthem_06,0
-	gInsFm -56,FmIns_Bass_club_108
-	gInsFm -56,FmIns_Bass_club_108
-	gInsFm -56,FmIns_Bass_Groove_1
-	gInsPcm -12,PcmIns_trnthem_10,1
-	gInsPwm -12,PwmIns_trnthem_11,0
-	gInsPwm -12,PwmIns_trnthem_12,0
-	gInsNull
-	gInsNull
-	gInsNull
-	gInsNull
-	gInsPcm 0,PcmIns_trnthem_20,0
-
-; -----------------------------------------------------------
-
-gtrk_Test3:
-	gemaHead .blk,.pat,.ins,16
-.blk:	binclude "sound/seq/box_blk.bin"
-.pat:	binclude "sound/seq/box_patt.bin"
-.ins:
-	gInsFm -24,FmIns_Organ_drawbar
-	gInsNull
-	gInsPcm +24,PcmIns_Kick,0
-	gInsNull
-	gInsPcm +24,PcmIns_BBoxHats,0
-	gInsPcm +24,PcmIns_BBoxHats,0
-	gInsNull
-	gInsNull
-	gInsPcm +24,PcmIns_BBoxHats,0
-	gInsPcm +24,PcmIns_BBoxSnare,0
+	gInsFm 0,FmIns_Vibraphone_1
+	gInsFm 0,FmIns_Organ_drawbar
 	gInsFm -12,FmIns_Bass_Groove_1
+	gInsFm +12,FmIns_bass_italo
+	gInsDac 0,DacIns_conga,0
+	gInsDac 0,DacIns_conga_low,0
+	gInsDac -12,DacIns_clap,0
+	gInsFm 0,FmIns_Flaute_1
+	gInsFm 0,FmIns_Hats_1
+	gInsDac +24,DacIns_Kick_Strong,0
+	gInsDac +12,DacIns_Snare,0
 	gInsNull
-	gInsFm -12,FmIns_Trumpet_1
-	gInsPcm 0,PcmIns_Trumpet1,0
+	gInsPsg 0,$00,$00,$00,$00,$02,$00
 	gInsNull
-	gInsFm -24,FmIns_Vibraphone_1
+	gInsNull
+	gInsNull
+	gInsNull
+	gInsNull
 	gInsNull
 
 ; ===========================================================================
@@ -325,18 +241,13 @@ FmIns_Guitar_bball:
 
 		align $800
 		;gSmplData Label,"file_path",loop_start
-; -----------------------------------------------------------
-	if MCD|MARS|MARSCD=0
-		gSmplData DacIns_sxbeats,"sound/ins/smpl/sxbeats.wav",0
-		gSmplData DacIns_sxbeats2,"sound/ins/smpl/sxbeats2.wav",0
-		gSmplData DacIns_drumsetA,"sound/ins/smpl/drumsetA.wav",0
-	endif
-; 		gSmplData DacIns_trnthem_10,"sound/ins/smpl/trnthem/10.wav",3033
-; 		gSmplData DacIns_trnthem_20,"sound/ins/smpl/trnthem/20.wav",14309
-		gSmplData DacIns_Kick,"sound/ins/smpl/kick.wav",0
+		gSmplData DacIns_clap,"sound/ins/smpl/clap.wav",0
+		gSmplData DacIns_conga,"sound/ins/smpl/conga.wav",0
+		gSmplData DacIns_conga_low,"sound/ins/smpl/conga_low.wav",0
+		gSmplData DacIns_Kick_Strong,"sound/ins/smpl/kick_strong.wav",0
 		gSmplData DacIns_Snare,"sound/ins/smpl/snare.wav",0
-		gSmplData DacIns_Kick_2,"sound/ins/smpl/kick_2.wav",0
-		gSmplData DacIns_Snare_2,"sound/ins/smpl/snare_2.wav",0
+; 		gSmplData DacIns_Kick_2,"sound/ins/smpl/kick_2.wav",0
+; 		gSmplData DacIns_Snare_2,"sound/ins/smpl/snare_2.wav",0
 ; 		gSmplData DacIns_Timpani,"sound/ins/smpl/timpani.wav",0
 ; 		gSmplData DacIns_wegot_kick,"sound/ins/smpl/wegot_kick.wav",0
 ; 		gSmplData DacIns_wegot_crash,"sound/ins/smpl/wegot_crash.wav",0

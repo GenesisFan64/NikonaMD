@@ -151,17 +151,6 @@ fs_file		macro filename,start,end
 .fend:
 		endm
 
-; ------------------------------------------------------------
-; Make filler sector at the end-of-file
-; ------------------------------------------------------------
-
-; TODO: check if this actually works
-
-fs_end		macro
-		dc.b 0
-		align $800			; Filler sector
-		endm
-
 ; ====================================================================
 ; ------------------------------------------------------------
 ; Nikona macros

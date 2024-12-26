@@ -96,7 +96,7 @@ sizeof_thisbuff		ds.l 0
 		bsr	Video_LoadArt_List
 	; ----------------------------------------------
 		lea	str_TesterTitle(pc),a0
-		moveq	#6,d0
+		moveq	#12,d0
 		moveq	#2,d1
 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
@@ -892,7 +892,7 @@ ArtList_Stuff:
 		dc.w cell_vram($30)
 
 str_TesterTitle:
-		dc.b "GEMA Sound Driver       V1.0",0
+		dc.b "GEMA Sound Test",0
 		align 2
 str_TesterInfo:
 		dc.b "Seq# Blk# Indx",$0A

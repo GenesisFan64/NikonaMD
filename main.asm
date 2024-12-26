@@ -1,6 +1,5 @@
 ; ===========================================================================
-; NikonaMD
-; by GenesisFan64 2023-2024
+; NikonaMD by GenesisFan64 2023-2024
 ;
 ; A devkit in assembly for developing software on the SEGA 16-bit
 ; family of systems:
@@ -17,7 +16,6 @@
 
 SET_INITMODE	equ 0		; Starting screen mode number on boot
 
-
 ; ====================================================================
 ; ----------------------------------------------------------------
 ; 68000 RAM SIZES (MAIN-CPU in SegaCD/CD32X)
@@ -27,14 +25,12 @@ MAX_StackSize	equ $0200	; Maximum Stack a7
 MAX_Globals	equ $0800	; USER Global variables
 MAX_ScrnBuff	equ $1000	; Current Screen's variables
 
-
 ; ----------------------------------------------------
 ; SCD, 32X and CD32X ONLY
 ;
 ; These sections are unused/free on Genesis/Pico
 MAX_SysCode	equ $2C00	; SCD/32X/CD32X: Nikona lib
 MAX_UserCode	equ $8400	; SCD/32X/CD32X: Current SCREEN's CODE+small DATA
-
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -263,6 +259,7 @@ Md_ReadModes:
 
 .pick_mode:
 		include "game/screens.asm"
+		align 2
 
 ; ====================================================================
 
@@ -296,7 +293,7 @@ IsoFileList:
 		fs_file "NKNAMARS.BIN",MARS_RAMCODE,MARS_RAMCODE_EOF
 		fs_file "GEMA_Z80.BIN",Z80_CODE_FILE,Z80_CODE_FILE_E
 		include "game/iso_files.asm"			; User files
-		fs_end
+		align $800
 IsoFileList_e:
 	endif
 
@@ -327,7 +324,7 @@ Z80_CODE_END:
 		dephase
 	elseif MCD|MARSCD
 		dephase
-		fs_end
+		align $800
 	endif
 Z80_CODE_FILE_E:
 
@@ -346,9 +343,9 @@ MCD_SMPDATA:
 .here:		erreport "SUB-CPU DATA",.here,$80000
 		dephase
 		phase MCD_SMPDATA+(.here-$20000)
-		fs_end
+		align $800
 MCD_SMPDATA_E:
-		fs_end
+		align $800
 	endif
 
 ; ====================================================================
@@ -371,7 +368,7 @@ MARS_RAMCODE:
 	endif
 MARS_RAMCODE_E:
 	if MCD|MARSCD
-		fs_end
+		align $800
 MARS_RAMCODE_EOF:
 	endif
 

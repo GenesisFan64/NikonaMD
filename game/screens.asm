@@ -2,16 +2,19 @@
 ; --------------------------------------------------------
 ; SCREEN CODE jump-list sorted by ID (RAM_ScreenMode)
 ;
-; - Screen CODE includes: incl_code.asm
+; Format:
+; 		dc.l Md_Screen00	; ROM label
+; 		dc.b "SCREEN00.BIN"	; CD Filename
 ;
-; - DATA Bank includes: incl_data.asm
+; - Screen CODE list: incl_code.asm
+; - DATA Bank list: incl_data.asm
 ;
-; ** For CD/CD32X **
-;    Add your ISO file entries for both
-;    CODE and DATA in iso_files.asm
+; ** For SCD/CD32X:
+;    Also go to iso_files.asm, include the label and
+;    filename.
 ; --------------------------------------------------------
-
-; Entry:
+		dc.l Md_Screen00	; ROM label/CD tag
+		dc.b "SCREEN00.BIN"	; CD Filename
 		dc.l Md_Screen00	; ****
 		dc.b "SCREEN00.BIN"
 		dc.l Md_Screen00	; ****
@@ -24,7 +27,5 @@
 		dc.b "SCREEN00.BIN"
 		dc.l Md_Screen00	; ****
 		dc.b "SCREEN00.BIN"
-		dc.l Md_Screen00	; ****
-		dc.b "SCREEN00.BIN"
-		dc.l Md_Screen07	; ****
+		dc.l Md_Screen07	; Sound tester
 		dc.b "SCREEN07.BIN"

@@ -3,42 +3,32 @@
 ; GLOBAL settings and variables
 ; ----------------------------------------------------------------
 
-; ====================================================================
 ; ----------------------------------------------------------------
-; USER SETTINGS
+; Variable example:
 ;
-; Example:
-; setting_tagname	equ value
-; SET_DEBUGMODE		equ True
-; SET_PLAYERNAME	equ "NIKONA"
+; example_value		equ $1234
+; example_bool		equ True
+; example_string	equ "NIKONA"
 ;
-; setting_tagname:
-; Any name you want but careful with any conflicting names
-; within the Nikona-internal code
-;
-; Notes:
+; You can use any name you want but be careful with any
+; conflicting names used by the Nikona code
 ; "equ" es permanent, "set" is temporal can get rewritten
-; during build
-; ----------------------------------------------------------------
-
-SET_EXAMPLE		equ False
-
-; ====================================================================
-; ----------------------------------------------------------------
-; RAM memory (RAM_Global)
+; later on during build
 ;
-; Your Score, Lives, Level number, etc. go here
+; RAM memory labels at RAM_Global
+;
+; Your Score, Lives, Level number, etc. go here.
 ; for storing temporals on your current screen use RAM_ScrnBuff
 ;
 ; Examples:
 ;
-; RAM_Glbl_ExmpL ds.l 8 ; Reserve 8 LONGS ($20 bytes)
-; RAM_Glbl_ExmpW ds.w 5 ; Reserve 5 WORDS ($0A bytes)
-; RAM_Glbl_ExmpB ds.b 6 ; Reserve 6 BYTES
+; RAM_YourName		ds.X N ; X: size b, w, l | N: number of items
+; RAM_Glbl_ExL		ds.l 8 ; Reserve 8 LONGS ($20 bytes)
+; RAM_Glbl_ExW		ds.w 5 ; Reserve 5 WORDS ($0A bytes)
+; RAM_Glbl_ExB		ds.b 6 ; Reserve 6 BYTES
 ;
-; Eeverything needs to be even-aligned
-; or your will get an ADDRESS ERROR, do not set ODD
-; sizes on bytes
+; Be careful will aligment or you will get an ADDRESS ERROR
+; on real hardware, also with any conflicting names.
 ; ----------------------------------------------------------------
 
 RAM_Glbl_Example_L	ds.l 1		; 1 long (4 bytes)
