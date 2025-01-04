@@ -2048,7 +2048,7 @@ sizeof_subcpu		ds.l 0
 ; ----------------------------------------------------------------
 
 			dephase
-			phase $20000		; <-- MANUAL location on Sub-CPU area
+			phase $40000		; <-- MANUAL location on Sub-CPU area
 SCPU_DATA:
 			dephase
 			dephase

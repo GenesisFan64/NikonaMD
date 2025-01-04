@@ -1258,7 +1258,7 @@ System_SetIntJumps:
 
 ; ====================================================================
 ; ----------------------------------------------------------------
-; SEGA CD / CD32X ONLY
+; SCD / CD32X ONLY
 ; ----------------------------------------------------------------
 
 ; --------------------------------------------------------
@@ -1285,15 +1285,14 @@ System_MdMcd_Interrupt:
 ; System_MdMcd_SubWait
 ;
 ; Waits until Sub-CPU finishes.
-;
-; Uses:
-; d7
 ; --------------------------------------------------------
 
 System_MdMcd_SubWait:
 	if MCD|MARSCD
+		move.w	d7,-(sp)
 .wait_sub_o:	move.b	(sysmcd_reg+mcd_comm_s).l,d7
 		bmi.s	.wait_sub_o
+		move.w	(sp)+,d7
 	endif
 		rts
 
@@ -1301,15 +1300,14 @@ System_MdMcd_SubWait:
 ; System_MdMcd_SubEnter
 ;
 ; Waits until Sub-CPU starts.
-;
-; Uses:
-; d7
 ; --------------------------------------------------------
 
 System_MdMcd_SubEnter:
 	if MCD|MARSCD
+		move.w	d7,-(sp)
 .wait_sub_o:	move.b	(sysmcd_reg+mcd_comm_s).l,d7
 		bpl.s	.wait_sub_o
+		move.w	(sp)+,d7
 	endif
 		rts
 
@@ -1326,7 +1324,7 @@ System_MdMcd_SubEnter:
 ;
 ; Notes:
 ; This exits without waiting SUB to finish,
-; call System_MdMcd_SubWait after this if required.
+; call System_MdMcd_SubWait afterwards if required.
 ; --------------------------------------------------------
 
 System_MdMcd_SubTask:
@@ -1370,7 +1368,7 @@ System_MdMcd_WaitWRAM:
 ; --------------------------------------------------------
 ; System_MdMcd_CheckWRAM
 ;
-; Checks if Word-RAM is set to MAIN in return
+; Checks if Word-RAM is set to MAIN in return, 2M
 ;
 ; Returns:
 ; beq | Word-RAM is available
@@ -1389,7 +1387,7 @@ System_MdMcd_CheckWRAM:
 ; --------------------------------------------------------
 ; System_MdMcd_GiveWRAM
 ;
-; Give Word-RAM to SubCPU (DMNA)
+; Give Word-RAM to SubCPU (DMNA), 2M
 ; --------------------------------------------------------
 
 System_MdMcd_GiveWRAM:
@@ -1398,9 +1396,9 @@ System_MdMcd_GiveWRAM:
 		rts
 
 ; --------------------------------------------------------
-; System_MdMcd_ReadFileRAM
+; System_MdMcd_RdFile_RAM
 ;
-; Read file from disc and transfer output the
+; Read file from disc and transfers output the
 ; data to a1, uses communication ports.
 ;
 ; Input:
@@ -1474,11 +1472,11 @@ System_MdMcd_RdFile_RAM:
 ; waits on finish.
 ;
 ; Input:
-; a0   | Filename string "FILENAME.BIN",0
+; a0   | Filename string "FILENAME.BIN"
 ; a1   | Output location
 ;
 ; Notes:
-; - Uses ALL dcomm_m ports
+; - STOP ALL tracks that use PCM samples (gemaStopAll)
 ; --------------------------------------------------------
 
 System_MdMcd_RdFile_WRAM:
@@ -1511,8 +1509,7 @@ System_MdMcd_RdFile_WRAM:
 ; System_MdMcd_CheckHome
 ;
 ; Checks if the player is holding A, B, C and
-; then presses the START button, check carry after
-; calling this
+; then presses the START button.
 ;
 ; Returns:
 ; bcc | Combo input not pressed
@@ -1521,8 +1518,8 @@ System_MdMcd_RdFile_WRAM:
 ; Notes:
 ; If you call this from your Title Screen:
 ; carry MUST JUMP to System_MdMcd_ExitShell,
-; for other screen modes carry jumps to Title
-; Screen.
+; for other screen modes carry jumps to your
+; Title Screen.
 ; --------------------------------------------------------
 
 System_MdMcd_CheckHome:
@@ -1548,12 +1545,12 @@ System_MdMcd_CheckHome:
 ; Exits the entire program and goes to
 ; the BIOS/Shell.
 ;
-; *** JUMP ONLY ***
+; *** JUMP ONLY
 ; --------------------------------------------------------
 
-; jmp $0280: Hot restart, Stops PSG and Clears VDP
+; jmp $0280: Hot restart, stops PSG and clears VDP
 ; jmp $0284: Entry point
-; jmp $0288: CD player keeps SP (unsafe)
+; jmp $0288: CD player, keeps SP (unsafe)
 ; jmp $028C: CD player, resets SP (official method)
 
 System_MdMcd_ExitShell:
@@ -1584,20 +1581,16 @@ System_MdMcd_ExitShell:
 ; This calls Sub-Task $10 for normal playback
 ; and $11 for looped
 ;
-; Uses:
-; d4
-;
 ; Notes:
-; Tracks $00, $01 and any negative values are
-; ignored.
+; Tracks $00, $01 and any negative values are ignored.
 ; --------------------------------------------------------
 
 System_MdMcd_CddaPlay:
-		movem.l	d0/d7/a6,-(sp)
+		movem.l	d0/d4/d7/a6,-(sp)
 		move.w	#$0010,d4
 		bra	sysMdMcd_SetCdda
 System_MdMcd_CddaPlayL:
-		movem.l	d0/d7/a6,-(sp)
+		movem.l	d0/d4/d7/a6,-(sp)
 		move.w	#$0011,d4
 sysMdMcd_SetCdda:
 	if MCD|MARSCD
@@ -1611,7 +1604,7 @@ sysMdMcd_SetCdda:
 		bsr	System_MdMcd_SubTask
 .fail_safe:
 	endif
-		movem.l	(sp)+,d0/d7/a6
+		movem.l	(sp)+,d0/d4/d7/a6
 		rts
 
 ; --------------------------------------------------------
@@ -1720,14 +1713,11 @@ System_MdMars_SendData:
 		bsr	sys_MSendData_0
 .exit_now:
 		movem.l	(sp)+,d3-d4
-	endif
 		rts
 
 ; ------------------------------------------------------------
 ; DREQ Genesis-to-32X code
 ; ------------------------------------------------------------
-
-	if MARS|MARSCD
 
 sys_MSendData_0:
 		movem.l	a5-a6/d5-d7,-(sp)
@@ -1735,6 +1725,7 @@ sys_MSendData_0:
 		bsr.s	sys_MSendData
 		movem.l	(sp)+,a5-a6/d5-d7
 		rts
+	endif
 
 ; --------------------------------------------------------
 ; System_MdMars_Update
@@ -1746,6 +1737,7 @@ sys_MSendData_0:
 ; --------------------------------------------------------
 
 System_MdMars_Update:
+	if MARS|MARSCD
 		movem.l	d5-d7/a0/a5-a6,-(sp)
 		move.w	d0,-(sp)
 		lea	(RAM_MdMars_CommBuff).w,a0
@@ -1796,8 +1788,8 @@ sys_MSendData:
 	endif
 		move.w	#%000,dreqctl(a6)		; Disable 68S, RV off
 		move.w	d5,sr				; Restore interrupts
-	endif
 		rts
+	endif
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -1810,9 +1802,13 @@ sys_MSendData:
 ; Sets the current DATA bank depending of the system
 ;
 ; Input:
-; a0   | Pointer and filename:
-;        dc.l bank_pointer
-;        dc.b "FILENAME.BIN"
+; d0 | Data location
+;      SCD/CD32X: Data label for searching
+;      the ISO filename in incl_list.asm
+;
+; Returns:
+; bcc | Loaded bank without problem
+; bcs | Bank not found
 ;
 ; Uses:
 ; a4-a5,d5-d7
@@ -1826,31 +1822,53 @@ sys_MSendData:
 ; --------------------------------------------------------
 
 System_SetDataBank:
+
+	; CD/CD32X:
 	if MCD|MARSCD
-		move.l	d7,-(sp)
-		move.l	(a0)+,d7
-		cmp.l	(RAM_SysLastBank).l,d7
+		movem.l	d7/a0,-(sp)
+		bsr	System_MdMcd_SubWait
+		cmp.l	(RAM_SysLastBank).l,d0
 		beq.s	.same_bank
-		move.l	d7,(RAM_SysLastBank).l
+		move.l	d0,(RAM_SysLastBank).l
+		lea	(disc_banklist).l,a0
+.srch_cdbank:
+		move.l	(a0),d7
+		cmp.l	#-1,d7
+		beq.s	.ran_out
+		cmp.l	d7,d0
+		beq.s	.found_it
+		adda	#$10,a0
+		bra.s	.srch_cdbank
+.ran_out:
+		or	#1,ccr
+		bra.s	.from_err
+.found_it:
+		adda	#4,a0
 		bsr	System_MdMcd_RdFile_WRAM
 .same_bank:
-		move.l	(sp)+,d7
+		and	#%11110,ccr
+.from_err:
+		movem.l	(sp)+,d7/a0
 		; rts
+
+	; 32X ONLY
 	elseif MARS
 		move.l	d7,-(sp)
 	rept 3
 		bsr	Video_MdMars_WaitSync
 		bsr	Video_MdMars_SetSync
 	endm
-		move.l	(a0),d7
+		move.l	d0,d7
 		swap	d7
 		lsr.w	#4,d7
 		andi.w	#%11,d7
 		move.w	d7,(sysmars_reg+bankset).l
 		move.l	(sp)+,d7
+		and	#%11110,ccr
 		; rts
 	endif
-		rts
+
+		rts			; *** KEEP THIS RTS ***
 
 ; ====================================================================
 ; ----------------------------------------------------------------

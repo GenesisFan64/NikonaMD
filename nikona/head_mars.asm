@@ -243,13 +243,14 @@ MD_ErrorTrap:
 
 MD_HotStRam:
 		move.w	#$2700,sr
-		lea	(RAM_Stack),sp			; HW: Set STACK manually, Pressing RESET moves it to 0
+		lea	(RAM_Stack),sp			; HW: Reset STACK, Pressing RESET moves it to 0
 		lea	(vdp_data).l,a6
 		lea	(sysmars_reg).l,a5
 	; ------------------------------------------------
 	; If the 32X get overloaded with interrupts
-	; it shuts itself OFF on reset, The SVDP will
-	; remain visible though.
+	; or flipping the RV bit a lot (heavy VDP DMA
+	; transfers) it shuts itself OFF on reset,
+	; The SVDP will remain visible though.
 	; ------------------------------------------------
 		btst	#0,adapter+1(a5)		; 32X STILL enabled?
 		bne.s	MD_MarsStartOk
@@ -297,7 +298,7 @@ MD_Init:
 
 MD_HotStart:
 		lea	($FFFF0000).l,a0		; Clean our "work" RAM
-		move.l	#sizeof_mdram,d1		; <-- until here
+		move.l	#sizeof_mdram,d1		; until here
 		moveq	#0,d0
 .loop_ram:	move.w	d0,(a0)+
 		cmp.l	d1,a0

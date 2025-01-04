@@ -265,11 +265,19 @@ drv_loop:
 		call	get_tick
 .neither:
 		rst	20h
-		rst	8
 	if MCD|MARS|MARSCD
+		rst	8
 		call	zmars_send		; External communication with SCD and 32X
-	endif
 		call	get_tick
+		rst	8
+	else
+		rst	8
+		nop
+		nop
+		nop
+		call	get_tick
+		rst	8
+	endif
 .next_cmd:
 		ld	a,(commZWrite)		; Check if commZ R/W indexes
 		ld	b,a			; are in the same spot a == b
@@ -587,7 +595,6 @@ drv_loop:
 ; --------------------------------------------------------
 
 upd_seq:
-		rst	20h
 		call	get_tick		; Check for tick flag
 		ld	iy,trkBuff_0		; ** MANUAL BUFFERS
 		call	.read_seq
@@ -602,9 +609,6 @@ upd_seq:
 ; ----------------------------------------
 
 .read_seq:
-		rst	8
-		nop
-		nop
 		ld	b,(iy+seq_Status)	; b - Track status and settings
 		bit	7,b			; bit7: Track active?
 		ret	z			; Return if not.
@@ -2991,10 +2995,10 @@ dtbl_singl:
 		ld	(ix+2),b
 		ld	(ix+1),h
 		ld	(ix),l
+		rst	20h			; TODO
 		ld	a,b
 		ld	bc,28h			; <- size
 		call	readRom			; *** ROM ACCESS ***
-; 		rst	20h			; TODO bad idea
 .same_patch:
 		pop	bc
 		pop	hl
@@ -3361,6 +3365,7 @@ zmars_send:
 		ld	a,(marsBlock)	; Enable MARS requests?
 		or	a
 		jp	nz,.blocked_m
+		ld	iy,8000h|5100h	; iy - mars sysreg
 		rst	8
 		ld	a,(marsUpd)	; NEW transfer?
 		or	a
@@ -3369,7 +3374,6 @@ zmars_send:
 		ld	(marsUpd),a
 		rst	20h
 		call	.set_combank
-		ld	iy,8000h|5100h	; iy - mars sysreg
 		ld	ix,pwmcom
 .wait_enter:
 		rst	8
@@ -3428,20 +3432,13 @@ zmars_send:
 		inc	hl
 		djnz	.clr_pwm
 .pwm_exit:
-		nop
-		nop
 		rst	8
-		nop
-		nop
-		nop
-	if MARSCD
-		ld	b,3
+	if MARSCD			; Delay for CD32X only
+		ld	b,1
 		djnz	$
 		nop
 		nop
-		nop
 	endif
-
 	endif
 		ret
 
@@ -3728,17 +3725,7 @@ readRom:
 ; Wait here until Genesis unlocks ROM
 .x68klpwt:
 		nop
-		nop
-	if EMU=0
-		nop
-		nop
-	endif
 		rst	8
-	if EMU=0
-		nop
-		nop
-	endif
-		nop
 		bit	0,(ix)		; 68k finished?
 		jr	nz,.x68klpwt
 		ret

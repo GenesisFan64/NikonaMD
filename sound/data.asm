@@ -5,24 +5,19 @@
 
 MainGemaSeqList:
 	gemaTrk 1,3,gtrk_Test0
-	gemaTrk 0,6,gtrk_Test0	; $0F
-	gemaTrk 1,6,gtrk_Test0
-	gemaTrk 1,3,gtrk_Test0
-	gemaTrk 1,3,gtrk_Test0
-	gemaTrk 1,6,gtrk_Test0
-	gemaTrk 1,6,gtrk_Test0
-	gemaTrk 1,6,gtrk_Test0
-	gemaTrk 1,6,gtrk_Test0	; $08
-	gemaTrk 1,6,gtrk_Test0
-	gemaTrk 1,6,gtrk_Test0
-	gemaTrk 1,6,gtrk_Test0
-	gemaTrk 1,6,gtrk_Test0
-	gemaTrk 1,6,gtrk_Test0
-	gemaTrk 1,6,gtrk_Test0
-	gemaTrk 0,6,gtrk_Test0	; $0F
+	gemaTrk 1,3,gtrk_Test1	; $0F
 
 ; ----------------------------------------------------
 gtrk_Test0:
+	gemaHead .blk,.pat,.ins,10
+.blk:	binclude "sound/seq/test_blk.bin"
+.pat:	binclude "sound/seq/test_patt.bin"
+.ins:
+	gInsDac 0,DacIns_TEST,1
+; 	gInsDac 0,DacIns_Snare_Rap,0
+
+; ----------------------------------------------------
+gtrk_Test1:
 	gemaHead .blk,.pat,.ins,10
 .blk:	binclude "sound/seq/axe_blk.bin"
 .pat:	binclude "sound/seq/axe_patt.bin"
@@ -36,7 +31,7 @@ gtrk_Test0:
 	gInsDac -12,DacIns_clap,0
 	gInsFm 0,FmIns_Flaute_1
 	gInsFm 0,FmIns_Hats_1
-	gInsDac +24,DacIns_Kick_Strong,0
+	gInsDac +24+2,DacIns_Kick_Strong,0
 	gInsDac +12,DacIns_Snare,0
 	gInsNull
 	gInsPsg 0,$00,$00,$00,$00,$02,$00
@@ -246,6 +241,9 @@ FmIns_Guitar_bball:
 		gSmplData DacIns_conga_low,"sound/ins/smpl/conga_low.wav",0
 		gSmplData DacIns_Kick_Strong,"sound/ins/smpl/kick_strong.wav",0
 		gSmplData DacIns_Snare,"sound/ins/smpl/snare.wav",0
+		gSmplData DacIns_Snare_Rap,"sound/ins/smpl/snare_rap.wav",0
+		gSmplData DacIns_TEST,"sound/ins/smpl/test.wav",0
+
 ; 		gSmplData DacIns_Kick_2,"sound/ins/smpl/kick_2.wav",0
 ; 		gSmplData DacIns_Snare_2,"sound/ins/smpl/snare_2.wav",0
 ; 		gSmplData DacIns_Timpani,"sound/ins/smpl/timpani.wav",0

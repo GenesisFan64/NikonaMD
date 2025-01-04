@@ -61,7 +61,7 @@ rot		ds.w 1
 
 MAX_MARSSPR	equ 32		; !! Maximum 2D-mode Sprites
 MAX_MARSMSPR	equ 24		; !! Maximum 3D-mode Sprites
-MAX_MARSOBJ	equ 48		; !! Maximum 3D-mode Objects (models)
+MAX_MARSOBJ	equ 40		; !! Maximum 3D-mode Objects (models)
 
 ; --------------------------------------------------------
 ; Structs
@@ -116,7 +116,7 @@ vram		ds.l 1		; Graphics VRAM position (in RAM_Mars_VramData)
 ; ----------------------------------------
 
 mmdl		struct
-frame		ds.w 1
+		ds.w 1
 		ds.w 1
 data		ds.l 1		; Model data pointer, 0: No model
 x_pos		ds.l 1		; X position
@@ -190,12 +190,10 @@ z_rot		ds.l 1		; Z rotation
 ;
 ; On the Genesis:
 ; 	lea	(RAM_MdMars_Comm+DREQ_LABEL).w,aN
-; On the 32X:
+; On the 32X, uses r0:
 ; 	mov	#DREQ_LABEL,rN
 ; 	mov	@(marsGbl_DreqRead,gbr),r0
 ;	add	r0,rN
-;
-; List MUST be aligned by 8bytes.
 ; ----------------------------------------------------------------
 
 Dreq		struct
@@ -215,13 +213,14 @@ Buff2		ds.b $400				; Buffer 2 | $400 bytes
 ; ----------------------------------------------------------------
 
 			memory RAM_MdMars_CommBuff
-			ds.w 256			; pallete skip
-RAM_MdMars_ScrlSett	ds.b $20
+			ds.w 256			; Pallete
+RAM_MdMars_ScrlSett	ds.b $10
+			ds.b $10			; Free
 RAM_MdMars_ScrlData	ds.w (512/16)*(256/16)
 RAM_MdMars_SuperSpr	ds.b sspr_len*MAX_MARSSPR
 .sizeof_this		ds.l 0
 			endmemory
-; 			erreport "This DREQ MEMORY: 2D",.sizeof_this-RAM_MdMars_CommBuff,Dreq_len
+			erreport "The 2D DREQ MEMORY",.sizeof_this-RAM_MdMars_CommBuff,Dreq_len
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -235,7 +234,7 @@ RAM_MdMars_MSprites	ds.b mspr_len*MAX_MARSMSPR	; $400
 RAM_MdMars_Models	ds.b mmdl_len*MAX_MARSOBJ	; $400
 .sizeof_this		ds.l 0
 			endmemory
-; 			erreport "This DREQ MEMORY: 3D",.sizeof_this-RAM_MdMars_CommBuff,Dreq_len
+			erreport "The 3D DREQ MEMORY",.sizeof_this-RAM_MdMars_CommBuff,Dreq_len
 
 ; ============================================================
 

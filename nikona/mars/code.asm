@@ -261,7 +261,7 @@ int_s_list:
 		dc.l s_irq_wdg			; 3 Watchdog
 		dc.l s_irq_bad			; 4
 		dc.l s_irq_dma			; 5 DMA exit
-		dc.l s_irq_pwm|$C0000000	; 6
+		dc.l s_irq_pwm|$C0000000	; 6 <-- Cache jump(s)
 		dc.l s_irq_pwm|$C0000000	; 7
 		dc.l s_irq_cmd			; 8
 		dc.l s_irq_cmd			; 9
@@ -2436,7 +2436,6 @@ sin_table	binclude "nikona/mars/data/sinedata.bin"
 
 		align $10
 RAM_Mars_Global:
-
 marsGbl		struct
 ThisFrame	ds.w 1			; Current framebuffer number
 XShift		ds.w 1			; horizontal scroll & 1 bit (2D ONLY)

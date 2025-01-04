@@ -9,7 +9,7 @@
 ; --------------------------------------------------------
 
 MAX_MDDMATSK		equ 24		; DMA BLAST entries
-MAX_MDMAPSPR		equ 24		; VDP Sprites with map data
+MAX_MDMAPSPR		equ 24		; VDP sprites with map data
 MAX_PALFDREQ		equ 8		; Maximum Pal-fading requests both VDP/SVDP, includes full fade
 
 SET_NullVram		equ $07FE	; Default Blank cell
@@ -621,7 +621,7 @@ Video_Clear:
 		dbf	d7,.clr_me
 		move.w	#0,d0
 		move.w	#0,d1
-		move.w	#cell_vram($7FE),d2
+		move.w	#cell_num($7FE),d2
 		bsr	Video_Fill
 
 ; --------------------------------------------------------
@@ -874,9 +874,9 @@ Video_SetMapSize:
 ; Loads VDP graphics using DMA
 ;
 ; Input:
-; d0.l | Graphics data (NOT a0)
-; d1.w | VRAM location: cell_vram(vram_pos)
-; d2.w | Size:          cell_vram(size)
+; d0.l | Graphics data *NOT a0*
+; d1.w | VRAM location: cell_num(vram_pos)
+; d2.w | Size:          cell_num(size)
 ;
 ; Notes:
 ; - For a faster load: call this during VBlank or
@@ -1026,8 +1026,8 @@ Video_LoadArt:
 ; a0 | List of graphics to load:
 ;        dc.w numof_entries
 ;        dc.l ART_DATA
-;        dc.w cell_vram(vram_pos)
-;        dc.w ART_DATA_end-ART_DATA OR cell_vram(size)
+;        dc.w cell_num(vram_pos)
+;        dc.w ART_DATA_end-ART_DATA OR cell_num(size)
 ;        ; ...more entries
 ;
 ; Note:
@@ -1057,8 +1057,8 @@ Video_LoadArt_List:
 ;
 ; Input:
 ; d0.b | BYTE to fill
-; d1.w | VRAM destination: cell_vram(dest)
-; d2.w | Size:             cell_vram(size)
+; d1.w | VRAM destination: cell_num(dest)
+; d2.w | Size:             cell_num(size)
 ;
 ; Notes:
 ; - FILL writes in this order: $56781234, Size $0001 is
@@ -1117,8 +1117,8 @@ vid_FillGo:
 ; Copy VRAM data to another location inside VRAM
 ;
 ; Input:
-; d0.w | VRAM Source: cell_vram(src)
-; d1.w | VRAM Destination: cell_vram(dest)
+; d0.w | VRAM Source: cell_num(src)
+; d1.w | VRAM Destination: cell_num(dest)
 ; d2.w | Size
 ; --------------------------------------------------------
 
@@ -1174,7 +1174,7 @@ Video_Copy:
 ;
 ; Input:
 ; d0.l | Graphics data location
-; d1.w | VRAM location: cell_vram(vram_pos)
+; d1.w | VRAM location: cell_num(vram_pos)
 ; d2.w | Size
 ;
 ; Notes:
@@ -1855,11 +1855,15 @@ Video_FadePal_List:
 ; Input:
 ; d0.l | Graphics data
 ;        $20 (" ") to $7F ("[DEL]")
+;        * Default labels:
+;        ASCII_FONT   for 8x8
+;        ASCII_FONT_W for 8x16
+;
 ; d1.w | VRAM output location to load and use
 ;        the ASCII text including attribute
 ;        settings (Palette and Priority)
-;        Defualt values are:
-;        DEF_PrintVram for 8x8 and
+;        * Defualt values:
+;        DEF_PrintVram  for 8x8
 ;        DEF_PrintVramW for 8x16
 ;
 ; Breaks:

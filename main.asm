@@ -1,5 +1,5 @@
 ; ===========================================================================
-; NikonaMD by GenesisFan64 2023-2024
+; NikonaMD by GenesisFan64 2023-2025
 ;
 ; A devkit in assembly for developing software on the SEGA 16-bit
 ; family of systems:
@@ -14,7 +14,7 @@
 ; NIKONA SETTINGS
 ; ----------------------------------------------------------------
 
-SET_INITMODE	equ 0		; Starting screen mode number on boot
+SET_FIRSTSCRN	equ 0		; Starting screen mode number on boot
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -50,11 +50,11 @@ MAX_UserCode	equ $8400	; SCD/32X/CD32X: Current SCREEN's CODE+small DATA
 
 		include	"rominfo.asm"		; ROM info
 		include	"nikona/macros.asm"	; Assembler macros
-		include	"nikona/shared.asm"	; Shared variables and specials
 		include	"nikona/mcd/map.asm"	; Sega CD hardware map (shared with Sub-CPU)
 		include	"nikona/mars/map.asm"	; 32X hardware map (shared with SH2)
 		include	"nikona/md/map.asm"	; Genesis hardware map and other areas
 		include	"nikona/ram.asm"	; Genesis RAM sections
+		include	"nikona/shared.asm"	; Shared variables and specials
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -112,7 +112,7 @@ sizeof_SaveInfo	ds.l 0
 		jsr	(Sound_init).l				; Init Sound driver (FIRST)
 		jsr	(Video_init).l				;  ''  Video
 		jsr	(System_Init).l				;  ''  System
-		move.w	#SET_INITMODE,(RAM_ScreenMode).w	; Reset screen mode
+		move.w	#SET_FIRSTSCRN,(RAM_ScreenMode).w	; Reset screen mode
 		jmp	(Md_ReadModes).l			; Go to SCREEN LOAD section
 
 ; ---------------------------------------------
@@ -145,7 +145,7 @@ sizeof_SaveInfo	ds.l 0
 		jsr	(Sound_Init).l				; Init Sound driver (FIRST)
 		jsr	(Video_Init).l				; Init Video
 		jsr	(System_Init).l				; Init System
-		move.w	#SET_INITMODE,(RAM_ScreenMode).w	; Reset screen mode
+		move.w	#SET_FIRSTSCRN,(RAM_ScreenMode).w	; Reset screen mode
 		jmp	(Md_ReadModes).l			; Go to SCREEN LOAD section
 filen_z80file:	dc.b "GEMA_Z80.BIN",0
 		align 2
@@ -160,7 +160,7 @@ filen_marscode:	dc.b "NKNAMARS.BIN",0
 		bsr	Sound_init				; Init Sound driver FIRST
 		bsr	Video_init				;  ''  Video
 		bsr	System_Init				;  ''  Values
-		move.w	#SET_INITMODE,(RAM_ScreenMode).w	; Reset screen mode
+		move.w	#SET_FIRSTSCRN,(RAM_ScreenMode).w	; Reset screen mode
 		bra.w	Md_ReadModes				; Go to SCREEN LOOP section
 
 ; ---------------------------------------------
@@ -171,7 +171,7 @@ filen_marscode:	dc.b "NKNAMARS.BIN",0
 		bsr	Sound_init				; Init Sound driver FIRST
 		bsr	Video_init				;  ''  Video
 		bsr	System_Init				;  ''  Values
-		move.w	#SET_INITMODE,(RAM_ScreenMode).w	; Reset screen mode
+		move.w	#SET_FIRSTSCRN,(RAM_ScreenMode).w	; Reset screen mode
 		bra.w	Md_ReadModes				; Go to SCREEN LOAD section
 
 ; ---------------------------------------------
@@ -215,7 +215,7 @@ Md_SysCode:
 
 Md_ReadModes:
 		ori.w	#$0700,sr			; Disable interrupts
-	if MCD|MARSCD					; CD/CD32X:
+	if MCD|MARSCD					; SCD and CD32X:
 		bsr	Video_MdMcd_StampDisable	; Disable Stamps
 		bsr	System_MdMcd_CddaStop		; Stop CDDA
 	endif
@@ -226,7 +226,7 @@ Md_ReadModes:
 		move.w	(RAM_ScreenMode).w,d0		; Read current screen number
 		and.w	#$7F,d0				; <-- CURRENT LIMIT
 		lsl.w	#4,d0				; number * $10
-		lea	.pick_mode(pc,d0.w),a0		; Read list
+		lea	.screen_list(pc,d0.w),a0		; Read list
 	; SCD/CD32X
 	if MCD|MARSCD					; CD/CD32X:
 		adda	#4,a0				; a0 - Filename string
@@ -238,7 +238,7 @@ Md_ReadModes:
 		jsr	(RAM_UserCode).l
 	; 32X Cartridge
 	elseif MARS
-		movea.l	.pick_mode(pc,d0.w),a0		; a0 - ROM Location(+$880000)
+		movea.l	.screen_list(pc,d0.w),a0		; a0 - ROM Location(+$880000)
 		lea	(RAM_UserCode).l,a1		; a1 - Output location
 		move.w	#(MAX_UserCode)-1,d7		; Copy manually
 .copyme2:
@@ -247,18 +247,14 @@ Md_ReadModes:
 		jsr	(RAM_UserCode).l
 	; Genesis and Pico
 	else
-		movea.l	.pick_mode(pc,d0.w),a0		; a0 - ROM location
+		movea.l	.screen_list(pc,d0.w),a0		; a0 - ROM location
 		jsr	(a0)
 	endif
 		bra.s	Md_ReadModes			; Loop on rts
 
 ; ====================================================================
-; ---------------------------------------------
-; ADD YOUR SCREEN MODE JUMPS GO HERE
-; ---------------------------------------------
 
-.pick_mode:
-		include "game/screens.asm"
+		include "game/incl_list.asm"
 		align 2
 
 ; ====================================================================
@@ -291,7 +287,7 @@ IsoFileList:
 	; MAX 8 sectors of file pointers
 		fs_file "NKNA_SUB.BIN",MCD_SMPDATA,MCD_SMPDATA_e
 		fs_file "NKNAMARS.BIN",MARS_RAMCODE,MARS_RAMCODE_EOF
-		fs_file "GEMA_Z80.BIN",Z80_CODE_FILE,Z80_CODE_FILE_E
+		fs_file "GEMA_Z80.BIN",Z80_CODE_FILE,Z80_CODE_EOF
 		include "game/iso_files.asm"			; User files
 		align $800
 IsoFileList_e:
@@ -326,7 +322,7 @@ Z80_CODE_END:
 		dephase
 		align $800
 	endif
-Z80_CODE_FILE_E:
+Z80_CODE_EOF:
 
 ; ====================================================================
 ; --------------------------------------------------------
@@ -336,13 +332,13 @@ Z80_CODE_FILE_E:
 	if MCD|MARSCD
 		align $800
 MCD_SMPDATA:
-		phase $20000				; <-- MANUAL location on Sub-CPU area
+		phase $40000				; <-- MANUAL location on Sub-CPU area
 	; ------------------------------------------------
 		include "sound/smpl_pcm.asm"		; PCM samples
 	; ------------------------------------------------
-.here:		erreport "SUB-CPU DATA",.here,$80000
+.here:		erreport "SUB-CPU DATA",.here,$60000
 		dephase
-		phase MCD_SMPDATA+(.here-$20000)
+		phase MCD_SMPDATA+(.here-$40000)
 		align $800
 MCD_SMPDATA_E:
 		align $800
@@ -390,7 +386,7 @@ MARS_RAMCODE_EOF:
 ; ----------------------------------------------------------------
 ; Cartridge-ONLY Section, direct label access
 ;
-; Genesis, 32X Cartridge and Pico ONLY.
+; For Genesis, 32X Cartridge and Pico ONLY.
 ; ----------------------------------------------------------------
 
 	if MCD|MARSCD=0

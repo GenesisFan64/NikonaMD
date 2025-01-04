@@ -69,7 +69,7 @@ sizeof_thisbuff		ds.l 0
 		bsr	System_Default
 	; ----------------------------------------------
 	; Load assets
-		lea	file_tscrn_main(pc),a0		; ** LOAD BANK **
+		move.l	#DATA_BANK0,d0
 		bsr	System_SetDataBank
 	; ----------------------------------------------
 		move.l	#ASCII_FONT,d0			; Load and setup PRINT system
@@ -684,20 +684,6 @@ sizeof_thisbuff		ds.l 0
 
 ; ====================================================================
 ; ------------------------------------------------------
-; DATA asset locations
-; ------------------------------------------------------
-
-file_tscrn_main:
-		dc.l DATA_BANK0
-		dc.b "BNK_MAIN.BIN",0
-		align 2
-; file_tscrn_mars:
-; 		dc.l DATA_BANK1
-; 		dc.b "BNK_MARS.BIN",0
-; 		align 2
-
-; ====================================================================
-; ------------------------------------------------------
 ; Objects
 ; ------------------------------------------------------
 
@@ -882,14 +868,14 @@ exgema_beats:
 ArtList_Stuff:
 		dc.w 3
 		dc.l Art_FairyDodo
-		dc.w cell_vram(setVram_Dodo)
-		dc.w cell_vram($30)
+		dc.w cell_num(setVram_Dodo)
+		dc.w cell_num($30)
 		dc.l Art_FairyMimi
-		dc.w cell_vram(setVram_Mimi)
-		dc.w cell_vram($30)
+		dc.w cell_num(setVram_Mimi)
+		dc.w cell_num($30)
 		dc.l Art_FairyFifi
-		dc.w cell_vram(setVram_Fifi)
-		dc.w cell_vram($30)
+		dc.w cell_num(setVram_Fifi)
+		dc.w cell_num($30)
 
 str_TesterTitle:
 		dc.b "GEMA Sound Test",0

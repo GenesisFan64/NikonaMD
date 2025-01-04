@@ -87,8 +87,6 @@
 ; ====================================================================
 ; ----------------------------------------------------------------
 ; Error handlers
-;
-; All of these do nothing for now.
 ; ----------------------------------------------------------------
 
 MD_ErrBus:				; Bus error
@@ -103,7 +101,10 @@ MD_Line1010:				; Line 1010 Emulator
 MD_Line1111:				; Line 1111 Emulator
 MD_ErrorEx:				; Error exception
 MD_ErrorTrap:
-		rte			; Return from Exception
+		nop
+		nop
+		bra	MD_ErrorTrap	; Infinite loop
+; 		rte
 
 ; ====================================================================
 ; ----------------------------------------------------------------

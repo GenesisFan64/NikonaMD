@@ -61,11 +61,12 @@ IP_Start:
 .wait_vint:	move.w	4(a6),d0
 		btst	#3,d0
 		beq.s	.wait_vint
+		move.b	#0,(sysmcd_reg+mcd_comm_m).l	; Clear MAIN comm
 		move.w	#$FD0C,(sysmcd_reg+mcd_hint).l	; Relocate HBlank jump
 		jmp	($FF0600+MCD_Main).l
 		align $800
 IP_End:
-		ds.b $260
+		ds.b $260				; Filler
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -86,20 +87,16 @@ SP_End:
 		align $2800
 MCD_Main:
 	; --------------------------------
-	; Copy colors
+	; Quick fade-out
 	; --------------------------------
 		lea	(vdp_data),a6
-		move.l	#$00000020,4(a6)		; Copy ALL palette colors
-; 		lea	(RAM_Palette).w,a5		; <-- Current palette
+		move.l	#$00000020,4(a6)	; Copy ALL palette colors
 		lea	($FFFFFF80).w,a5
 		move.l	a5,a0
 		move.w	#64-1,d1
 .copy_colors:
 		move.w	(a6),(a0)+
 		dbf	d1,.copy_colors
-	; --------------------------------
-	; Quick fade-out
-	; --------------------------------
 .fade_out:
 		move.w	4(a6),d0		; Wait VBlank
 		btst	#3,d0
@@ -157,4 +154,3 @@ MCD_Main:
 .cleanup:
 		move.w	d6,(a0)+
 		dbf	d7,.cleanup
-		move.b	#0,(sysmcd_reg+mcd_comm_m).l	; Clear MAIN comm

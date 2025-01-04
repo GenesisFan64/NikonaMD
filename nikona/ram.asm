@@ -2,13 +2,13 @@
 ; ----------------------------------------------------------------
 ; Genesis/Pico 68000 RAM section (SCD: "MAIN-CPU")
 ;
-; RESERVED RAM areas:
-; $FFF700-$FFFC00 | Buffers used by BIOS Boot ROM*
-; $FFFC00-$FFFD00 | Stack area a7
-; $FFFD00-$FFFDFF | RESERVED for the Sega CD Vector jumps*
-; $FFFE00-$FFFFFF | USED by the BIOS as temporals*
+; Used RAM areas:
+; $FFF700-$FFFC00 | Used by Boot ROM *
+; $FFFC00-$FFFD00 | Boot ROM's stack area a7
+; $FFFD00-$FFFDB3 | RESERVED for the Sega CD Vector jumps
+; $FFFDB4-$FFFFFF | Used by Boot ROM *
 ;
-; * FREE on Cartridge
+; * Free on Cartridge
 ; ----------------------------------------------------------------
 
 SET_RAMLIMIT		equ $00FFFC00
@@ -58,7 +58,7 @@ sizeof_MdRam		ds.l 0
 ; ------------------------------------------------
 			endmemory
 		if (sizeof_MdRam&$FF0000 == 0) | (sizeof_MdRam&$FFFFFF>(SET_RAMLIMIT))
-			error "RAN OUT OF GENESIS RAM FOR THIS SYSTEM"
+			error "RAN OUT OF GENESIS/MAIN RAM FOR THIS SYSTEM"
 		endif
 
 ; --------------------------------------------------------

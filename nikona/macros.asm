@@ -15,7 +15,7 @@ MAX_WramBank	equ $3F800	; Maxium WRAM available to use + filler $120
 splitw		function l,r,(((l))<<16&$FFFF0000|((r))&$FFFF)		; Two WORDS stored in a single LONG: $11112222
 
 ; Common functions
-cell_vram	function a,(a<<5)					; Cell position to real VRAM position
+cell_num	function a,(a<<5)					; Value in VDP cells
 color_indx	function a,a<<1						; Applies to both VDP and SuperVDP
 pstr_mem	function a,b,((a|$80)<<24)|b&$FFFFFF			; PRINT memory: pstr_mem(type,mem_pos)
 full_loc	function a,-(-a)&$FFFFFFFF
@@ -233,7 +233,7 @@ mpadlbl	:= (mlastpos&$FFF800)+$800	; Fill sectors
 endlbl label *	; <-- CD/CD32X ONLY
 
 		if GLBL_MDATA_RP > MAX_WramBank
-			error "SCD/CD32X: THIS BANK SIZE IS TOO LARGE for WORD-RAM"
+			error "SCD/CD32X: DATA BANK IS TOO LARGE: $\{GLBL_MDATA_RP} of $\{MAX_WramBank}"
 		endif
 	endif
 	endm

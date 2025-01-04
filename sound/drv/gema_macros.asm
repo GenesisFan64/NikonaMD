@@ -9,7 +9,7 @@
 ; ----------------------------------------------------
 ; gSmplData - Special include for .wav files,
 ;
-; labl | Label used in this sample
+; labl | Label for this sample
 ; file | WAV file location
 ; loop | Loop start point
 ; ----------------------------------------------------
@@ -32,7 +32,7 @@ labl_e:
 ; ----------------------------------------------------
 ; gSmplRaw - Special include for raw files
 ;
-; labl | Label used in this sample
+; labl | Label for this sample
 ; file | RAW file location
 ; loop | Loop start point
 ; ----------------------------------------------------
@@ -73,7 +73,7 @@ gemaTrk macro enblt,ticks,loc
 ; blk_data  | Block data pointer
 ; patt_data | Pattern data pointer
 ; ins_list  | instrument list pointer
-; num_chnls | Number of channels used in the track
+; num_chnls | Number of channels used in the seq
 ;             If 0: Read ALL channels
 ;                   (NOT recommended, UNSTABLE)
 ;

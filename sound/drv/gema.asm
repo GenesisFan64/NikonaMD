@@ -27,7 +27,7 @@ zDrvMaxCmnd	equ $20;MAX_ZCMND		; Command fifo size
 ; Labels
 ; --------------------------------------------------------
 
-RAM_ZCdFlagD	equ RAM_SoundBuff		; transferRom flag (shared with Z80)
+RAM_ZCdFlagD	equ RAM_SoundBuff			; transferRom flag shared with Z80
 
 ; ====================================================================
 ; --------------------------------------------------------
@@ -80,7 +80,7 @@ gemaReset:
 		bsr	gemaStopAll
 		lea	(MainGemaSeqList),a0
 		bsr	gemaSetMasterList
-		moveq	#7,d7				; Make sure it finishes.
+		moveq	#8,d7				; Make sure it finishes.
 		dbf	d7,*
 		rts
 
@@ -300,7 +300,7 @@ gemaTest:
 ;
 ; Notes:
 ; - ALL TRACKS MUST BE STOPPED, CALL gemaStopAll FIRST
-; and wait a frame maximum.
+; with a separate delay
 ; --------------------------------------------------------
 
 gemaSetMasterList:

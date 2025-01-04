@@ -7,19 +7,19 @@
 ;	include "game/data/your_bank.asm"
 ;	dend_bank LABEL_END
 ;
+; Then in incl_list.asm add an entry like this, this is only
+; required for SCD and CD32X:
+; 	dc.l DATA_BANK			; Label
+; 	dc.b "BNK_MAIN.BIN"		; ISO filename
+;
 ; In your screen code load banks with:
-; 	lea	bank_info(pc),a0
+; 	move.l	#DATA_BANK,d0
 ; 	bsr	System_SetDataBank
-; 	; mode code
 ;
-; ; the data:
-; bank_info:
-; 	dc.l DATA_BANK0		; ROM label for Cartridge, used on CD as a temporal
-; 	dc.b "BNK_MAIN.BIN",0	; ISO filename for CD (Unused on Cartridge)
-; 	align 2
-;
-; You MUST use the banks for compatibility on all systems
-; even if the standard Genesis doesn't use require it.
+; You MUST use the banks for compatibility to all systems
+; even if the standard Genesis doesn't require it.
+; DO note that on SCD and CD32X the DATA banks are stored
+; on DISC, so loading will be take a lot.
 ; ----------------------------------------------------------------
 
 	data_bank DATA_BANK0

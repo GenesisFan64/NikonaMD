@@ -30,7 +30,7 @@
 		dc.l Pico_ErrorEx
 		dc.l Pico_Error
 		dc.l RAM_ExternalJump	; PICO: User interrupt
-		dc.l Pico_PcmInt	; PICO: PCM-is-full interrupt
+		dc.l Pico_PcmInt	; PICO: PCM-full interrupt
 		dc.l RAM_HBlankJump	; RAM jump for HBlank (JMP xxxx xxxx)
 		dc.l Pico_UnkInt	; PICO: Unknown
 		dc.l RAM_VBlankJump	; RAM jump for VBlank (JMP xxxx xxxx)
@@ -87,8 +87,6 @@
 ; ====================================================================
 ; ----------------------------------------------------------------
 ; Error handlers
-;
-; All of these do nothing for now.
 ; ----------------------------------------------------------------
 
 Pico_ErrBus:				; Bus error
@@ -103,7 +101,9 @@ Pico_Line1010:				; Line 1010 Emulator
 Pico_Line1111:				; Line 1111 Emulator
 Pico_ErrorEx:				; Error exception
 Pico_Error:
-		rte
+		nop
+		nop
+		bra	Pico_Error	; Infinite loop
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -111,7 +111,7 @@ Pico_Error:
 ; ----------------------------------------------------------------
 
 Pico_UserInt:
-Pico_PcmInt:				; <-- Interrupt when the PCM chip gets full
+Pico_PcmInt:				; Interrupt when the PCM chip gets full
 Pico_UnkInt:
 		rte
 

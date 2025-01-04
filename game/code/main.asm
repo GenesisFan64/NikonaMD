@@ -15,12 +15,11 @@ MAX_SC0_OPTIONS		equ 4
 ; Structs
 ; ------------------------------------------------------
 
-			memory 2
-			ds.b 2
-thisVram_BG		ds.b $3B4
-thisVram_BG_e		ds.b 0
-
-			endmemory
+; 			memory 2
+; 			ds.b 2
+; thisVram_BG		ds.b $419
+; thisVram_BG_e		ds.b 0
+; 			endmemory
 
 ; ====================================================================
 ; ------------------------------------------------------
@@ -47,7 +46,7 @@ RAM_SC0_OldOption	ds.w 1
 		bsr	System_SramSave				; Save to SRAM/BRAM
 	; ----------------------------------------------
 	; Init Print
-		lea	file_scrn1_main(pc),a0			; Load MAIN DATA bank
+		move.l	#DATA_BANK0,d0				; Load MAIN DATA bank
 		bsr	System_SetDataBank
 		move.l	#ASCII_FONT,d0
 		move.w	#DEF_PrintVram,d1
@@ -57,20 +56,20 @@ RAM_SC0_OldOption	ds.w 1
 		bsr	Video_PrintInitW
 		bsr	Video_PrintDefPal_Fade
 	; ----------------------------------------------
-		move.l	#ART_TESTBG,d0
-		move.w	#cell_vram(thisVram_BG),d1
-		move.w	#cell_vram(thisVram_BG_e-thisVram_BG),d2
-		bsr	Video_LoadArt
-		lea	(MAP_TESTBG),a0
-		move.l	#splitw(0,0),d0
-		move.l	#splitw(320/8,224/8),d1
-		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_BG),d2
-		move.w	#thisVram_BG|$4000,d3
-		bsr	Video_LoadMap
-		lea	(PAL_TESTBG),a0
-		moveq	#32,d0
-		moveq	#16,d1
-		bsr	Video_FadePal
+; 		move.l	#ART_TESTBG,d0
+; 		move.w	#cell_num(thisVram_BG),d1
+; 		move.w	#cell_num(thisVram_BG_e-thisVram_BG),d2
+; 		bsr	Video_LoadArt
+; 		lea	(MAP_TESTBG),a0
+; 		move.l	#splitw(0,0),d0
+; 		move.l	#splitw(320/8,224/8),d1
+; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_BG),d2
+; 		move.w	#thisVram_BG|$4000,d3
+; 		bsr	Video_LoadMap
+; 		lea	(PAL_TESTBG),a0
+; 		moveq	#32,d0
+; 		moveq	#16,d1
+; 		bsr	Video_FadePal
 	; ----------------------------------------------
 		lea	str_MenuText(pc),a0
 		moveq	#1,d0					; X/Y position: 1,1
@@ -89,6 +88,12 @@ RAM_SC0_OldOption	ds.w 1
 	; ----------------------------------------------
 		bsr	Video_DisplayOn				; Enable VDP Display
 		bsr	Video_FadeIn_Full			; Full fade-in w/Delay
+
+; 		lea	($FFFFFDB4),a0
+; 		move.w	#$100-1,d0
+; .test:
+; 		move.w	#0,(a0)+
+; 		dbf	d0,.test
 
 ; ====================================================================
 ; ------------------------------------------------------
@@ -134,15 +139,6 @@ RAM_SC0_OldOption	ds.w 1
 		bsr	Video_FadeOut_Full
 		bra	System_MdMcd_ExitShell
 	endif
-
-; ------------------------------------------------------
-; BANK data location
-; ------------------------------------------------------
-
-file_scrn1_main:
-		dc.l DATA_BANK0
-		dc.b "BNK_MAIN.BIN",0
-		align 2
 
 ; ====================================================================
 ; ------------------------------------------------------
