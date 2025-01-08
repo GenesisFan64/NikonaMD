@@ -1,26 +1,33 @@
-; ===========================================================================
+; ====================================================================
 ; ----------------------------------------------------------------
-; DATA BANKS
-;
-; MACRO Usage:
+; DATA Section
+; ----------------------------------------------------------------
+
+; ------------------------------------------------------------
+; Usage:
 ;	data_bank LABEL_START
 ;	include "game/data/your_bank.asm"
 ;	dend_bank LABEL_END
 ;
-; Then in incl_list.asm add an entry like this, this is only
-; required for SCD and CD32X:
+; CD/CD32X ONLY:
+; Go to incl_list.asm add an entry in disc_banklist:
 ; 	dc.l DATA_BANK			; Label
-; 	dc.b "BNK_MAIN.BIN"		; ISO filename
+; 	dc.b "BNK_EXMP.BIN"		; ISO filename
 ;
-; In your screen code load banks with:
+; And add the labels and ISO filename at iso_files.asm
+;
+; * This is ONLY required for CD/CD32X, if you forget to
+; include it it will crash the entire system.
+;
+; During your screen code load banks with:
 ; 	move.l	#DATA_BANK,d0
 ; 	bsr	System_SetDataBank
 ;
 ; You MUST use the banks for compatibility to all systems
 ; even if the standard Genesis doesn't require it.
 ; DO note that on SCD and CD32X the DATA banks are stored
-; on DISC, so loading will be take a lot.
-; ----------------------------------------------------------------
+; on DISC so loading banks will be SLOW.
+; ------------------------------------------------------------
 
 	data_bank DATA_BANK0
 	include "game/data/bank_main.asm"

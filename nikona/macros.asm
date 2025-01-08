@@ -159,10 +159,10 @@ fs_file		macro filename,start,end
 ; --------------------------------------------
 ; Screen mode code
 ;
-; screen_code START_LABEL,END_LABEL,CODE_PATH
+; code_bank START_LABEL,END_LABEL,CODE_PATH
 ; --------------------------------------------
 
-screen_code macro lblstart,lblend,path
+code_bank macro lblstart,lblend,path
 	if MCD|MARSCD
 		align $800		; SCD/CD32X sector align
 	elseif MARS

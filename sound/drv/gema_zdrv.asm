@@ -1626,6 +1626,8 @@ tblbuff_read:
 ; ----------------------------------------
 
 .nextsrch_tbl:
+		rst	8
+		nop
 		push	de
 		ld	de,MAX_TBLSIZE
 		add	hl,de
@@ -2996,6 +2998,7 @@ dtbl_singl:
 		ld	(ix+1),h
 		ld	(ix),l
 		rst	20h			; TODO
+		rst	8
 		ld	a,b
 		ld	bc,28h			; <- size
 		call	readRom			; *** ROM ACCESS ***
@@ -3085,6 +3088,7 @@ dtbl_singl:
 		ld	h,a
 	; d    - Loop enable bit
 	; e,hl - 24-bit pointer + loop bit
+		rst	8
 		ld	ix,pcmcom
 		ld	b,0
 		ld	c,(iy+ztbl_Chip)
@@ -3096,6 +3100,7 @@ dtbl_singl:
 		add	ix,bc
 		ld	(ix),h
 		add	ix,bc
+		rst	8
 		ld	(ix),l
 		pop	bc
 		pop	hl
@@ -3143,6 +3148,7 @@ dtbl_singl:
 		ld	(ix),e
 		add	ix,bc
 		ld	(ix),h
+		rst	8
 		add	ix,bc
 		ld	(ix),l
 		pop	bc

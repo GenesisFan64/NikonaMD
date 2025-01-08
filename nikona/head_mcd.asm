@@ -154,3 +154,9 @@ MCD_Main:
 .cleanup:
 		move.w	d6,(a0)+
 		dbf	d7,.cleanup
+		lea	($FFFFF700).w,a0
+		move.w	#($500/2)-1,d7
+.lil_clnup:
+		move.w	d6,(a0)+
+		dbf	d7,.lil_clnup
+		lea	(RAM_Stack),sp

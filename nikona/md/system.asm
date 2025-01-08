@@ -154,9 +154,9 @@ ram		ds.b $40	; Object's own RAM
 ; ----------------------------------------------------------------
 
 			memory RAM_MdSystem
+RAM_Objects		ds.b obj_len*MAX_MDOBJ		; Objects buffer
 RAM_SaveData		ds.b SET_SRAMSIZE		; Read/Write of the SAVE data
 RAM_InputData		ds.b sizeof_input*4		; Input data section
-RAM_Objects		ds.b obj_len*MAX_MDOBJ		; Objects buffer
 RAM_SysRandVal		ds.l 1				; Random value
 RAM_SysRandom		ds.l 1				; Randomness seed
 RAM_SysLastBank		ds.l 1
@@ -166,7 +166,6 @@ RAM_ExternalJump	ds.w 3				; External jump (JMP xxxx xxxx)
 RAM_SaveEnable		ds.w 1				; Flag to enable SAVE data
 RAM_ScreenMode		ds.w 1				; Current screen number
 RAM_ScreenOption	ds.w 1				; Current screen setting (OPTIONAL)
-RAM_McdExit		ds.w 1
 sizeof_mdsys		ds.l 0
 			endmemory
 
@@ -1078,7 +1077,7 @@ sysRnd_MkValue:
 ; uses System_Random
 ;
 ; Input:
-; d0.l | Maximum number to use + 1
+; d0.l | Maximum number + 1
 ; d1.l | Starting seed (_DiceRoll_Seed ONLY)
 ;
 ; Returns:
@@ -1808,7 +1807,7 @@ sys_MSendData:
 ;
 ; Returns:
 ; bcc | Loaded bank without problem
-; bcs | Bank not found
+; bcs | Bank not found on DISC (CD/CD32 ONLY)
 ;
 ; Uses:
 ; a4-a5,d5-d7
@@ -1817,12 +1816,14 @@ sys_MSendData:
 ; - This code is shared to all systems, on CD/CD32X
 ;   this will load from DISC so transfer will be
 ;   slow.
-; - CD/CD32X: DO NOT USE THIS WHEN STAMPS ARE ACTIVE
-;   Load the stamp data with this BEFORE enabling them.
+; - CD/CD32X: Requires adding the ISO filename
+;   in incl_list.asm
+; - CD/CD32X: DO NOT CALL THIS WHEN STAMPS ARE BEING
+;   ACTIVE, Load the stamp data with this
+;   BEFORE enabling them.
 ; --------------------------------------------------------
 
 System_SetDataBank:
-
 	; CD/CD32X:
 	if MCD|MARSCD
 		movem.l	d7/a0,-(sp)
@@ -1840,6 +1841,7 @@ System_SetDataBank:
 		adda	#$10,a0
 		bra.s	.srch_cdbank
 .ran_out:
+	; TODO: an on-screen message
 		or	#1,ccr
 		bra.s	.from_err
 .found_it:
@@ -1888,7 +1890,7 @@ Object_Init:
 		rts
 
 ; --------------------------------------------------------
-; Process objects
+; Process ALL Objects
 ;
 ; ONLY CALL THIS ONCE PER FRAME
 ; --------------------------------------------------------

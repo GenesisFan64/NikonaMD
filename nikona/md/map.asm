@@ -3,7 +3,7 @@
 ; Genesis / Pico 68000 map
 ; ----------------------------------------------------------------
 
-sys_sram	equ	$200000		; Second half of 4MB rom or external RAM (Normal or save data)
+sys_sram	equ	$200000		; Second half of 4MB rom or external RAM, Normal or Save data
 z80_cpu		equ	$A00000		; Z80 CPU area, size: $2000
 ym_ctrl_1	equ	$A04000		; YM2612 reg 1
 ym_data_1	equ	$A04001		; YM2612 reg 2

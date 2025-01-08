@@ -1,5 +1,5 @@
 # NikonaMD
-A code-base in pure assembly for developing on these SEGA systems: Genesis, Sega CD, Sega 32X, Sega CD32X and Sega Pico.<br>
+A SDK in pure assembly for developing on these SEGA systems: Genesis, Sega CD, Sega 32X, Sega CD32X and Sega Pico.<br>
 
 ## REQUIREMENTS
 
@@ -32,11 +32,11 @@ A code-base in pure assembly for developing on these SEGA systems: Genesis, Sega
 * CDDA Playback: Play, Stop, Volume fading
 * BRAM Saving/Loading
 * PCM playback: All 8 channels with data-streaming for larger samples *see GEMA Sound Driver
-* Scaling and Rotation "Stamps" **unstable**
+* Scaling and Rotation "Stamps"
 
 ### with Sega 32X
 
-* 256-color 2D smooth-scrolling layer with "Super" Sprites --Single SH2 currently--
+* 256-color 2D smooth-scrolling layer with "Super" Sprites
 * 256-color 3D envoriment using model data and 3D-Sprites.
 * PWM playback: Maximum 7 channels with both Mono and Stereo samples *see GEMA Sound Driver
 
@@ -57,12 +57,12 @@ This is a custom sound driver, tracker-based that supports all the sound channel
 
 ## NOTES
 
-* All the user code goes to `/game`, DO NOT MODIFY `/nikona` as it will get updated with the latest changes and fixes
+* All the game code goes to `/game`, DO NOT MODIFY `/nikona` as it will get updated with the latest changes and fixes
 * To keep compatibilty to all systems the CODE and DATA are separated: game code is stored as "screen modes" (ex. Title, Level...) and the DATA is stored as "banks" and loaded manually on each screen, depending of the system. (Picking a ROM location or loading data from Disc)
 
 ## CURRENT ISSUES
 
-* No documentation as I keep changing things.
+* No documentation...
 * (SCD) Stamps support is unstable/unfinished
 * (32X) 2D-mode might break on hardware if placing too many Super-Sprites
 

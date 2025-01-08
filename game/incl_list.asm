@@ -1,13 +1,11 @@
 ; ============================================================
 ; --------------------------------------------------------
-; SCREEN CODE jump-list sorted by ID (RAM_ScreenMode)
+; SCREEN CODE jump list sorted by ID (RAM_ScreenMode)
 ;
-; - Screen CODE list: incl_code.asm
-; - DATA Bank list: incl_data.asm
-;
-; ** For SCD/CD32X:
-;    Go to iso_files.asm, include the label and
-;    filename.
+; - CODE banks are at: incl_code.asm
+; - For SCD/CD32X:
+;   Include the Start+End labels and ISO filename
+;   at iso_files.asm
 ; --------------------------------------------------------
 
 .screen_list:
@@ -31,11 +29,16 @@
 
 ; ============================================================
 ; --------------------------------------------------------
-; SCD/CD32X ONLY:
-; Bank label redirects to ISO filename
+; CD/CD32X ONLY: Bank filenames at any order
+;
+; If you forget to reference the label it will crash
+; the entire SCD system.
+;
+; - Include the Start+End labels and ISO filename
+;   at iso_files.asm
 ; --------------------------------------------------------
 
 disc_banklist:
-		dc.l DATA_BANK0		; Label
+		dc.l DATA_BANK0		; Start Label
 		dc.b "BNK_MAIN.BIN"	; ISO filename
 		dc.l -1			; END-OF-LIST

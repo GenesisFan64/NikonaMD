@@ -40,7 +40,8 @@ HTAG_CDVER	equ $0100|$02		; $0100|Version: $00-$FF
 HTAG_DATEINFO	equ "(C)GF64 2024.???"
 
 ; --------------------------------------------------------
-; "Domestic" Name: Your game's name in your language
+; "Domestic" Name: Your game's name in Japan
+; (or in your language)
 ; --------------------------------------------------------
 
 HTAG_NDM_MD	equ "Nikona MD                                       "

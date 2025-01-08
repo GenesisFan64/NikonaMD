@@ -2,7 +2,10 @@
 ; ----------------------------------------------------
 ; SCD/CD32X ONLY:
 ;
-; Labels and filenames for the CODE and DATA banks
+; Labels and ISO filenames for the CODE and DATA banks
+;
+; The labels are the same ones your set on
+; incl_code.asm and incl_data.asm
 ; ----------------------------------------------------
 
 	;fs_file "ISO_FILE.BIN",Label_Start,Lable_End
