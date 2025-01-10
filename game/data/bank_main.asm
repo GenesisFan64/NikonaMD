@@ -9,14 +9,18 @@
 ;	binclude_dma_e LABEL_START,LABEL_END,"filename"	; Start and End labels
 ;
 ; - 32X SVDP graphics:
-; 	mars_VramStart Label_test			; Set the Start label
+; GfxPack_Start:
+; 	marsVramData
+;
 ; example_0:
 ; 	include "your_svdp_graphics.bin"
 ; 	align 4						; ** Don't forget to align by 4 at the end **
 ; example_1:
 ; 	include "more_svdp.bin"
 ;	align 4
-;	mars_VramEnd Label_end				; Set the End label
+;
+;	marsVramDEnd
+; GfxPack_End:
 ; ----------------------------------------------------------------
 
 		include "sound/data.asm"		; GEMA sound data
@@ -38,3 +42,19 @@ objMap_Mimi:	binclude "game/data/md/sprites/mimi/map.bin"
 		align 2
 objMap_Fifi:	binclude "game/data/md/sprites/fifi/map.bin"
 		align 2
+
+; ----------------------------------------------------------------
+
+MPal_Test:
+	binclude "game/data/mars/objects/test/mtrl/002_pal.bin"
+	align 2
+
+MVram_test:
+	marsVramData
+Textr_test:
+	binclude "game/data/mars/objects/test/mtrl/002_art.bin"
+	align 8
+	marsVramDEnd
+MVram_test_e:
+
+; ----------------------------------------------------------------

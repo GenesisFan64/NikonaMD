@@ -36,6 +36,7 @@ setVram_Fifi		ds.b $30
 ; ------------------------------------------------------
 
 			memory RAM_ScrnBuff
+RAM_ThisObjList		ds.b obj_len*64
 RAM_GemaCache_PSG	ds.l 3
 RAM_GemaCache_PSGN	ds.l 1
 RAM_GemaCache_FM	ds.l 4
@@ -43,7 +44,6 @@ RAM_GemaCache_FM3	ds.l 1
 RAM_GemaCache_FM6	ds.l 1
 RAM_GemaCache_PCM	ds.l 8
 RAM_GemaCache_PWM	ds.l 8
-
 RAM_CurrPick		ds.w 1
 RAM_LastPick		ds.w 1
 RAM_GemaIndx		ds.w 1		; DONT MOVE
@@ -54,7 +54,6 @@ RAM_FairyVars		ds.w 1
 RAM_CurrBeats		ds.w 1
 RAM_Copy_fmSpecial	ds.w 1
 RAM_Copy_HasDac		ds.w 1
-
 sizeof_thisbuff		ds.l 0
 			endmemory
 
@@ -144,7 +143,7 @@ sizeof_thisbuff		ds.l 0
 	; NEW controls
 		lea	(Controller_1).w,a6
 	; LEFT/RIGHT
-		move.w	on_press(a6),d7
+		move.w	pad_press(a6),d7
 		move.w	d7,d6
 		andi.w	#JoyStart,d6
 		bne	.exit_this
@@ -162,7 +161,7 @@ sizeof_thisbuff		ds.l 0
 .lr_seq:
 
 	; UP/DOWN
-		move.w	on_press(a6),d7
+		move.w	pad_press(a6),d7
 		andi.w	#JoyUp+JoyDown,d7
 		beq.s	.ud_seq
 		moveq	#1,d0
@@ -178,7 +177,7 @@ sizeof_thisbuff		ds.l 0
 .ud_seq:
 
 	; X/Y
-		move.w	on_press(a6),d7
+		move.w	pad_press(a6),d7
 		andi.w	#JoyX+JoyY,d7
 		beq.s	.xy_seq
 		moveq	#1,d0
@@ -193,7 +192,7 @@ sizeof_thisbuff		ds.l 0
 .xy_seq:
 
 	; C BUTTON
-		move.w	on_press(a6),d7
+		move.w	pad_press(a6),d7
 		andi.w	#JoyC+JoyZ,d7
 		beq.s	.c_press
 		lea	(RAM_GemaIndx).w,a5
@@ -216,7 +215,7 @@ sizeof_thisbuff		ds.l 0
 		bsr	gemaSetBeats
 .c_press:
 	; B BUTTON
-		move.w	on_press(a6),d7
+		move.w	pad_press(a6),d7
 		andi.w	#JoyB,d7
 		beq.s	.b_press
 		lea	(RAM_GemaIndx).w,a5
@@ -224,17 +223,17 @@ sizeof_thisbuff		ds.l 0
 		move.w	(a5)+,d0
 		bsr	gemaStopSeq
 .b_press:
-		move.w	on_press(a6),d7
+		move.w	pad_press(a6),d7
 		andi.w	#JoyA,d7
 		beq.s	.a_press
 		bsr	gemaStopAll
 .a_press:
 
 
-; 		move.w	on_hold(a6),d7
+; 		move.w	pad_hold(a6),d7
 ; 		andi.w	#JoyA+JoyB+JoyC,d7
 ; 		bne.s	.n_up
-; 		move.w	on_press(a6),d7
+; 		move.w	pad_press(a6),d7
 ; 		btst	#bitJoyDown,d7
 ; 		beq.s	.n_down
 ; 		addq.w	#1,(a5)
@@ -244,7 +243,7 @@ sizeof_thisbuff		ds.l 0
 ; .n_downd:
 ; 		bsr.s	.show_me
 ; .n_down:
-; 		move.w	on_press(a6),d7
+; 		move.w	pad_press(a6),d7
 ; 		btst	#bitJoyUp,d7
 ; 		beq.s	.n_up
 ; 		subq.w	#1,(a5)
@@ -329,7 +328,7 @@ sizeof_thisbuff		ds.l 0
 ; ; ------------------------------------------------------
 ;
 ; .nothing:
-; 		move.w	on_press(a6),d7
+; 		move.w	pad_press(a6),d7
 ; 		btst	#bitJoyStart,d7
 ; 		beq.s	.no_press
 ; 		bsr.s	.show_me
@@ -343,7 +342,7 @@ sizeof_thisbuff		ds.l 0
 
 ; 		bra.s	.show_me
 ; .option1_args:
-; 		move.w	on_hold(a6),d7
+; 		move.w	pad_hold(a6),d7
 ; 		move.w	d7,d6
 ; 		andi.w	#JoyA+JoyB+JoyC,d6
 ; 		beq.s	.no_press
@@ -355,7 +354,7 @@ sizeof_thisbuff		ds.l 0
 ; 		beq.s	.d3_opt
 ; 		adda	#4,a5
 ; .d3_opt:
-; 		move.w	on_press(a6),d7
+; 		move.w	pad_press(a6),d7
 ; 		btst	#bitJoyRight,d7
 ; 		beq.s	.op1_right
 ; 		addq.w	#1,(a5)
@@ -366,7 +365,7 @@ sizeof_thisbuff		ds.l 0
 ; 		subq.w	#1,(a5)
 ; 		bra	.show_me
 ; .op1_left:
-; 		move.w	on_hold(a6),d7
+; 		move.w	pad_hold(a6),d7
 ; 		btst	#bitJoyUp,d7
 ; 		beq.s	.op1_down
 ; 		addq.w	#1,(a5)
@@ -386,7 +385,7 @@ sizeof_thisbuff		ds.l 0
 ;
 ; .option_2:
 ; 		lea	(RAM_GemaIndx).w,a5
-; 		move.w	on_press(a6),d7
+; 		move.w	pad_press(a6),d7
 ; 		btst	#bitJoyStart,d7
 ; 		beq.s	.option1_args
 ; 		move.w	(a5)+,d0
@@ -399,7 +398,7 @@ sizeof_thisbuff		ds.l 0
 ;
 ; .option_3:
 ; 		lea	(RAM_GemaArg3).w,a5
-; 		move.w	on_press(a6),d7
+; 		move.w	pad_press(a6),d7
 ; 		btst	#bitJoyStart,d7
 ; 		beq	.option1_args
 ; 		move.w	(a5)+,d0
@@ -412,7 +411,7 @@ sizeof_thisbuff		ds.l 0
 ;
 ; .option_4:
 ; 		lea	(RAM_GemaArg3).w,a5
-; 		move.w	on_press(a6),d7
+; 		move.w	pad_press(a6),d7
 ; 		btst	#bitJoyStart,d7
 ; 		beq	.option1_args
 ; 		move.w	(a5)+,d0
@@ -424,7 +423,7 @@ sizeof_thisbuff		ds.l 0
 ; ; ------------------------------------------------------
 ;
 ; .option_5:
-; 		move.w	on_press(a6),d7
+; 		move.w	pad_press(a6),d7
 ; 		btst	#bitJoyStart,d7
 ; 		beq.s	.no_press2
 ; 		bsr	.show_me
@@ -438,10 +437,10 @@ sizeof_thisbuff		ds.l 0
 ;
 ; .option_6:
 ; 		lea	(RAM_GemaArg6).w,a5
-; 		move.w	on_hold(a6),d7
+; 		move.w	pad_hold(a6),d7
 ; 		andi.w	#JoyA,d7
 ; 		beq.s	.no_press2
-; 		move.w	on_press(a6),d7
+; 		move.w	pad_press(a6),d7
 ; 		btst	#bitJoyRight,d7
 ; 		beq.s	.op2_right
 ; 		addq.w	#1,(a5)
@@ -452,7 +451,7 @@ sizeof_thisbuff		ds.l 0
 ; 		subq.w	#1,(a5)
 ; 		bsr	.show_me_2
 ; .op2_left:
-; 		move.w	on_hold(a6),d7
+; 		move.w	pad_hold(a6),d7
 ; 		btst	#bitJoyDown,d7
 ; 		beq.s	.op2_down
 ; 		addq.w	#1,(a5)
@@ -463,7 +462,7 @@ sizeof_thisbuff		ds.l 0
 ; 		subq.w	#1,(a5)
 ; 		bsr	.show_me_2
 ; .op2_up:
-; 		move.w	on_press(a6),d7
+; 		move.w	pad_press(a6),d7
 ; 		btst	#bitJoyStart,d7
 ; 		beq.s	.no_press2
 ; .show_me_2:
@@ -476,7 +475,7 @@ sizeof_thisbuff		ds.l 0
 ; ; ------------------------------------------------------
 ;
 ; .option_7:
-; 		move.w	on_press(a6),d7
+; 		move.w	pad_press(a6),d7
 ; 		btst	#bitJoyStart,d7
 ; 		beq.s	.no_press2
 ; 		move.w	#-1,(RAM_ScreenMode).w	; risky but works.
@@ -485,6 +484,9 @@ sizeof_thisbuff		ds.l 0
 ; ------------------------------------------------------
 
 .gema_viewinit:
+		lea	(RAM_ThisObjList).w,a0
+		move.w	#4,d0
+		bsr	Object_Enable
 	if VIEW_FAIRY
 		move.l	#obj_Fairy,d0		; <-- If you don't like the fairies comment out or
 		moveq	#0,d1			; delete all of this

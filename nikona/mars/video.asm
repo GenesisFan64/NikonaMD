@@ -25,7 +25,7 @@ SET_FBVRAM_PATCH	equ $1E000	; Framebuffer location to store the affected XShift 
 SET_3DFIELD_WDTH	equ 320
 SET_3DFIELD_HGHT	equ 224
 MAX_FACES		equ 256		; Maximum 3D polygon faces to read
-MAX_ZDIST		equ -$280	; Maximum 3D field distance (-value)
+MAX_ZDIST		equ -$400	; Maximum 3D field distance (-value)
 
 ; --------------------------------------------------------
 ; Variables

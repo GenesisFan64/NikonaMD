@@ -10,7 +10,6 @@
 ; Settings
 ; --------------------------------------------------------
 
-MAX_MDOBJ	equ 40		; Maximum Genesis objects
 TAG_SRAMDATA	equ "SAVE"	; 4-letter savefile id
 
 ; ===================================================================
@@ -38,11 +37,8 @@ JoyID_MS	equ $0F		; <-- Same ID for no controller
 
 ; ------------------------------------------------
 ; Genesis controller
-;
-; Read these as WORD
 ; ------------------------------------------------
 
-; on_hold, on_press
 JoyUp		equ $0001
 JoyDown		equ $0002
 JoyLeft		equ $0004
@@ -69,9 +65,9 @@ bitJoyX		equ 10
 bitJoyMode	equ 11
 
 ; ------------------------------------------------
-; Mega Mouse ONLY
+; Mega Mouse
 ;
-; mouse_x and mouse_y are speed increment values,
+; pad_x and pad_y are speed increment values,
 ; NOT screen position.
 ; ------------------------------------------------
 
@@ -88,8 +84,10 @@ bitClickS	equ 3
 ; Sega PICO
 ; Directons U/D/L/R use the same bits as Genesis.
 ;
-; For reading the pen position use
-; mouse_x and mouse_y
+; For reading the pen use pad_x and pad_y
+; pad_y:
+; $0000-$00EF - Tablet area
+; $0100-$01EF - Storyware area
 ; ------------------------------------------------
 
 JoyRED		equ $0010
@@ -104,23 +102,23 @@ bitJoyPEN	equ 7
 
 ; ------------------------------------------------
 ; RAM_InputData
+; ------------------------------------------------
 
-; *** MANUAL VARIABLES ***
-pad_id		equ $00;ds.b 1			; Controller ID
-pad_ver		equ $01;ds.b 1			; Controller type/revision
-on_hold		equ $02;ds.w 1			; User HOLD bits
-on_press	equ $04;ds.w 1			; User PRESSED bits
-on_release	equ $06;ds.w 1			; User RELEASED bits
-mouse_x		equ $08;ds.w 1			; Mouse/Pen X speed
-mouse_y		equ $0A;ds.w 1			; Mouse/pen Y speed
-ext_3		equ $0C;ds.w 1
-ext_4		equ $0E;ds.w 1
-sizeof_input	equ $10
+pad		struct
+id		ds.b 1		; Controller ID
+ver		ds.b 1		; Controller type/revision
+hold		ds.w 1		; HOLD bits
+press		ds.w 1		; PRESSED bits
+release		ds.w 1		; RELEASED bits
+x		ds.w 1		; Mouse/Pen X speed
+y		ds.w 1		; Mouse/Pen Y speed
+page		ds.w 1		; PICO page
+ext		ds.w 1
+; pad_len	ds.l 0
+		endstruct
 
 ; ------------------------------------------------
-; RAM_Objects
-;
-; Size must end as even
+; The object's memory
 ; ------------------------------------------------
 
 obj		struct
@@ -154,18 +152,19 @@ ram		ds.b $40	; Object's own RAM
 ; ----------------------------------------------------------------
 
 			memory RAM_MdSystem
-RAM_Objects		ds.b obj_len*MAX_MDOBJ		; Objects buffer
 RAM_SaveData		ds.b SET_SRAMSIZE		; Read/Write of the SAVE data
-RAM_InputData		ds.b sizeof_input*4		; Input data section
+RAM_InputData		ds.b pad_len*4			; Input data section
 RAM_SysRandVal		ds.l 1				; Random value
 RAM_SysRandom		ds.l 1				; Randomness seed
 RAM_SysLastBank		ds.l 1
+RAM_CurrObjList		ds.l 1
 RAM_VBlankJump		ds.w 3				; VBlank jump (JMP xxxx xxxx)
 RAM_HBlankJump		ds.w 3				; HBlank jump (JMP xxxx xxxx)
 RAM_ExternalJump	ds.w 3				; External jump (JMP xxxx xxxx)
 RAM_SaveEnable		ds.w 1				; Flag to enable SAVE data
 RAM_ScreenMode		ds.w 1				; Current screen number
 RAM_ScreenOption	ds.w 1				; Current screen setting (OPTIONAL)
+RAM_CurrObjNum		ds.w 1
 sizeof_mdsys		ds.l 0
 			endmemory
 
@@ -174,8 +173,10 @@ sizeof_mdsys		ds.l 0
 ; Label aliases
 ; ----------------------------------------------------------------
 
-Controller_1		equ RAM_InputData
-Controller_2		equ RAM_InputData+sizeof_input
+Controller_1	equ RAM_InputData
+Controller_2	equ RAM_InputData+pad_len
+Controller_3	equ RAM_InputData+pad_len*2
+Controller_4	equ RAM_InputData+pad_len*3
 
 ; ====================================================================
 ; --------------------------------------------------------
@@ -207,7 +208,7 @@ System_Init:
 		move.l	#ExtInt_Default,d2
 		bsr	System_SetIntJumps
 		lea	(RAM_InputData).w,a0	; Clear input data buffer
-		move.w	#(sizeof_input/2)-1,d1
+		move.w	#(pad_len/2)-1,d1
 		moveq	#0,d0
 		move.l	d0,(RAM_SysLastBank).l
 .clrinput:
@@ -415,13 +416,13 @@ Sound_Init:
 ; PICO input is hard-coded to
 ; Controller_1
 ;
-; on_hold/on_press:
+; pad_hold/pad_press:
 ; %P00BRLDU
 ; UDLR - Arrows
 ;    B - BIG button red (JoyB)
 ;    P - Pen press/click (JoyStart)
 ;
-; mouse_x/mouse_y:
+; pad_x/pad_y:
 ; Pen X/Y position
 ; ----------------------------------------
 
@@ -433,15 +434,15 @@ System_Input:
 		move.b	(a5),d7			; $800003: %P00BRLDU
 		eori.w	#$FF,d7
 		move.w	d7,d6
-		move.w	on_hold(a6),d5
+		move.w	pad_hold(a6),d5
 		eor.w	d5,d7
 		and.w	d5,d7
-		move.w	d7,on_release(a6)
-		move.w	on_hold(a6),d5
+		move.w	d7,pad_release(a6)
+		move.w	pad_hold(a6),d5
 		eori.w	#$FF,d5
 		and.w	d6,d5
-		move.w	d5,on_press(a6)
-		move.w	d6,on_hold(a6)
+		move.w	d5,pad_press(a6)
+		move.w	d6,pad_hold(a6)
 		move.b	2(a5),d7
 		lsl.w	#8,d7
 		move.b	4(a5),d7
@@ -449,7 +450,7 @@ System_Input:
 		bpl.s	.x_valid	 	; Failsafe negative X
 		clr.w	d7
 .x_valid:
-		move.w	d7,mouse_x(a6)
+		move.w	d7,pad_x(a6)
 	; $0000-$00EF - Tablet
 	; $0100-$01EF - Storyware
 		moveq	#0,d7
@@ -460,7 +461,7 @@ System_Input:
 		bmi.s	.bad_y
 		move.w	d6,d7
 .bad_y:
-		move.w	d7,mouse_y(a6)
+		move.w	d7,pad_y(a6)
 		move.b	10(a5),d6
 		moveq	#0,d7
 		moveq	#6-1,d5		; 6 pages
@@ -470,7 +471,7 @@ System_Input:
 		addq.w	#1,d7
 .no_bit:
 		dbf	d5,.page_it
-		move.b	d7,ext_3(a6)
+		move.b	d7,pad_page(a6)
 	else
 
 	; ----------------------------------------
@@ -479,7 +480,7 @@ System_Input:
 		lea	(sys_data_1),a5		; a5 - BASE Genesis Input regs area
 		bsr.s	.this_one
 		adda	#2,a5
-		adda	#sizeof_input,a6
+		adda	#pad_len,a6
 
 ; ----------------------------------------
 ; Read port
@@ -581,11 +582,11 @@ System_Input:
 		nop
 		move.b	(a5),d7
  		andi.w	#%1111,d7
-		move.w	on_hold(a6),d6
+		move.w	pad_hold(a6),d6
 		eor.w	d7,d6
-		move.w	d7,on_hold(a6)
+		move.w	d7,pad_hold(a6)
 		and.w	d7,d6
-		move.w	d6,on_press(a6)
+		move.w	d6,pad_press(a6)
 		move.b	#$00,(a5)	; X7 | X6 | X5 | X4
 		nop
 		nop
@@ -602,7 +603,7 @@ System_Input:
 		neg.b	d7
 		neg.w	d7
 .x_neg:
-		move.w	d7,mouse_x(a6)
+		move.w	d7,pad_x(a6)
 		move.b	#$00,(a5)	; Y7 | Y6 | Y5 | Y4
 		nop
 		nop
@@ -620,7 +621,7 @@ System_Input:
 		neg.w	d7
 .y_neg:
 		neg.w	d7		; Reverse Y
-		move.w	d7,mouse_y(a6)
+		move.w	d7,pad_y(a6)
 
 .invalid:
 		move.b	#$60,(a5)
@@ -647,14 +648,14 @@ System_Input:
 		or.w	d5,d7
 		move.b	#$40,(a5)	; Show CB|RLDU (2)
 		not.w	d7
-		move.b	on_hold+1(a6),d5
+		move.b	pad_hold+1(a6),d5
 		move.b	d5,d4
 		move.b	#$00,(a5)	; Show SA|RLDU (3)
 		eor.b	d7,d5
-		move.b	d7,on_hold+1(a6)
+		move.b	d7,pad_hold+1(a6)
 		and.b	d7,d5
 		move.b	#$40,(a5)	; 6 button responds (4)
-		move.b	d5,on_press+1(a6)
+		move.b	d5,pad_press+1(a6)
 		move.b	d7,d5
 		move.b	(a5),d7		; Grab ??|MXYZ
  		move.b	#$00,(a5)	; (5)
@@ -662,7 +663,7 @@ System_Input:
 		and.b	d4,d5
  		move.b	(a5),d6		; Type: $03 old, $0F new
  		move.b	#$40,(a5)	; (6)
-		move.b	d5,on_release+1(a6)
+		move.b	d5,pad_release+1(a6)
 		andi.w	#$F,d6
 		lsr.w	#2,d6
 		andi.w	#1,d6
@@ -670,15 +671,15 @@ System_Input:
 		not.b	d7
  		andi.w	#%1111,d7
  		move.b	d7,d6
-		move.b	on_hold(a6),d5
+		move.b	pad_hold(a6),d5
 		eor.b	d5,d6
 		and.b	d5,d6
-		move.b	d6,on_release(a6)
-		move.b	on_hold(a6),d5
+		move.b	d6,pad_release(a6)
+		move.b	pad_hold(a6),d5
 		eor.b	d7,d5
-		move.b	d7,on_hold(a6)
+		move.b	d7,pad_hold(a6)
 		and.b	d7,d5
-		move.b	d5,on_press(a6)
+		move.b	d5,pad_press(a6)
 .oldpad:
 		move.b	d6,pad_ver(a6)
 		rts
@@ -1523,8 +1524,8 @@ System_MdMcd_RdFile_WRAM:
 
 System_MdMcd_CheckHome:
 		movem.w	d6-d7,-(sp)
-		move.w	(Controller_1+on_press).w,d7
-		move.w	(Controller_1+on_hold).w,d6
+		move.w	(Controller_1+pad_press).w,d7
+		move.w	(Controller_1+pad_hold).w,d6
 		andi.w	#JoyA+JoyB+JoyC,d6
 		cmpi.w	#JoyA+JoyB+JoyC,d6
 		bne.s	.not_press
@@ -1878,26 +1879,59 @@ System_SetDataBank:
 ; ----------------------------------------------------------------
 
 ; --------------------------------------------------------
-; Init/Clear Objects system
+; Object_Init
+;
+; Reset Objects system
 ; --------------------------------------------------------
 
 Object_Init:
-		lea	(RAM_Objects).w,a6
-		move.w	#(obj_len*MAX_MDOBJ)-1,d7
-.clr:
-		clr.b	(a6)+
-		dbf	d7,.clr
+		move.l	#0,(RAM_CurrObjList).w
+		move.w	#0,(RAM_CurrObjNum).w
 		rts
 
 ; --------------------------------------------------------
+; Object_Enable
+;
+; Enable Objects on the current screen
+;
+; Input:
+; a0   | Objects buffer
+; d0.w | Number of Objects to use
+; --------------------------------------------------------
+
+Object_Enable:
+		movem.l	d7/a6,-(sp)
+		move.l	a0,a6
+		move.w	d0,d7
+		mulu.w	#obj_len,d7
+		subq.w	#1,d7
+.clr_first:
+		clr.b	(a6)+
+		dbf	d7,.clr_first
+		move.l	a0,(RAM_CurrObjList).w
+		move.w	d0,(RAM_CurrObjNum).w
+		movem.l	(sp)+,d7/a6
+		rts
+
+; --------------------------------------------------------
+; Object_Run
+;
 ; Process ALL Objects
 ;
-; ONLY CALL THIS ONCE PER FRAME
+; Breaks:
+; ALL
+;
+; Notes:
+; - ONLY CALL THIS ONCE PER FRAME
 ; --------------------------------------------------------
 
 Object_Run:
-		lea	(RAM_Objects).w,a6
-		move.w	#MAX_MDOBJ-1,d7
+		move.l	(RAM_CurrObjList).w,d7
+		beq.s	.invld_num
+		move.l	d7,a6
+		move.w	(RAM_CurrObjNum).w,d7
+		beq.s	.invld_num
+		bmi.s	.invld_num
 .next_one:
 		move.l	obj_code(a6),d6
 		beq.s	.no_code
@@ -1908,6 +1942,7 @@ Object_Run:
 .no_code:
 		adda	#obj_len,a6
 		dbf	d7,.next_one
+.invld_num:
 		rts
 
 ; --------------------------------------------------------
@@ -1934,20 +1969,20 @@ Object_Run:
 
 Object_Set:
 		movem.l	d6-d7/a5-a6,-(sp)
-		lea	(RAM_Objects).w,a6
+		movea.l	(RAM_CurrObjList).w,a6
 		moveq	#0,d7
 		move.w	d2,d7
 		mulu.w	#obj_len,d7
 		adda	d7,a6
 		bra.s	objSet_Go
-
 Object_Make:
 		movem.l	d6-d7/a5-a6,-(sp)
-		lea	(RAM_Objects).w,a6
-		move.w	#MAX_MDOBJ-1,d7
+		movea.l	(RAM_CurrObjList).w,a6
+		move.w	(RAM_CurrObjNum).w,d7
+		subq.w	#1,d7
 		moveq	#0,d6
 .search:
-		cmp.w	#MAX_MDOBJ,d6
+		cmp.w	(RAM_CurrObjNum).w,d6
 		bge.s	objSet_Error
 		tst.l	obj_code(a6)
 		beq.s	objSet_Go
@@ -1958,7 +1993,6 @@ objSet_Error:
 		movem.l	(sp)+,d6-d7/a5-a6
 		move	#1,ccr			; Return carry (No slots)
 		rts
-
 objSet_Go:
 		tst.l	d0
 		beq.s	.from_del
@@ -2150,13 +2184,13 @@ object_Touch:
 		move.w	obj_size_y(a6),d5
 		or.w	d5,d6
 		beq	.exit_this
-		lea	(RAM_Objects).w,a5
+		movea.l	(RAM_CurrObjList).w,a5
 		move.w	d0,d6
 		mulu.w	#obj_len,d6
 		adda	d6,a5
 		move.w	d0,d7
 .next:
-		cmp.w	#MAX_MDOBJ,d7
+		cmp.w	(RAM_CurrObjNum).w,d7
 		bge.s	.ran_out
 		cmp.l	a6,a5			; If reading THIS object, skip
 		beq.s	.skip

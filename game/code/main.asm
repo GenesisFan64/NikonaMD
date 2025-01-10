@@ -42,8 +42,8 @@ RAM_SC0_OldOption	ds.w 1
 		bsr	System_Default				; Default system settings
 	; ----------------------------------------------
 	; Init/Load save
-		addq.l	#1,(RAM_Save_Counter).w
-		bsr	System_SramSave				; Save to SRAM/BRAM
+; 		addq.l	#1,(RAM_Save_Counter).w
+; 		bsr	System_SramSave				; Save to SRAM/BRAM
 	; ----------------------------------------------
 	; Init Print
 		move.l	#DATA_BANK0,d0				; Load MAIN DATA bank
@@ -70,6 +70,22 @@ RAM_SC0_OldOption	ds.w 1
 ; 		moveq	#32,d0
 ; 		moveq	#16,d1
 ; 		bsr	Video_FadePal
+	if MARS|MARSCD
+		lea	(MPal_Test+2),a0
+		moveq	#1,d0
+		move.w	#255,d1
+		moveq	#0,d2
+		bsr	Video_MdMars_FadePal
+		lea	(MVram_test),a0
+		move.l	#0,a1
+		move.w	#MVram_test_e-MVram_test,d0
+		bsr	Video_MdMars_LoadVram
+		lea	(RAM_MdMars_Models).w,a0
+		move.l	#MarsObj_test,mmdl_data(a0)
+		move.l	#-$200,mmdl_z_pos(a0)
+		moveq	#2,d0
+		bsr	Video_MdMars_VideoMode
+	endif
 	; ----------------------------------------------
 		lea	str_MenuText(pc),a0
 		moveq	#1,d0					; X/Y position: 1,1
@@ -77,23 +93,17 @@ RAM_SC0_OldOption	ds.w 1
 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2		; FG VRAM location
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3	; FG width
 		bsr	Video_PrintW
-		lea	(RAM_Save_Counter).w,a0
-		move.l	#3,a1
-		moveq	#1,d0
-		moveq	#3,d1
-		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
-		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
-		bsr	Video_PrintValW
+; 		lea	(RAM_Save_Counter).w,a0
+; 		move.l	#3,a1
+; 		moveq	#1,d0
+; 		moveq	#3,d1
+; 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
+; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
+; 		bsr	Video_PrintValW
 		bsr	.loop_print				; Draw counter
 	; ----------------------------------------------
 		bsr	Video_DisplayOn				; Enable VDP Display
 		bsr	Video_FadeIn_Full			; Full fade-in w/Delay
-
-; 		lea	($FFFFFDB4),a0
-; 		move.w	#$100-1,d0
-; .test:
-; 		move.w	#0,(a0)+
-; 		dbf	d0,.test
 
 ; ====================================================================
 ; ------------------------------------------------------
@@ -104,13 +114,21 @@ RAM_SC0_OldOption	ds.w 1
 		bsr	System_Render
 		bsr	.loop_print
 
-	; CD only, check ABC+Start "home" combo
+	if MARS|MARSCD
+		lea	(RAM_MdMars_Models).w,a0
+		sub.l	#4,mmdl_y_rot(a0)
+; 		sub.l	#1,mmdl_x_rot(a0)
+	endif
+
+	; CD only
+	; check ABC+Start "home" combo
 	if MCD|MARSCD
 		bsr	System_MdMcd_CheckHome
 		bcs.s	.exit_shell
 	endif
+
 		lea	(Controller_1).w,a6
-		move.w	on_press(a6),d7
+		move.w	pad_press(a6),d7
 		btst	#bitJoyStart,d7
 		beq.s	.loop
 		bsr	Video_FadeOut_Full

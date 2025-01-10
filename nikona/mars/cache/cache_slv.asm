@@ -760,7 +760,7 @@ MarsMdl_ReadModel:
 		sts	macl,r0
 		mov	r0,@r12
 		mov	r13,@(4,r12)
-		add	#plygn_len,r13	; Next X/Y polygon
+		add	#plygn_len,r13		; Next X/Y polygon
 		add	#8,r12			; Next Z storage
 		add	#1,r11			; Mark as a valid face
 		nop

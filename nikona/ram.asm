@@ -33,8 +33,8 @@ RAM_UserCode		ds.b MAX_UserCode	; CD/32X/CD32X only
 ; ------------------------------------------------
 
 			memory $FFFFB000
-RAM_MdGlobal		ds.b MAX_Globals
 RAM_ScrnBuff		ds.b MAX_ScrnBuff
+RAM_MdGlobal		ds.b MAX_Globals
 
 ; ----------------------------------------
 ; * FIRST PASS LABELS *

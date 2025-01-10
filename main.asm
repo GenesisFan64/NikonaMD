@@ -21,9 +21,8 @@ SET_FIRSTSCRN	equ 0		; Starting screen mode number on boot
 ; 68000 RAM SIZES (MAIN-CPU in SegaCD/CD32X)
 ; ----------------------------------------------------------------
 
-MAX_StackSize	equ $0200	; Maximum Stack a7
 MAX_Globals	equ $0800	; USER Global variables
-MAX_ScrnBuff	equ $1000	; Current Screen's variables
+MAX_ScrnBuff	equ $2000	; Current Screen's buffer
 
 ; ----------------------------------------------------
 ; SCD, 32X and CD32X ONLY
