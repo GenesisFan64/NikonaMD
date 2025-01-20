@@ -46,9 +46,9 @@ RAM_GemaCache_PCM	ds.l 8
 RAM_GemaCache_PWM	ds.l 8
 RAM_CurrPick		ds.w 1
 RAM_LastPick		ds.w 1
-RAM_GemaIndx		ds.w 1		; DONT MOVE
 RAM_GemaSeq		ds.w 1		; ''
 RAM_GemaBlk		ds.w 1		; ''
+RAM_GemaIndx		ds.w 1		; DONT MOVE
 RAM_GemaStatus		ds.w 4
 RAM_FairyVars		ds.w 1
 RAM_CurrBeats		ds.w 1
@@ -290,7 +290,8 @@ sizeof_thisbuff		ds.l 0
 		move.w	(a0,d1.w),d0
 		move.w	d0,(RAM_CurrBeats).w
 
-		lea	str_ShowBeats(pc),a0
+		lea	(RAM_CurrBeats).w,a0
+		move.l	#1,a1
 	if VIEW_FAIRY
 		moveq	#13,d0
 	else
@@ -299,8 +300,9 @@ sizeof_thisbuff		ds.l 0
 		moveq	#12,d1
 		move.w	#DEF_PrintVram|DEF_PrintPal,d2
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
-		bsr	Video_Print
-		lea	str_ShowVars(pc),a0
+		bsr	Video_PrintVal
+		lea	(RAM_GemaSeq+1).w,a0
+		move.l	#0,a1
 	if VIEW_FAIRY
 		moveq	#7,d0
 	else
@@ -309,7 +311,13 @@ sizeof_thisbuff		ds.l 0
 		moveq	#9,d1
 		move.w	#DEF_PrintVramW|DEF_PrintPal,d2
 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
-		bra	Video_PrintW
+		bsr	Video_PrintValW
+		adda	#2,a0
+		addq.w	#5,d0
+		bsr	Video_PrintValW
+		adda	#2,a0
+		addq.w	#5,d0
+		bra	Video_PrintValW
 
 ; ; ------------------------------------------------------
 ;
@@ -929,21 +937,3 @@ strL_LazyVal:	dc.b "0",0,"1",0,"2",0,"3",0,"4",0,"5",0,"6",0,"7",0,"8",0,"9",0
 
 str_Speci:	dc.b "FM3",0
 str_Sampl:	dc.b "DAC",0
-
-str_ShowVars:
-		dc.l pstr_mem(0,RAM_GemaSeq+1)
-		dc.b "   "
-		dc.l pstr_mem(0,RAM_GemaBlk+1)
-		dc.b "   "
-		dc.l pstr_mem(0,RAM_GemaIndx+1)
-		dc.b 0
-		align 2
-str_ShowBeats:
-		dc.l pstr_mem(1,RAM_CurrBeats)
-		dc.b 0
-		align 2
-
-str_Info:
-		dc.l pstr_mem(3,RAM_Framecount)
-		dc.b 0
-		align 2

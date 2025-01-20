@@ -11,28 +11,39 @@
 ; * Free on Cartridge
 ; ----------------------------------------------------------------
 
+; ====================================================================
+; ----------------------------------------------------------------
+; 68000 RAM SIZES (MAIN-CPU in SegaCD/CD32X)
+; ----------------------------------------------------------------
+
+MAX_Globals		equ $1000	; USER Global variables
+MAX_ScrnBuff		equ $2000	; Current Screen's buffer
+MAX_SysCode		equ $3000	; SCD/32X/CD32X: Nikona lib
+MAX_UserCode		equ $7800	; SCD/32X/CD32X: Current SCREEN's CODE+small DATA
+
+; ====================================================================
+
 SET_RAMLIMIT		equ $00FFFC00
 
-; --------------------------------------------------------
+; ===========================================================================
+; ----------------------------------------------------------------
 ; MAIN USER RAM
-; --------------------------------------------------------
+; ----------------------------------------------------------------
 
 			memory $FFFF0000
-RAM_SystemCode		ds.b MAX_SysCode	; CD/32X/CD32X only
-RAM_UserCode		ds.b MAX_UserCode	; CD/32X/CD32X only
+		if MCD|MARS|MARSCD
+RAM_SystemCode		ds.b MAX_SysCode
+RAM_UserCode		ds.b MAX_UserCode
+sizeof_thisram		ds.l 0
+		endif
 .end:
 			endmemory
-		if .end&$FFFF > $B000
-			error "RAN OUT OF SPACE FOR _SystemCode/_UserCode \{.end&$FFFF}"
+
+		if MCD|MARS|MARSCD
+			memory sizeof_thisram
+		else
+			memory $FFFFB000	; Genesis/Pico ONLY
 		endif
-
-; ------------------------------------------------
-; Nikona .w section of RAM
-;
-; MUST BE AFTER $FF8000
-; ------------------------------------------------
-
-			memory $FFFFB000
 RAM_ScrnBuff		ds.b MAX_ScrnBuff
 RAM_MdGlobal		ds.b MAX_Globals
 

@@ -241,6 +241,7 @@ System_Init:
 ;   (Video_Render)
 ;
 ; Notes:
+; - This exits INSIDE VBlank
 ; - If VDP Display is disabled all of this
 ;   will be skipped.
 ; --------------------------------------------------------
@@ -295,11 +296,8 @@ System_Render:
 		bsr	Video_MdMars_SetSync		; Set bit to wait for DREQ-RAM swap
 	endif
 .from_late:
-	if MCD|MARSCD
 		bsr	Sound_Update
-	endif
 	if MARS|MARSCD
-		bsr	Sound_Update
 		bsr	Video_MdMars_Cleanup
 	endif
 		addq.l	#1,(RAM_Framecount).w		; Count the frame.

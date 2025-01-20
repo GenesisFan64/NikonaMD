@@ -101,6 +101,9 @@ RAM_SC0_OldOption	ds.w 1
 ; 		move.l	#splitw(DEF_HSIZE_64,DEF_VRAM_FG),d3
 ; 		bsr	Video_PrintValW
 		bsr	.loop_print				; Draw counter
+; 		moveq	#0,d0
+; 		moveq	#0,d1
+; 		bsr	gemaPlaySeqAuto
 	; ----------------------------------------------
 		bsr	Video_DisplayOn				; Enable VDP Display
 		bsr	Video_FadeIn_Full			; Full fade-in w/Delay
@@ -140,7 +143,7 @@ RAM_SC0_OldOption	ds.w 1
 ; ------------------------------------------------------
 
 .loop_print:
-		lea	(RAM_Framecount),a0			; Memory location to print
+		lea	(RAM_Framecount).w,a0			; Memory location to print
 		move.l	#3,a1					; Display type 3
 		moveq	#31,d0
 		moveq	#1,d1

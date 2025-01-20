@@ -37,7 +37,7 @@ HTAG_CDVER	equ $0100|$02		; $0100|Version: $00-$FF
 ; "(C)NAME year.month"
 ; --------------------------------------------------------
 
-HTAG_DATEINFO	equ "(C)GF64 2024.???"
+HTAG_DATEINFO	equ "(C)GF64 2025.???"
 
 ; --------------------------------------------------------
 ; "Domestic" Name: Your game's name in Japan
