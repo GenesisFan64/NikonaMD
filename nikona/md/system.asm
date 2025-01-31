@@ -383,19 +383,19 @@ System_DmaExit_RAM:
 
 ; ====================================================================
 ; --------------------------------------------------------
-; Update sound/syncronize with the Z80
-; --------------------------------------------------------
-
-Sound_Update:
-		bra	gemaSendRam
-
-; ====================================================================
-; --------------------------------------------------------
 ; Init sound driver
 ; --------------------------------------------------------
 
 Sound_Init:
 		bra	gemaInit
+
+; ====================================================================
+; --------------------------------------------------------
+; Update sound/syncronize with the Z80
+; --------------------------------------------------------
+
+Sound_Update:
+		bra	gemaSendRam
 
 ; ====================================================================
 ; --------------------------------------------------------
@@ -558,7 +558,6 @@ System_Input:
 ; ----------------------------------------
 
 ; *** NOT TESTED ON HARDWARE ***
-; *** NO RELEASED BITS ***
 
 .id_03:
 		move.b	#$20,(a5)
@@ -683,11 +682,16 @@ System_Input:
 		rts
 	endif
 
-; ============================================================
+; ====================================================================
+; ----------------------------------------------------------------
+; SRAM/BRAM Support
+; ----------------------------------------------------------------
+
 ; --------------------------------------------------------
 ; System_SramInit
 ;
 ; Enable SRAM/BRAM support
+; SET_ENBLSAVE must be set to True (rominfo.asm)
 ;
 ; Input:
 ; a0 | CD/CD32X ONLY: Save data settings for BRAM
@@ -696,23 +700,24 @@ System_Input:
 ;                            ; protection)
 ;      dc.w flags:
 ;            0 | Normal
-;           -1 | Save protection
-;
+;           -1 | Protected
 ;
 ; Notes:
-; - ONLY use the RAM_SaveData section to modify
-;   your changes, then call System_SramSave to
-;   save it into SRAM/BRAM.
+; - Already called by System_Init
+; - ONLY modify the RAM_SaveData section and
+;   then call System_SramSave to save it into SRAM/BRAM.
 ;
 ; CD/CD32X ONLY:
-; - Call gemaStopAll FIRST if any track uses
-;   PCM samples
 ; - NO lowercase CHARACTERS, NO " "($20) SPACES.
 ; - BE CAREFUL CHOOSING YOUR FILENAME as it can
 ;   OVERWRITE without warning any other save.
+; - Call gemaStopAll FIRST if any track uses
+;   PCM samples
 ; --------------------------------------------------------
 
 System_SramInit:
+	if SET_ENBLSAVE
+
 	if PICO
 		nop						; Pico can't use save data
 	elseif MCD|MARSCD
@@ -721,9 +726,6 @@ System_SramInit:
 	; ------------------------------------------------
 		tst.w	(RAM_SaveEnable).w			; Already initialized?
 		bne	.already_set
-; 	if MARSCD
-; 		bset	#0,(sysmars_reg+dreqctl+1).l		; Set RV=1
-; 	endif
 		bsr	System_MdMcd_SubWait
 		lea	def_SaveInfo(pc),a5			; Init+Load SRAM/BRAM feature
 		lea	(sysmcd_reg+mcd_dcomm_m).l,a6		; Copy-paste info
@@ -734,9 +736,6 @@ System_SramInit:
 		moveq	#$08,d0					; Init BRAM support
 		bsr	System_MdMcd_SubTask
 		bsr	System_MdMcd_SubWait
-; 	if MARSCD
-; 		bclr	#0,(sysmars_reg+dreqctl+1).l		; Set RV=0
-; 	endif
 		move.w	#0,(RAM_SaveEnable).w			; Disable SAVE R/W
 		cmp.w	#-2,(sysmcd_reg+mcd_dcomm_s).l		; Got -2 No RAM / Unformatted?
 		beq.s	.cont_save
@@ -785,14 +784,23 @@ System_SramInit:
 		bra	System_SramLoad
 .already_set:
 		rts
+	endif
 
 ; --------------------------------------------------------
 ; System_SramLoad
 ;
 ; Load the SRAM/BRAM to the SAVE data buffer
+; SET_ENBLSAVE must be set to True (rominfo.asm)
+;
+; Notes:
+; CD/CD32X ONLY:
+; - Call gemaStopAll FIRST if any track uses
+;   PCM samples
 ; --------------------------------------------------------
 
 System_SramLoad:
+	if SET_ENBLSAVE
+
 	if PICO
 		nop			; Pico can't use save data
 	elseif MCD|MARSCD
@@ -875,20 +883,23 @@ System_SramLoad:
 	; ------------------------------------------------
 	endif
 		rts
+	endif
 
 ; --------------------------------------------------------
 ; System_SramSave
 ;
 ; Write the SAVE data buffer to SRAM/BRAM
+; SET_ENBLSAVE must be set to True (rominfo.asm)
 ;
-; NOTE SCD/CD32X:
-; Uses ALL mcd_dcomm_m PORTS
-;
-; Stop or Pause All GEMA Sequences that use PCM samples
-; before calling this (TODO: a PCM-block flag)
+; Notes:
+; CD/CD32X ONLY:
+; - Call gemaStopAll FIRST if any track uses
+;   PCM samples
 ; --------------------------------------------------------
 
 System_SramSave:
+	if SET_ENBLSAVE
+
 	if PICO
 		nop			; Pico can't use save data
 	elseif MCD|MARSCD
@@ -964,6 +975,7 @@ System_SramSave:
 .cant_use_c:
 	; ------------------------------------------------
 	endif
+	endif ; end SET_ENBLSAVE
 		rts
 
 ; ============================================================
@@ -986,7 +998,7 @@ System_Default:
 		dbf	d7,.clr_loop
 		bsr	Video_Clear
 		bsr	Video_Default
-		bra	Object_Init			; Reset all objects
+		bra	Objects_Init			; Reset all objects
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -998,18 +1010,14 @@ System_Default:
 ; --------------------------------------------------------
 
 VInt_Default:
-; 		movem.l	d0-a6,-(sp)
-; 		bsr	System_Input
-; 		addi.l	#1,(RAM_FrameCount).w
-; 		movem.l	(sp)+,d0-a6
-		rte
+; 		rte
 
 ; --------------------------------------------------------
 ; HBlank
 ; --------------------------------------------------------
 
 HInt_Default:
-		rte
+; 		rte
 
 ; --------------------------------------------------------
 ; External interrupt
@@ -1408,7 +1416,7 @@ System_MdMcd_GiveWRAM:
 ; d7,a0-a1,a5-a6
 ;
 ; Notes:
-; - STOP ALL tracks that use PCM samples (gemaStopAll)
+; - Uses ALL dcomm_m ports, breaks GEMA's PCM playback
 ; --------------------------------------------------------
 
 System_MdMcd_RdFile_RAM:
@@ -1474,7 +1482,7 @@ System_MdMcd_RdFile_RAM:
 ; a1   | Output location
 ;
 ; Notes:
-; - STOP ALL tracks that use PCM samples (gemaStopAll)
+; - Uses ALL dcomm_m ports, breaks GEMA's PCM playback
 ; --------------------------------------------------------
 
 System_MdMcd_RdFile_WRAM:
@@ -1877,18 +1885,18 @@ System_SetDataBank:
 ; ----------------------------------------------------------------
 
 ; --------------------------------------------------------
-; Object_Init
+; Objects_Init
 ;
 ; Reset Objects system
 ; --------------------------------------------------------
 
-Object_Init:
+Objects_Init:
 		move.l	#0,(RAM_CurrObjList).w
 		move.w	#0,(RAM_CurrObjNum).w
 		rts
 
 ; --------------------------------------------------------
-; Object_Enable
+; Objects_Enable
 ;
 ; Enable Objects on the current screen
 ;
@@ -1897,7 +1905,7 @@ Object_Init:
 ; d0.w | Number of Objects to use
 ; --------------------------------------------------------
 
-Object_Enable:
+Objects_Enable:
 		movem.l	d7/a6,-(sp)
 		move.l	a0,a6
 		move.w	d0,d7
@@ -1912,18 +1920,18 @@ Object_Enable:
 		rts
 
 ; --------------------------------------------------------
-; Object_Run
+; Objects_Run
 ;
 ; Process ALL Objects
 ;
-; Breaks:
+; Uses:
 ; ALL
 ;
 ; Notes:
 ; - ONLY CALL THIS ONCE PER FRAME
 ; --------------------------------------------------------
 
-Object_Run:
+Objects_Run:
 		move.l	(RAM_CurrObjList).w,d7
 		beq.s	.invld_num
 		move.l	d7,a6
@@ -1944,7 +1952,7 @@ Object_Run:
 		rts
 
 ; --------------------------------------------------------
-; Object_Set, Object_Make
+; Objects_Set, Objects_Make
 ;
 ; Set a new object into a specific slot.
 ;
@@ -1965,7 +1973,7 @@ Object_Run:
 ; called this.
 ; --------------------------------------------------------
 
-Object_Set:
+Objects_Set:
 		movem.l	d6-d7/a5-a6,-(sp)
 		movea.l	(RAM_CurrObjList).w,a6
 		moveq	#0,d7
@@ -1973,7 +1981,7 @@ Object_Set:
 		mulu.w	#obj_len,d7
 		adda	d7,a6
 		bra.s	objSet_Go
-Object_Make:
+Objects_Make:
 		movem.l	d6-d7/a5-a6,-(sp)
 		movea.l	(RAM_CurrObjList).w,a6
 		move.w	(RAM_CurrObjNum).w,d7
@@ -2010,13 +2018,11 @@ objSet_Go:
 
 ; ====================================================================
 ; --------------------------------------------------------
-; Object subroutines
-;
-; These can ONLY be called on the current object's code
+; Object functions
 ; --------------------------------------------------------
 
 ; --------------------------------------------------------
-; object_ResetVars
+; object_Reset
 ;
 ; Resets the current object's memory, call this
 ; at very beginning of your object's init code
@@ -2025,7 +2031,7 @@ objSet_Go:
 ; a6 | This object
 ; --------------------------------------------------------
 
-object_ResetVars:
+object_Reset:
 		movem.l	d6-d7/a5,-(sp)
 		lea	obj_ram(a6),a5
 		move.w	#(obj_len-obj_ram)-1,d6

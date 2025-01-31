@@ -27,7 +27,7 @@ zDrvMaxCmnd	equ $20;MAX_ZCMND		; Command fifo size
 ; Labels
 ; --------------------------------------------------------
 
-RAM_ZCdFlagD	equ RAM_SoundBuff			; transferRom flag shared with Z80
+RAM_ZCdFlagD	equ RAM_ExReserved+$FF			; transferRom flag shared with Z80
 
 ; ====================================================================
 ; --------------------------------------------------------

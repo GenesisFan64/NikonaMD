@@ -6,12 +6,12 @@
 ; Genesis, Sega CD, Sega 32X, Sega CD32X and Sega Pico.
 ;
 ; DO NOT MODIFY THE nikona FOLDER AS IT WILL GET UPDATED WITH THE
-; LATEST BUGFIXES AND CHANGES WITHOUT INTERFERING YOUR GAME CODE
+; LATEST CHANGES AND BUGFIXES WITHOUT INTERFERING YOUR GAME CODE
 ; ===========================================================================
 
 ; ====================================================================
 ; ----------------------------------------------------------------
-; QUICK SETTINGS
+; SETTINGS
 ; ----------------------------------------------------------------
 
 SET_FIRSTSCRN	equ 0		; Starting screen mode number on boot
@@ -45,7 +45,7 @@ SET_FIRSTSCRN	equ 0		; Starting screen mode number on boot
 ; GLOBAL variables
 ; ----------------------------------------------------------------
 
-		memory RAM_MdGlobal
+		memory RAM_Globals
 	; ------------------------------------------------
 		include "game/globals.asm"
 		align 2
@@ -54,7 +54,7 @@ sizeof_MdGlbl	ds.l 0
 	if (sizeof_MdGlbl&1 == 1)
 		error "GLOBALS ARE MISALIGNED"
 	endif
-		erreport "USER Globals",(sizeof_MdGlbl-RAM_MdGlobal),MAX_Globals	; Report error if ran out
+		erreport "USER Globals",(sizeof_MdGlbl-RAM_Globals),MAX_Globals	; Report error if ran out
 		endmemory
 
 ; ====================================================================
@@ -245,7 +245,7 @@ Md_ReadModes:
 
 	if MCD|MARS|MARSCD
 .end:
-		erreport "NIKONA RAM-CODE",(.end-RAM_SystemCode),MAX_SysCode
+		erreport "NIKONA-LIB RAM CODE",(.end-RAM_SystemCode),MAX_LibCode
 		dephase
 		phase (.end-RAM_SystemCode)+Md_SysCode
 	endif
@@ -385,7 +385,7 @@ MARS_RAMCODE_EOF:
 ; ROM-only DMA-graphics
 ; --------------------------------------------------------
 
-		include "game/data/md/ROM_dma_vdp.asm"
+		include "game/data/md/ROM_dmavdp.asm"
 
 ; --------------------------------------------------------
 ; ROM-only 32X data

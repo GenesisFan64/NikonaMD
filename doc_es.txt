@@ -1,0 +1,426 @@
+---------------------------------------------------------------------------------------------------------
+Nikona v0.1 documentation ES WIP
+---------------------------------------------------------------------------------------------------------
+
+Este SDK fue diseñado para todos los sistemas de la familia Genesis:
+
+- Genesis (base)
+- Sega CD
+- Sega 32X
+- Sega CD32X
+- Pico *parcial*
+
+El proposito de este SDK es solo utilizar el 68000 principal para hacer tus juegos, no necesitas saber
+de Z80 para el sonido o SH2 en 32X.
+
+Dependiendo de que add-on tengas insertado puedes controlar sus caracteristicas especiales desde
+el 68000 principal del Genesis, como las Stamps del SCD o modelos 3D del 32X.
+
+--------------------------------------------------------
+GUIA DE CARPETAS
+--------------------------------------------------------
+
+/game
+  /code           El codigo de tu juego separados por modos de pantalla ("CODE")
+  /data           Todos los materiales visuales para tu juego
+  globals.asm     Tus variables globales siempre disponibles: $1000 bytes
+  incl_code.asm   Todos los includes de las pantallas "CODE"
+  incl_data.asm   Todos los includes de los bloques de "DATA"
+  incl_list.asm   Las dos listas de pantallas "CODE" y bloques "DATA"
+  iso_files.asm   Los "CODE" y "DATA" almacenados en el CD/CD32X
+  savestruct.asm  La estructura para los archivos de guardado SRAM/BRAM
+
+/nikona		   Todo relacionado con Nikona va aquí ** NO MODIFICAR NADA **
+/out		   Tus ROMs e ISOs ya compilados
+  /emu             ROMs que solo funcionan en emuladores
+  /realhw          ROMs que solo funcionan en hardware real (el importante)
+/sound
+  /drv             El driver GEMA van aqui (Z80, macros y funciones)
+  /ins             Todos los instrumentos FM, DAC, PCM, PWM (Los PSG van dentro de los seq)
+  /seq             Todas las sequencias (Musica y SFX)
+  data.asm         Banco de sonido predeterminado: Los sequences, ins. FM y DAC van aqui
+  ROM_smpl_pwm.asm Datos de samples PWM SOLO PARA 32X CARTUCHO
+  smpl_pcm.asm     Datos de samples PCM para Sega CD
+  smpl_pwm.asm     Datos de samples PWM para ambos cartucho y CD32X (MUY poco espacio)
+
+/tools		   Ensamblador y scripts python3
+build.bat	   Batch para compilar ROMs desde Windows
+build.sh	   Shell script para compilar ROMs desde Linux
+doc_es.txt	   (Este archivo)
+main.asm           Archivo pricipal para compilar todos los ROMs
+rominfo.asm        Información de tu ROMs incluyendo soporte para SRAM/BRAM
+
+--------------------------------------------------------
+
+Para compatibilidad con todos los sistemas se ha limitado el codigo y
+los datos en dos secciones:
+
+ 0000 + ---------- +       00000 + --------- +
+      | Tu codigo/ |             | Data      |
+      | pantalla   | ---->       | Block     |
+      | "CODE"     |             | "DATA"    |
+ 77FF + ---------- +             |           |
+            ^                    |           |
+            |                    |           |
+            |                    |           |
+            |                    |           |
+            |              3FFFF + --------- +
+            |
+            |
+      + ------------------------------------ +
+      | CODE Screens and DATA blocks stored  |
+      | or Cartridge or DISC                 |
+      + ------------------------------------ +
+
+----------------------------------------------------------------
+CODE en /game/code
+----------------------------------------------------------------
+
+                                 Sizes:
+      + ------------------ +
+      | Tu pantalla        | \
+      | "CODE"             |  >-- $77FF
+      |                    | /
+      + ------------------ +
+      | Memoria temporal   | \
+      | para esta pantalla |  >-- $2000
+      | RAM_ScrnBuff       | /
+      + ------------------ +
+      | Variables GLOBAL   | \
+      |                    |  >-- $1000
+      | RAM_Globals        | /
+      + ------------------ +
+
+Los "CODE" son basicamente los modos de pantalla que pueden ser entre el Titulo, tu motor de juego
+principal, etc.
+
+Hay $2000 bytes de memoria temporal (RAM_ScrnBuff) y $1000 bytes de Globales (RAM_Globals)
+- La memoria temporal es donde pones tu buffer del nivel y la lista de objectos, esta memoria se
+limpia cada vez que cambias de pantalla.
+- Los Globales se mantienen siempre en cada cambio de pantalla, puedes poner los puntos,
+vidas, el numero del nivel, etc.
+
+El CODE está limitado a $77FF bytes debido a que en CD, 32X y CD32X el codigo se carga en RAM.
+En Genesis y Pico el codigo se lee desde ROM pero si te pasas del limite romperás compatibilidad con
+los otros sistemas, si no te interesa compilar a CD, 32X y/o CD32X puedes modificar build.bat o build.sh
+dependiendo de tu OS pero ya no tendrás vuelta atrás hasta que vuelvas a organizar todo el codigo.
+
+------------------------------------------------
+AÑADIENDO PANTALLAS
+------------------------------------------------
+
+Archivos a checar:
+/game/incl_list.asm     Lista de los CODE en orden (.screen_list)
+/game/incl_code.asm     Todos los includes del codigo
+/game/iso_files.asm     Archivos en el CD
+/game/code/template.asm Pantalla de ejemplo
+/main.asm               Un Variable para elejir la primera pantalla
+
+- En el archivo incl_list.asm las pantallas están ordenadas por ID, por ejemplo
+vamos a agregar la pantalla numero $01 (en hexadecimal)
+Para CD/CD32X el nombre del archivo ISO debe estár formato 8.3 y de preferencia
+en MAYUSCULAS
+
+        dc.l Md_Screen00	; ROM label
+        dc.b "SCREEN00.BIN"	; ISO Filename
+        dc.l Md_Screen01        <-- AQUI
+        dc.b "SCREEN01.BIN"
+
+- Ahora en incl_code.asm incluye tu pantalla usando el macro code_bank, si es posible organiza las
+pantallas en orden para mejor compatibilidad con CD/CD32X para no estresar mucho el laser, tambien
+incluye una etiqueta de final del codigo:
+
+	code_bank Md_Screen01,Md_Screen01_e,"game/code/template.asm"
+
+Para CD/CD32X: hay que agregar el archivo ISO usando este macro:
+
+        fs_file "SCREEN01.BIN",Md_Screen01,Md_Screen01_e
+
+- Si lo deseas en main.asm hay un variable para elejir que pantalla usar al inicio, te puede servir
+para probar nuevos modos sin tener que pasar por las otras pantallas:
+
+SET_FIRSTSCRN   equ 0
+
+------------------------------------------------
+NOTAS
+------------------------------------------------
+
+Dentro del codigo de tu pantalla, para cambiar a otra escribe el nuevo numero seguido de un rts:
+
+	move.w	#scrn_num,(RAM_ScreenMode).w
+	rts
+
+Cambiar pantallas es al instante en Genesis, 32X y Pico, pero
+en CD/CD32X las pantallas son copiadas del disco en donde le tomará unos
+segundos en cargar.
+
+----------------------------------------------------------------
+DATA en /game/data
+----------------------------------------------------------------
+
+Genesis y Pico: Todos los 2MB/4MB: 8/10 bancos "DATA" visibles
+      CD/CD32X: $200000 (Word-RAM 256KB)
+  32X Cartucho: $900000 (1MB) 4 bancos "DATA" visibles
+
+             CD / CD32X            32X Cartucho           Genesis y
+             (Word-RAM)             ($900000)             Pico
+     200000 + --------- +  900000 + ---------- +  000000 + ---------- +
+            | Data      |         | Main       |         | First      |
+            | Bank      |         | "DATA"     |         | "DATA"     |
+            | "DATA"    |         |            |         |            |
+     23FFFF + --------- +  940000 + ---------- +  040000 + ---------- +
+                  ^               |            |         |            |
+                  |               |            |         |            |
+                  |               |            |         |            |
+                  |        980000 + ---------- +  080000 + ---------- +
+                  |               |            |             '''''''
+                  |               |            |         Hasta 16 bancos
+                  |               |            |         "DATA" en todo
+                  |        9C0000 + ---------- +          los 4MB's de
+                  |               | Last       |               ROM
+                  |               | "BANK"     |
+                  |               |            |
+                  |        9FFFFF + ---------- +
+                  |                  '''''''''
+                  |                 Otros bancos
+                  |                 no visibles
+                  |                   en ROM
+                  |
+                  |
+                  |
+
+              Bancos de DATA en Cartucho o Disco:
+            + ---------------- + ---------------- +
+            | Default bank     | CD               |
+            | (and all sound)  | Stamps           |
+            + ---------------- + ---------------- +
+            | More VDP stuff   | 32X gfx          |
+            |                  | and 3D           |
+            + ---------------- + ---------------- +
+            | Etc...           |                  |
+            + ---------------- + ---------------- +
+
+Los DATA son basicamente todo lo necesario para tu juego:
+Graficos, Paletas, tus layouts de niveles, etc.
+
+Si se te acaba el espacio puedes agregar otro y cambiarlo dependiendo
+del sistema que estés corriendo.
+
+La limitación a $40000 bytes fue para tener compatibilidad con CD/CD32X, SI ES posible saltarse el
+limite en Genesis/Pico (2MB/4MB) y 32X (max. 1MB, 4 bancos) pero roperás compatibilidad con CD/CD32X,
+no hay vuelta atrás hasta que vuelvas a reorganizar todo con el limite de los $40000 bytes.
+
+------------------------------------------------
+AÑADIENDO BANCOS
+------------------------------------------------
+
+Archivos a checar:
+/game/incl_list.asm     Lista de los DATA (disc_banklist)
+/game/incl_data.asm     Todos los includes del codigo
+/game/iso_files.asm     Archivos en el CD
+
+** ESTA PARTE ES NECESARIA PARA CD/CD32X **
+
+Casi parecido a como añades los CODE, en incl_list.asm hay una lista de bancos a usar junto
+con el nombre del archivo en disco:
+
+		dc.l DATA_BANK0		; Start Label
+		dc.b "BNK_MAIN.BIN"	; ISO filename
+		dc.l DATA_BANK1		<-- AQUI
+		dc.b "BNK_NEW1.BIN"
+
+Puedes ponerlo en cualquier lugar de la lista, pero NO quitar el -1 porque es lo que indica el fin
+de la lista.
+
+------------------------------------------------
+NOTAS
+------------------------------------------------
+
+Aunque el Genesis y Pico no usen bancos igual sigue utilizando System_SetDataBank aunque en estos
+no usen bancos, PUEDE que en el futuro se implemente el Sega Mapper "SSF2" (No aplica para Pico)
+
+------------------------------------------------
+LISTA DE CARPETAS dentro de /data
+
+* ESTO PUEDE CAMBIAR EN PROXIMAS VERSIONES *
+------------------------------------------------
+
+/mars           * Contenido para 32X:
+  /maps                 Mapas para el modo 2D
+  /objects              Modelos 3D para el modo 3D
+  /screens              Pantallas estaticas
+  /sprites              "Super Sprites" para el modo 2D
+  ROM_mars.asm          Datos para el lado SH2 SOLO PARA CARTUCHO, todos los 4MB del ROM disponibles pero solo si RV=0
+
+/mcd            * Contenido para CD/CD32X:
+  /stamps               Stamps de rotación y scaling
+
+/md             * Carpeta para base Genesis:
+  /maps                 Mapas VDP
+  /sprites              Sprites VDP con sus mapas
+  /tilesets             Graficos VDP generales
+  ROM_bank0.asm         Datos en Genesis SOLO PARA CARTUCHO max. 1MB para compatibilidad con 32X
+  ROM_bank1.asm         (Otros bancos 1MB reservados)
+  ROM_bank2.asm         ''
+  ROM_bank3.asm         ''
+  ROM_dmavdp.asm        Graficos VDP SOLO PARA CARTUCHO (incluye Pico)
+
+------------------------------------------------
+PRECAUCIONES
+------------------------------------------------
+
+** CD y CD32X **
+
+- Cambiar bancos de DATA es LENTO, además que al cargar del disco los sectores se escriben en $920 bytes,
+así que el area $3F800-$3FFFFF no se puede utilizar ya que los $120 bytes extras se salen del area del
+Word-RAM y no sé sabe que podría pasarle al hardware del CD/CD32X.
+
+- Si vas a usar los Stamps: el DATA quedará INUTILIZABLE mientras Sub-CPU genera las Stamps, esto también
+afecta TODO EL SONIDO
+PERO el driver GEMA tiene soporte para leer desde RAM: puedes hacer entre una copia de lista de sequencia o
+solo el unico sequence que vayas a utilizar e incluirlo dentro del CODE (que está en RAM) y cambiar la dirección
+de las lista de sequencias llamando gemaSetMasterList
+Durante tu codigo tendrás que llamar Sound_Update en todo momento para que el Z80 pueda comunicarse
+con 68K y copiar los datos.
+
+- Si NO estás utilizando Stamps y los $2000 bytes temporales se hacen poco puedes utilizar algún
+area libre del Word-RAM, asegurandote que el permiso SIEMPRE lo tenga el MAIN-CPU.
+
+** 32X Cartucho **
+
+En 32X si es posible de correr el CODE directo del ROM en el area $880000, pero causaría estos problemas:
+- EL SH2 pierde velocidad ya que estaría peleando por el ROM cada vez que el 68K lee el ROM de su lado
+  esto incluye el mismo codigo que va corriendo.
+- Las transferencias DMA de ROM-to-VRAM van a dejar de funcionar porque su circuito no puede llegar a
+  las nuevas direcciones de memoria ($880000 y $900000), la solucion a esto es el RV bit.
+  Pero al utilizar el RV bit causa estos nuevos problemas:
+  -> Si el codigo estaba corriendo en $880000 y/o $900000 y activas el RV bit el codigo desaparecerá y
+     crashea todo el sistema, debido a que el ROM cambió de dirección a su posición original
+     El truco aqui es que el codigo que enciende y apaga el bit RV debe estar en RAM, primero RV=1
+     haces el transfer (el CPU se congela) y al salir apagas RV=0
+     (NOTA: Las transferencias RAM-to-VDP NO necesitan el RV)
+  -> El SH2 no puede ver el ROM mientras está activo
+
+Para hacerla facil mejor utilizo el RAM al mismo estilo que CD/CD32X
+
+----------------------------------------------------------------
+FUNCIONES DE NIKONA
+
+ nikona/md/system.asm
+ nikona/md/video.asm
+----------------------------------------------------------------
+
+--------------------------------------------------------
+** Genesis/Pico side **
+System_Init
+System_Render
+System_DmaEnter_ROM, System_DmaExit_ROM, System_DmaEnter_RAM, System_DmaExit_RAM
+System_Input
+System_SramInit, System_SramLoad, System_SramSave
+System_Default
+System_Random, System_Random_Seed
+System_DiceRoll, System_DiceRoll_Seed
+System_SineWave, System_SineWave_Cos
+System_BCD_AddB, System_BCD_AddW, System_BCD_AddL, System_BCD_SubB, System_BCD_SubW, System_BCD_SubL
+System_SetIntJumps
+System_SetDataBank
+Sound_Init
+Sound_Update
+
+Video_Init
+Video_Default
+Video_Render
+Video_BuildSprites
+Video_Clear
+Video_ClearScreen
+Video_DisplayOn, Video_DisplayOff
+Video_DmaOn, Video_DmaOff
+Video_IntEnable
+Video_Resolution
+Video_UpdMapVram
+Video_SetMapSize
+Video_LoadArt
+Video_LoadArt_List
+Video_Fill
+Video_Copy
+Video_MakeDmaEntry
+Video_LoadMap, Video_LoadMapV
+Video_RunFade
+Video_WaitFade
+Video_FadeIn_Full
+Video_FadeOut_Full
+Video_MakeFade, Video_MdMars_MakeFade
+Video_LoadPal, Video_FadePal
+Video_LoadPal_List, Video_FadePal_List
+Video_PrintInit, Video_PrintInitW
+Video_Print, Video_PrintW
+Video_PrintVal, Video_PrintValW
+Video_SetSpr, Video_MakeSpr
+Video_SetSprMap, Video_MakeSprMap
+Video_SetSprMap_DMA, Video_MakeSprMap_DMA
+
+; ----------------------------------------------------------------
+** w/SEGA CD attached **
+
+System_MdMcd_Interrupt
+System_MdMcd_SubWait
+System_MdMcd_SubEnter
+System_MdMcd_SubTask
+System_MdMcd_WaitWRAM
+System_MdMcd_CheckWRAM
+System_MdMcd_GiveWRAM
+System_MdMcd_RdFile_RAM
+System_MdMcd_Trnsfr_WRAM
+System_MdMcd_CheckHome
+System_MdMcd_ExitShell
+System_MdMcd_CddaPlay
+System_MdMcd_CddaPlayL
+System_MdMcd_CddaStop
+System_MdMcd_CddaFade
+
+Video_MdMcd_StampInit
+Video_MdMcd_StampRender
+Video_MdMcd_StampEnable
+Video_MdMcd_StampDisable
+Video_MdMcd_StampDotMap
+Video_MdMcd_SetStamp, Video_MdMcd_MakeStamp
+Video_MdMcd_StampMap
+Video_MdMcd_StampReset
+
+; ----------------------------------------------------------------
+** w/SEGA 32X attached **
+
+System_MdMars_SendData
+System_MdMars_Update
+
+Video_MdMars_SetSync
+Video_MdMars_WaitSync
+Video_MdMars_WaitFrame
+Video_MdMars_Cleanup
+Video_MdMars_PalBackup
+
+Video_MdMars_VideoMode, Video_MdMars_VideoOff
+Video_MdMars_LoadVram
+Video_MdMars_LoadMap
+Video_MdMars_SetSpr2D, Video_MdMars_MakeSpr2D
+Video_MdMars_SetSpr3D, Video_MdMars_MakeSpr3D
+Video_MdMars_RunFade
+Video_MdMars_LoadPal, Video_MdMars_FadePal
+Video_MdMars_LoadPal_List, Video_MdMars_FadePal_List
+
+; ----------------------------------------------------------------
+; Objects system (MD side)
+
+Objects_Init
+Objects_Enable
+Objects_Run
+Objects_Set
+Objects_Make
+
+* Inside the object code:
+object_Reset
+object_ResetAnim
+object_Speed
+object_Animate
+object_Touch
+object_MdMars_GetSprInfo

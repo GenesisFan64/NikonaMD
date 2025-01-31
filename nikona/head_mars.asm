@@ -238,7 +238,7 @@ MD_ErrorTrap:
 
 ; ====================================================================
 ; ----------------------------------------------------------------
-; HOT START RAM-CODE
+; HOT START RAM-CODE PATCH
 ; ----------------------------------------------------------------
 
 MD_HotStRam:
@@ -247,12 +247,12 @@ MD_HotStRam:
 		lea	(vdp_data).l,a6
 		lea	(sysmars_reg).l,a5
 	; ------------------------------------------------
-	; If the 32X get overloaded with interrupts
+	; If the 32X gets overloaded with interrupts
 	; or flipping the RV bit a lot (heavy VDP DMA
 	; transfers) it shuts itself OFF on reset,
-	; The SVDP will remain visible though.
+	; The SVDP remains visible though...
 	; ------------------------------------------------
-		btst	#0,adapter+1(a5)		; 32X STILL enabled?
+		btst	#0,adapter+1(a5)		; 32X didn't break?
 		bne.s	MD_MarsStartOk
 		move.b	#%01,adapter+1(a5)		; Re-enable and Reset SH2
 MD_MarsRestart:
@@ -268,7 +268,7 @@ MD_MarsStartOk:
 ; 		bne.s	.wait_mstr
 ; .wait_slv:	cmp.l	#"S_OK",comm4(a5)
 ; 		bne.s	.wait_slv
-		jmp	($880000|MD_HotStart).l		; Jump to Hot start as normal
+		jmp	($880000|MD_HotStart).l		; Jump to HotStart as normal
 MD_HotStRam_e:
 		align 2
 
@@ -280,7 +280,7 @@ MD_HotStRam_e:
 MD_Init:
 		move.w	#$2700,sr
 		lea	MD_HotStRam(pc),a0		; Copy HotStart RAM jump
-		lea	($FFFFFD00).w,a1
+		lea	(RAM_ExReserved).w,a1		; Use reserved area for this patch
 		move.w	#((MD_HotStRam_e-MD_HotStRam)/2)-1,d0
 .copy_code:
 		move.w	(a0)+,(a1)+
@@ -293,7 +293,7 @@ MD_Init:
 
 ; ====================================================================
 ; ----------------------------------------------------------------
-; COLD Init
+; From hot-start
 ; ----------------------------------------------------------------
 
 MD_HotStart:

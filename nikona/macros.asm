@@ -13,12 +13,10 @@ MAX_WramBank	equ $3F800	; Maxium WRAM available to use + filler $120
 ; ------------------------------------------------------------
 
 splitw		function l,r,(((l))<<16&$FFFF0000|((r))&$FFFF)		; Two WORDS stored in a single LONG: $11112222
-
-; Common functions
 cell_num	function a,(a<<5)					; Value in VDP cells
-color_indx	function a,a<<1						; Applies to both VDP and SuperVDP
-pstr_mem	function a,b,((a|$80)<<24)|b&$FFFFFF			; PRINT memory: pstr_mem(type,mem_pos)
+; pstr_mem	function a,b,((a|$80)<<24)|b&$FFFFFF			; PRINT memory: pstr_mem(type,mem_pos)
 full_loc	function a,-(-a)&$FFFFFFFF
+vdp_wrtl	function a,((a>>14)&3)|(((a&$3FFF)|$4000)<<16)
 
 ; ====================================================================
 ; ------------------------------------------------------------

@@ -2,13 +2,14 @@
 ; ----------------------------------------------------------------
 ; Genesis/Pico 68000 RAM section (SCD: "MAIN-CPU")
 ;
-; Used RAM areas:
-; $FFF700-$FFFC00 | Used by Boot ROM *
-; $FFFC00-$FFFD00 | Boot ROM's stack area a7
-; $FFFD00-$FFFDB3 | RESERVED for the Sega CD Vector jumps
-; $FFFDB4-$FFFFFF | Used by Boot ROM *
-;
-; * Free on Cartridge
+; Reserved RAM areas:
+; $FFFD00-$FFFDEF |  SCD: Boot-ROM's Vector jumps ($FFFD00-$FFFDB3)
+;                 |  32X: HOT-START jump code
+;                 | PICO: 68K Sound driver buffer (TODO)
+;                 | Else: Unused, could be used for bankswitching
+;                 |       or any modern-day cartridge chip
+; $FFFDF0-$FFFDFF | Byte writes from Z80
+; $FFFE00-$FFFFFF | Stack
 ; ----------------------------------------------------------------
 
 ; ====================================================================
@@ -16,14 +17,14 @@
 ; 68000 RAM SIZES (MAIN-CPU in SegaCD/CD32X)
 ; ----------------------------------------------------------------
 
-MAX_Globals		equ $1000	; USER Global variables
-MAX_ScrnBuff		equ $2000	; Current Screen's buffer
-MAX_SysCode		equ $3000	; SCD/32X/CD32X: Nikona lib
-MAX_UserCode		equ $7800	; SCD/32X/CD32X: Current SCREEN's CODE+small DATA
+MAX_Globals	equ $1000	; USER Global variables
+MAX_ScrnBuff	equ $2000	; Current Screen's temporal memory
+MAX_LibCode	equ $3000	; SCD/32X/CD32X: Nikona lib
+MAX_UserCode	equ $7800	; SCD/32X/CD32X: Current SCREEN's CODE+small DATA
 
 ; ====================================================================
 
-SET_RAMLIMIT		equ $00FFFC00
+SET_RAMLIMIT	equ $FFFD00
 
 ; ===========================================================================
 ; ----------------------------------------------------------------
@@ -32,7 +33,7 @@ SET_RAMLIMIT		equ $00FFFC00
 
 			memory $FFFF0000
 		if MCD|MARS|MARSCD
-RAM_SystemCode		ds.b MAX_SysCode
+RAM_SystemCode		ds.b MAX_LibCode
 RAM_UserCode		ds.b MAX_UserCode
 sizeof_thisram		ds.l 0
 		endif
@@ -45,7 +46,7 @@ sizeof_thisram		ds.l 0
 			memory $FFFFB000	; Genesis/Pico ONLY
 		endif
 RAM_ScrnBuff		ds.b MAX_ScrnBuff
-RAM_MdGlobal		ds.b MAX_Globals
+RAM_Globals		ds.b MAX_Globals
 
 ; ----------------------------------------
 ; * FIRST PASS LABELS *
@@ -68,6 +69,7 @@ sizeof_MdRam		ds.l 0
 	endif
 ; ------------------------------------------------
 			endmemory
+
 		if (sizeof_MdRam&$FF0000 == 0) | (sizeof_MdRam&$FFFFFF>(SET_RAMLIMIT))
 			error "RAN OUT OF GENESIS/MAIN RAM FOR THIS SYSTEM"
 		endif
@@ -110,6 +112,5 @@ sizeof_mdmisc		ds.l 0
 ; Fixed areas
 ; --------------------------------------------------------
 
-RAM_Stack		equ RAM_MegaCd		; <-- Goes backwards
-RAM_MegaCd		equ $FFFFFD00		; SCD's vector jumps
-RAM_SoundBuff		equ $FFFFFF00
+RAM_ExReserved		equ $FFFFFD00	; $100 bytes
+RAM_Stack		equ 0		; <-- Goes backwards

@@ -96,6 +96,6 @@ HTAG_REGIONS	equ "F               "
 ; --------------------------------------------------------
 
 SET_ENBLSAVE	equ True		; Disable/Enable saving support
-SET_SRAMSIZE	equ $200		; SRAM/BRAM filesize
+SET_SRAMSIZE	equ $100		; SRAM/BRAM filesize
 HTAG_CDSAVE	equ "NIKONACD___"	; SCD internal save name
 HTAG_MARSCDSAV	equ "NIKONACD32X"	; CD32X internal save name

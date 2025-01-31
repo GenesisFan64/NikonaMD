@@ -123,7 +123,7 @@ sizeof_thisbuff		ds.l 0
 ; 		bsr	.steal_vars
 	; ----------------------------------------------
 		bsr	Video_DisplayOn
-		bsr	Object_Run
+		bsr	Objects_Run
 		bsr	Video_BuildSprites
 		bsr	System_Render
 		bsr	Video_FadeIn_Full
@@ -137,7 +137,7 @@ sizeof_thisbuff		ds.l 0
 		bsr	System_Render
 ; 		bsr	.show_cursor
 		bsr	.gema_view
-		bsr	Object_Run
+		bsr	Objects_Run
 		bsr	Video_BuildSprites
 
 	; NEW controls
@@ -195,15 +195,13 @@ sizeof_thisbuff		ds.l 0
 		move.w	pad_press(a6),d7
 		andi.w	#JoyC+JoyZ,d7
 		beq.s	.c_press
-		lea	(RAM_GemaIndx).w,a5
-
-		move.w	(a5)+,d2
+		move.w	(RAM_GemaIndx).w,d2
 		andi.w	#JoyZ,d7
 		beq.s	.not_auto
 		moveq	#-1,d2
 .not_auto:
-		move.w	(a5)+,d0
-		move.w	(a5)+,d1
+		move.w	(RAM_GemaSeq).w,d0
+		move.w	(RAM_GemaBlk).w,d1
 		bsr	gemaPlaySeq
 
 		move.w	(RAM_GemaSeq).w,d0	; External beats
@@ -218,9 +216,8 @@ sizeof_thisbuff		ds.l 0
 		move.w	pad_press(a6),d7
 		andi.w	#JoyB,d7
 		beq.s	.b_press
-		lea	(RAM_GemaIndx).w,a5
-		move.w	(a5)+,d1
-		move.w	(a5)+,d0
+		move.w	(RAM_GemaSeq).w,d0
+		move.w	(RAM_GemaIndx).w,d1
 		bsr	gemaStopSeq
 .b_press:
 		move.w	pad_press(a6),d7
@@ -494,15 +491,15 @@ sizeof_thisbuff		ds.l 0
 .gema_viewinit:
 		lea	(RAM_ThisObjList).w,a0
 		move.w	#4,d0
-		bsr	Object_Enable
+		bsr	Objects_Enable
 	if VIEW_FAIRY
 		move.l	#obj_Fairy,d0		; <-- If you don't like the fairies comment out or
 		moveq	#0,d1			; delete all of this
-		bsr	Object_Make		;
+		bsr	Objects_Make		;
 		addq.w	#1,d1			;
-		bsr	Object_Make		;
+		bsr	Objects_Make		;
 		addq.w	#1,d1			;
-		bsr	Object_Make		; <-- until here
+		bsr	Objects_Make		; <-- until here
 	endif
 
 	if VIEW_GEMAINFO
@@ -691,11 +688,6 @@ sizeof_thisbuff		ds.l 0
 		adda	#4,a3
 		dbf	d7,.show_table
 		rts
-
-; ====================================================================
-; ------------------------------------------------------
-; Objects
-; ------------------------------------------------------
 
 ; ====================================================================
 ; ------------------------------------------------------

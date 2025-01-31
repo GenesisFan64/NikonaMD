@@ -2,8 +2,8 @@
 ; -------------------------------------------------------------------
 ; 32X BOOT FOR SEGA CD, modified from original.
 ;
-; SH2 CODE MUST BE ALREADY LOADED ON WORD-RAM AND WITH
-; PERMISSION SET TO MAIN.
+; SH2 CODE MUST BE ALREADY LOADED ON WORD-RAM WITH THE
+; WORD-RAM ACCESS SET TO MAIN
 ; -------------------------------------------------------------------
 
 		lea	(sysmars_reg).l,a5
@@ -23,7 +23,6 @@
 		move.l	d0,comm0(a5)
 		move.l	d0,comm4(a5)
 		move.b	#%11,adapter+1(a5)	; Adapter enable + Cancel/Stop SH2 Reset
-; 		vdp_showme $0EE
 .fm3
 		bclr.b	#7,(a5)			; Set SVDP to Genesis
 		bne.b	.fm3
@@ -56,11 +55,11 @@
 		move.l	d0,$28(a5)		; 8
 		move.l	d0,$2C(a5)		; 12
 		move	#0,ccr			; Complete
-		bra.s	IcdAllEnd
+		bra	IcdAllEnd
 Hot_Start:
 		move.w	d0,6(a5)		; DREQ Control Reg.
 		move.w	#$8000,d0
-		bra.s	IcdAllEnd
+		bra	IcdAllEnd
 
 ; ----------------------------------------------------------------
 ; No 32X detected
@@ -68,7 +67,9 @@ Hot_Start:
 
 MarsError:
 		move	#1,ccr			; Return error carryflag
-		rts
+		move.l	#$C0000000,(vdp_ctrl).l
+		move.w	#$00E,(vdp_data).l
+		bra	*
 
 ; ----------------------------------------------------------------
 ; Clear framebuffer
@@ -127,7 +128,7 @@ PaletteClear:
 ; ===================================================================
 
 IcdAllEnd:
-		bcs	*				; <-- Nothing
+; 		bcs	MarsError			; <-- Nothing
 		tst.w	d0
 		bmi	.soft_reset
 

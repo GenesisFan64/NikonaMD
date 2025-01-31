@@ -246,7 +246,6 @@ Video_Init:
 ; Video_Default
 ;
 ; Reset VDP settings to defaults
-; SCD: Clears ALL Stamps
 ; --------------------------------------------------------
 
 Video_Default:
@@ -259,10 +258,13 @@ Video_Default:
 		move.w	#DEF_VRAM_HSCRL,(RAM_VdpVramHScrl).w
 		bsr	Video_UpdMapVram
 		bsr	Video_UpdSprHVram
-		moveq	#%0001,d0				; Size H64 V32
+		move.w	d0,-(sp)
+		move.w	#%0001,d0				; Size H64 V32
 		bsr	Video_SetMapSize
-		moveq	#%0001,d0				; Resolution 320x224
-		bra	Video_Resolution
+		move.w	#%0001,d0				; Resolution 320x224
+		bsr	Video_Resolution
+		move.w	(sp)+,d0
+		rts
 
 ; ====================================================================
 ; --------------------------------------------------------
@@ -697,7 +699,11 @@ vid_WrtReg01:
 ; Video_IntEnable
 ;
 ; Enable or Disable VBlank, HBlank and
-; External interrupts
+; External interrupts.
+;
+; This is for Enabling and Disabling interrupts generated
+; by the VDP, to set your interrupt locations
+; use System_SetIntJumps
 ;
 ; Input:
 ; d0.b | Enable these interrupts:
@@ -705,9 +711,6 @@ vid_WrtReg01:
 ;      |     e: External
 ;      |     h: HBlank
 ;      |     v: VBlank
-;
-; Notes:
-; Set your interrupt locations with System_SetIntJumps
 ; --------------------------------------------------------
 
 Video_IntEnable:
@@ -875,7 +878,7 @@ Video_SetMapSize:
 ; Loads VDP graphics using DMA
 ;
 ; Input:
-; d0.l | Graphics data *NOT a0*
+; d0.l | Graphics data (NOT a0)
 ; d1.w | VRAM location: cell_num(vram_pos)
 ; d2.w | Size:          cell_num(size)
 ;
@@ -3067,7 +3070,7 @@ Video_MdMcd_StampDotMap:
 		rts
 
 ; --------------------------------------------------------
-; Video_MdMcd_StampSet
+; Video_MdMcd_SetStamp, Video_MdMcd_MakeStamp
 ;
 ; Set or Make a Sega CD Stamp
 ;
@@ -3167,7 +3170,6 @@ vidMdMcd_RdStmpSlot:
 
 Video_MdMcd_StampMap:
 		rts
-
 
 ; --------------------------------------------------------
 ; Video_MdMcd_StampReset
@@ -3335,7 +3337,7 @@ Video_MdMars_PalBackup:
 ; --------------------------------------------------------
 
 ; --------------------------------------------------------
-; Video_MdMars_VideoMode
+; Video_MdMars_VideoMode, Video_MdMars_VideoOff
 ;
 ; Set the graphics mode on the 32X.
 ;
@@ -3353,16 +3355,15 @@ Video_MdMars_PalBackup:
 ; --------------------------------------------------------
 
 Video_MdMars_VideoOff:
+		move.w	d0,-(sp)
 		moveq	#0,d0
+		bsr.s	Video_MdMars_VideoMode
+		move.w	(sp)+,d7
+		rts
 
 Video_MdMars_VideoMode:
 		move.w	d7,-(sp)
-	if EMU=0
 		bsr	Video_MdMars_SetSync
-; 		bsr	Video_MdMars_WaitSync
-; 		bsr	System_MdMars_Update
-; 		bsr	Video_MdMars_SetSync
-	endif
 	rept 2
 		bsr	Video_MdMars_WaitSync
 		bsr	System_MdMars_Update
@@ -3880,7 +3881,7 @@ vidMars_Pal:
 		rts
 
 ; --------------------------------------------------------
-; Video_LoadPal_List, Video_FadePal_List
+; Video_MdMars_LoadPal_List, Video_MdMars_FadePal_List
 ;
 ; Loads palettes on bulk with a list
 ;
