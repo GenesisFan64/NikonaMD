@@ -146,10 +146,6 @@ buffIncr		ds.l 1
 RAM_PalFadeList		ds.b palfd_len*MAX_PALFDREQ	; Pal-fade request and buffers
 RAM_SprMapList		ds.b $10*MAX_MDMAPSPR		; List of mapped-sprite data
 RAM_SprPzList		ds.b $08*80			; List of sprite pieces to build
-RAM_HorScroll		ds.l 240			; DMA Horizontal scroll data
-RAM_VerScroll		ds.l 320/16			; DMA Vertical scroll data
-RAM_Sprites		ds.w 8*80			; DMA Sprites
-RAM_Palette		ds.w 64				; DMA Palette
 RAM_PaletteFade		ds.w 64				; Target MD palette for FadeIn/Out
 RAM_VdpDmaIndx		ds.w 1				; Current index in DMA BLAST list
 RAM_VdpDmaMod		ds.w 1				; Mid-write flag

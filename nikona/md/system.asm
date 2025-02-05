@@ -10,7 +10,7 @@
 ; Settings
 ; --------------------------------------------------------
 
-TAG_SRAMDATA	equ "SAVE"	; 4-letter savefile id
+TAG_SRAMDATA		equ "SAVE"	; 4-letter savefile id
 
 ; ===================================================================
 ; --------------------------------------------------------
@@ -31,38 +31,38 @@ TAG_SRAMDATA	equ "SAVE"	; 4-letter savefile id
 ; is 3button(0) or 6button(1)
 ; ------------------------------------------------
 
-JoyID_Mouse	equ $03
-JoyID_MD	equ $0D
-JoyID_MS	equ $0F		; <-- Same ID for no controller
+JoyID_Mouse		equ $03
+JoyID_MD		equ $0D
+JoyID_MS		equ $0F		; <-- Same ID for no controller
 
 ; ------------------------------------------------
 ; Genesis controller
 ; ------------------------------------------------
 
-JoyUp		equ $0001
-JoyDown		equ $0002
-JoyLeft		equ $0004
-JoyRight	equ $0008
-JoyB		equ $0010
-JoyC		equ $0020
-JoyA		equ $0040
-JoyStart	equ $0080
-JoyZ		equ $0100
-JoyY		equ $0200
-JoyX		equ $0400
-JoyMode		equ $0800
-bitJoyUp	equ 0
-bitJoyDown	equ 1
-bitJoyLeft	equ 2
-bitJoyRight	equ 3
-bitJoyB		equ 4
-bitJoyC		equ 5
-bitJoyA		equ 6
-bitJoyStart	equ 7
-bitJoyZ		equ 8
-bitJoyY		equ 9
-bitJoyX		equ 10
-bitJoyMode	equ 11
+JoyUp			equ $0001
+JoyDown			equ $0002
+JoyLeft			equ $0004
+JoyRight		equ $0008
+JoyB			equ $0010
+JoyC			equ $0020
+JoyA			equ $0040
+JoyStart		equ $0080
+JoyZ			equ $0100
+JoyY			equ $0200
+JoyX			equ $0400
+JoyMode			equ $0800
+bitJoyUp		equ 0
+bitJoyDown		equ 1
+bitJoyLeft		equ 2
+bitJoyRight		equ 3
+bitJoyB			equ 4
+bitJoyC			equ 5
+bitJoyA			equ 6
+bitJoyStart		equ 7
+bitJoyZ			equ 8
+bitJoyY			equ 9
+bitJoyX			equ 10
+bitJoyMode		equ 11
 
 ; ------------------------------------------------
 ; Mega Mouse
@@ -71,14 +71,14 @@ bitJoyMode	equ 11
 ; NOT screen position.
 ; ------------------------------------------------
 
-ClickR		equ $0001
-ClickL		equ $0002
-ClickM		equ $0004		; US MOUSE ONLY
-ClickS		equ $0008		; (Untested)
-bitClickL	equ 0
-bitClickR	equ 1
-bitClickM	equ 2
-bitClickS	equ 3
+ClickR			equ $0001
+ClickL			equ $0002
+ClickM			equ $0004	; US MOUSE ONLY
+ClickS			equ $0008	; (Untested)
+bitClickL		equ 0
+bitClickR		equ 1
+bitClickM		equ 2
+bitClickS		equ 3
 
 ; ------------------------------------------------
 ; Sega PICO
@@ -90,10 +90,10 @@ bitClickS	equ 3
 ; $0100-$01EF - Storyware area
 ; ------------------------------------------------
 
-JoyRED		equ $0010
-JoyPEN		equ $0080
-bitJoyRED	equ 4
-bitJoyPEN	equ 7
+JoyRED			equ $0010
+JoyPEN			equ $0080
+bitJoyRED		equ 4
+bitJoyPEN		equ 7
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -104,47 +104,47 @@ bitJoyPEN	equ 7
 ; RAM_InputData
 ; ------------------------------------------------
 
-pad		struct
-id		ds.b 1		; Controller ID
-ver		ds.b 1		; Controller type/revision
-hold		ds.w 1		; HOLD bits
-press		ds.w 1		; PRESSED bits
-release		ds.w 1		; RELEASED bits
-x		ds.w 1		; Mouse/Pen X speed
-y		ds.w 1		; Mouse/Pen Y speed
-page		ds.w 1		; PICO page
-ext		ds.w 1
-; pad_len	ds.l 0
-		endstruct
+pad			struct
+id			ds.b 1		; Controller ID
+ver			ds.b 1		; Controller type/revision
+hold			ds.w 1		; HOLD bits
+press			ds.w 1		; PRESSED bits
+release			ds.w 1		; RELEASED bits
+x			ds.w 1		; Mouse/Pen X speed
+y			ds.w 1		; Mouse/Pen Y speed
+page			ds.w 1		; PICO page
+ext			ds.w 1
+; pad_len		ds.l 0
+			endstruct
 
 ; ------------------------------------------------
 ; The object's memory
 ; ------------------------------------------------
 
-obj		struct
-code		ds.l 1		; Object code, If 0 == blank slot
-x		ds.l 1		; Object X Position $xxxx.0000
-y		ds.l 1		; Object Y Position $yyyy.0000
-z		ds.l 1		; Object Z Position $zzzz.0000 (3D ONLY)
-size_x		ds.w 1		; Object size Left/Right $llrr
-size_y		ds.w 1		; Object size Up/Down $uudd
-size_z		ds.w 1		; Object size Zback/Zfront $bbff starting from object's X/Y pointer in 10mm's (3D ONLY)
-x_spd		ds.w 1		; Object X Speed $xx.00 (object_Speed)
-y_spd		ds.w 1		; Object Y Speed $yy.00 ''
-z_spd		ds.w 1		; Object Z Speed $zz.00 '' (3D ONLY)
-index		ds.b 1		; Object current code index, mostly for init(0) and main(1)
-subid		ds.b 1		; Object Sub-ID for custom placement settings
-status		ds.b 1		; General purpose USER status: Falling, Floating, etc.
-attr		ds.b 1		; Quick attribute bits for VRAM (depending of the type)
-				; ** object_Animate ONLY:
-frame		ds.w 1		; ** Current frame, object_Animate outputs here
-anim_num	ds.w 1		; ** Animation number to use
-anim_indx	ds.w 1		; ** Animation script index
-anim_icur	ds.b 1		; ** Current animation id
-anim_spd	ds.b 1		; ** Animation delay set on animation script
-ram		ds.b $40	; Object's own RAM
-; obj_len	ds.l 0
-		endstruct
+obj			struct
+code			ds.l 1		; Object code, If 0 == blank slot
+x			ds.l 1		; Object X Position $xxxx.0000
+y			ds.l 1		; Object Y Position $yyyy.0000
+z			ds.l 1		; Object Z Position $zzzz.0000 (3D ONLY)
+size_x			ds.w 1		; Object size Left/Right $llrr
+size_y			ds.w 1		; Object size Up/Down $uudd
+size_z			ds.w 1		; Object size Zback/Zfront $bbff starting from object's X/Y pointer in 10mm's (3D ONLY)
+x_spd			ds.w 1		; Object X Speed $xx.00 (object_Speed)
+y_spd			ds.w 1		; Object Y Speed $yy.00 ''
+z_spd			ds.w 1		; Object Z Speed $zz.00 '' (3D ONLY)
+index			ds.b 1		; Object current code index, mostly for init(0) and main(1)
+subid			ds.b 1		; Object Sub-ID for custom placement settings
+status			ds.b 1		; General purpose USER status: Falling, Floating, etc.
+attr			ds.b 1		; Quick attribute bits for VRAM (depending of the type)
+					; ** object_Animate ONLY:
+frame			ds.w 1		; ** Current frame, object_Animate outputs here
+anim_num		ds.w 1		; ** Animation number to use
+anim_indx		ds.w 1		; ** Animation script index
+anim_icur		ds.b 1		; ** Current animation id
+anim_spd		ds.b 1		; ** Animation delay set on animation script
+ram			ds.b $40	; Object's own RAM
+; obj_len		ds.l 0
+			endstruct
 
 ; ====================================================================
 ; ----------------------------------------------------------------
@@ -152,18 +152,17 @@ ram		ds.b $40	; Object's own RAM
 ; ----------------------------------------------------------------
 
 			memory RAM_MdSystem
-RAM_SaveData		ds.b SET_SRAMSIZE		; Read/Write of the SAVE data
-RAM_InputData		ds.b pad_len*4			; Input data section
-RAM_SysRandVal		ds.l 1				; Random value
-RAM_SysRandom		ds.l 1				; Randomness seed
-RAM_SysLastBank		ds.l 1
-RAM_CurrObjList		ds.l 1
-RAM_VBlankJump		ds.w 3				; VBlank jump (JMP xxxx xxxx)
-RAM_HBlankJump		ds.w 3				; HBlank jump (JMP xxxx xxxx)
-RAM_ExternalJump	ds.w 3				; External jump (JMP xxxx xxxx)
-RAM_SaveEnable		ds.w 1				; Flag to enable SAVE data
-RAM_ScreenMode		ds.w 1				; Current screen number
-RAM_ScreenOption	ds.w 1				; Current screen setting (OPTIONAL)
+RAM_InputData		ds.b pad_len*4		; Input data section
+RAM_SysRandVal		ds.l 1			; Random value
+RAM_SysRandom		ds.l 1			; Randomness seed
+RAM_SysLastBank		ds.l 1			; Last bank loaded
+RAM_CurrObjList		ds.l 1			; Current pointer to objects
+RAM_VBlankJump		ds.w 3			; VBlank jump (JMP xxxx xxxx)
+RAM_HBlankJump		ds.w 3			; HBlank jump (JMP xxxx xxxx)
+RAM_ExternalJump	ds.w 3			; External jump (JMP xxxx xxxx)
+RAM_SaveEnable		ds.w 1			; Flag to enable SAVE data
+RAM_ScreenMode		ds.w 1			; Current screen number
+RAM_ScreenOption	ds.w 1			; Current screen setting (OPTIONAL)
 RAM_CurrObjNum		ds.w 1
 sizeof_mdsys		ds.l 0
 			endmemory
@@ -173,10 +172,10 @@ sizeof_mdsys		ds.l 0
 ; Label aliases
 ; ----------------------------------------------------------------
 
-Controller_1	equ RAM_InputData
-Controller_2	equ RAM_InputData+pad_len
-Controller_3	equ RAM_InputData+pad_len*2
-Controller_4	equ RAM_InputData+pad_len*3
+Controller_1		equ RAM_InputData
+Controller_2		equ RAM_InputData+pad_len
+Controller_3		equ RAM_InputData+pad_len*2
+Controller_4		equ RAM_InputData+pad_len*3
 
 ; ====================================================================
 ; --------------------------------------------------------
@@ -215,7 +214,7 @@ System_Init:
 		move.w	d0,(a0)+
 		dbf	d1,.clrinput
 	if SET_ENBLSAVE
-		bsr	System_SramInit				; Init/Load SRAM
+		bsr	System_SramInit		; Init/Load SRAM
 	endif
 		andi.w	#$F8FF,sr
 		rts
@@ -353,8 +352,18 @@ System_DmaExit_ROM:
 	endif
 		bra	System_DmaExit_RAM
 
+; --------------------------------------------------------
+; *** EXTERNAL JUMPS ***
+; --------------------------------------------------------
+
+System_DmaEnter_RAM:
+		bra	gemaDmaPause
+System_DmaExit_RAM:
+		bra	gemaDmaResume
+
 ; ------------------------------------------------
 
+	if MARS
 sys_MarsSlvCmd:
 		move.b	(sysmars_reg+comm14).l,d7
 		bne.s	sys_MarsSlvCmd
@@ -371,15 +380,7 @@ sys_MarsSlvCmd:
 		move.b	(sysmars_reg+comm14).l,d7
 		bne.s	.wait_exit
 		rts
-
-; --------------------------------------------------------
-; *** EXTERNAL JUMPS ***
-; --------------------------------------------------------
-
-System_DmaEnter_RAM:
-		bra	gemaDmaPause
-System_DmaExit_RAM:
-		bra	gemaDmaResume
+	endif
 
 ; ====================================================================
 ; --------------------------------------------------------

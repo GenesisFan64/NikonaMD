@@ -47,6 +47,11 @@ sizeof_thisram		ds.l 0
 		endif
 RAM_ScrnBuff		ds.b MAX_ScrnBuff
 RAM_Globals		ds.b MAX_Globals
+RAM_SaveData		ds.b SET_SRAMSIZE	; Read/Write of the SAVE data
+RAM_HorScroll		ds.l 240		; DMA Horizontal scroll data
+RAM_VerScroll		ds.l 320/16		; DMA Vertical scroll data
+RAM_Sprites		ds.w 8*80		; DMA Sprites
+RAM_Palette		ds.w 64			; DMA Palette
 
 ; ----------------------------------------
 ; * FIRST PASS LABELS *

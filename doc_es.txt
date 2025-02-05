@@ -2,9 +2,9 @@
 Nikona v0.1 documentation ES WIP
 ---------------------------------------------------------------------------------------------------------
 
-Este SDK fue diseñado para todos los sistemas de la familia Genesis:
+Este es un SDK en puro ensablador para estos sistemas de la familia Genesis:
 
-- Genesis (base)
+- Genesis (BASE)
 - Sega CD
 - Sega 32X
 - Sega CD32X
@@ -17,28 +17,29 @@ Dependiendo de que add-on tengas insertado puedes controlar sus caracteristicas 
 el 68000 principal del Genesis, como las Stamps del SCD o modelos 3D del 32X.
 
 --------------------------------------------------------
-GUIA DE CARPETAS
+GUÍA DE CARPETAS
 --------------------------------------------------------
 
 /game
-  /code           El codigo de tu juego separados por modos de pantalla ("CODE")
-  /data           Todos los materiales visuales para tu juego
-  globals.asm     Tus variables globales siempre disponibles: $1000 bytes
-  incl_code.asm   Todos los includes de las pantallas "CODE"
-  incl_data.asm   Todos los includes de los bloques de "DATA"
-  incl_list.asm   Las dos listas de pantallas "CODE" y bloques "DATA"
-  iso_files.asm   Los "CODE" y "DATA" almacenados en el CD/CD32X
-  savestruct.asm  La estructura para los archivos de guardado SRAM/BRAM
+  /code            El codigo de tu juego separados por modos de pantalla ("CODE")
+  /data            Todos los materiales visuales para tu juego
+  globals.asm      Tus variables globales siempre disponibles: $1000 bytes
+  incl_code.asm    Todos los includes de las pantallas "CODE"
+  incl_data.asm    Todos los includes de los bloques de "DATA"
+  incl_list.asm    Las dos listas de pantallas "CODE" y bloques "DATA"
+  iso_files.asm    Los "CODE" y "DATA" almacenados en el CD (solo SCD y CD32X)
+  savestruct.asm   La estructura para los archivos de guardado SRAM/BRAM
 
-/nikona		   Todo relacionado con Nikona va aquí ** NO MODIFICAR NADA **
+/nikona		   Todo relacionado con Nikona va aquí **NO MODIFICAR NADA O ROMPERÁS ACTUALIZACIONES**
+
 /out		   Tus ROMs e ISOs ya compilados
   /emu             ROMs que solo funcionan en emuladores
-  /realhw          ROMs que solo funcionan en hardware real (el importante)
+  /realhw          ROMs que solo funcionan en hardware real (importante)
 /sound
-  /drv             El driver GEMA van aqui (Z80, macros y funciones)
+  /drv             El driver GEMA va aqui (Z80, macros y funciones)
   /ins             Todos los instrumentos FM, DAC, PCM, PWM (Los PSG van dentro de los seq)
   /seq             Todas las sequencias (Musica y SFX)
-  data.asm         Banco de sonido predeterminado: Los sequences, ins. FM y DAC van aqui
+  data.asm         Banco de sonido predeterminado: Los sequences, ins. FM y DAC van aquí
   ROM_smpl_pwm.asm Datos de samples PWM SOLO PARA 32X CARTUCHO
   smpl_pcm.asm     Datos de samples PCM para Sega CD
   smpl_pwm.asm     Datos de samples PWM para ambos cartucho y CD32X (MUY poco espacio)
@@ -56,8 +57,8 @@ Para compatibilidad con todos los sistemas se ha limitado el codigo y
 los datos en dos secciones:
 
  0000 + ---------- +       00000 + --------- +
-      | Tu codigo/ |             | Data      |
-      | pantalla   | ---->       | Block     |
+      | Tu codigo/ |             | Bloque de |
+      | pantalla   | ---->       | datos     |
       | "CODE"     |             | "DATA"    |
  77FF + ---------- +             |           |
             ^                    |           |
@@ -68,18 +69,21 @@ los datos en dos secciones:
             |
             |
       + ------------------------------------ +
-      | CODE Screens and DATA blocks stored  |
-      | or Cartridge or DISC                 |
+      | Tus pantallas CODE y bloques de      |
+      | datos DATA en Cartucho y Disco       |
       + ------------------------------------ +
 
 ----------------------------------------------------------------
 CODE en /game/code
 ----------------------------------------------------------------
 
-                                 Sizes:
+      + ------------------ +
+      | Librería Nikona    | \
+      | en CD, 32X y       |  >-- $3000 * Libres en Genesis y Pico
+      | CD32X              | /
       + ------------------ +
       | Tu pantalla        | \
-      | "CODE"             |  >-- $77FF
+      | "CODE"             |  >-- $77FF * Libres en Genesis y Pico
       |                    | /
       + ------------------ +
       | Memoria temporal   | \
@@ -91,14 +95,13 @@ CODE en /game/code
       | RAM_Globals        | /
       + ------------------ +
 
-Los "CODE" son basicamente los modos de pantalla que pueden ser entre el Titulo, tu motor de juego
-principal, etc.
+Los "CODE" son los modos de pantalla que pueden ser entre el Titulo, tu motor de juego principal, etc.
 
-Hay $2000 bytes de memoria temporal (RAM_ScrnBuff) y $1000 bytes de Globales (RAM_Globals)
-- La memoria temporal es donde pones tu buffer del nivel y la lista de objectos, esta memoria se
-limpia cada vez que cambias de pantalla.
-- Los Globales se mantienen siempre en cada cambio de pantalla, puedes poner los puntos,
-vidas, el numero del nivel, etc.
+Hay $2000 bytes de memoria temporal (RAM_ScrnBuff) y $1000 bytes de Globales (RAM_Globals):
+
+La memoria temporal es donde pones tu buffer del nivel y la lista de objectos, esta memoria se limpia
+cada vez que cambias de pantalla, y los Globales se mantienen siempre en cada cambio de pantalla, puedes
+poner los puntos, vidas, el numero del nivel, etc.
 
 El CODE está limitado a $77FF bytes debido a que en CD, 32X y CD32X el codigo se carga en RAM.
 En Genesis y Pico el codigo se lee desde ROM pero si te pasas del limite romperás compatibilidad con
@@ -116,10 +119,9 @@ Archivos a checar:
 /game/code/template.asm Pantalla de ejemplo
 /main.asm               Un Variable para elejir la primera pantalla
 
-- En el archivo incl_list.asm las pantallas están ordenadas por ID, por ejemplo
+- En el archivo incl_list.asm las pantallas están ordenadas por numero, por ejemplo
 vamos a agregar la pantalla numero $01 (en hexadecimal)
-Para CD/CD32X el nombre del archivo ISO debe estár formato 8.3 y de preferencia
-en MAYUSCULAS
+Para CD/CD32X el nombre del archivo ISO debe estár formato 8.3 y en MAYUSCULAS
 
         dc.l Md_Screen00	; ROM label
         dc.b "SCREEN00.BIN"	; ISO Filename
@@ -127,12 +129,12 @@ en MAYUSCULAS
         dc.b "SCREEN01.BIN"
 
 - Ahora en incl_code.asm incluye tu pantalla usando el macro code_bank, si es posible organiza las
-pantallas en orden para mejor compatibilidad con CD/CD32X para no estresar mucho el laser, tambien
-incluye una etiqueta de final del codigo:
+pantallas para mejor compatibilidad con CD/CD32X y no estresar mucho el laser, tambien incluye una
+etiqueta de final del codigo (siempre es un _e):
 
 	code_bank Md_Screen01,Md_Screen01_e,"game/code/template.asm"
 
-Para CD/CD32X: hay que agregar el archivo ISO usando este macro:
+- Para CD/CD32X: hay que agregar el archivo ISO usando este macro:
 
         fs_file "SCREEN01.BIN",Md_Screen01,Md_Screen01_e
 
@@ -158,16 +160,16 @@ segundos en cargar.
 DATA en /game/data
 ----------------------------------------------------------------
 
-Genesis y Pico: Todos los 2MB/4MB: 8/10 bancos "DATA" visibles
+Genesis y Pico: Todos los 2MB/4MB: 8/10 bloques "DATA" visibles
       CD/CD32X: $200000 (Word-RAM 256KB)
-  32X Cartucho: $900000 (1MB) 4 bancos "DATA" visibles
+  32X Cartucho: $900000 (1MB) 4 bloques "DATA" visibles
 
              CD / CD32X            32X Cartucho           Genesis y
              (Word-RAM)             ($900000)             Pico
      200000 + --------- +  900000 + ---------- +  000000 + ---------- +
-            | Data      |         | Main       |         | First      |
-            | Bank      |         | "DATA"     |         | "DATA"     |
-            | "DATA"    |         |            |         |            |
+            | Bloque de |         | Primer     |         | Primer     |
+            | datos     |         | bloque     |         | bloque     |
+            | "DATA"    |         | "DATA"     |         | "DATA"     |
      23FFFF + --------- +  940000 + ---------- +  040000 + ---------- +
                   ^               |            |         |            |
                   |               |            |         |            |
@@ -177,37 +179,35 @@ Genesis y Pico: Todos los 2MB/4MB: 8/10 bancos "DATA" visibles
                   |               |            |         Hasta 16 bancos
                   |               |            |         "DATA" en todo
                   |        9C0000 + ---------- +          los 4MB's de
-                  |               | Last       |               ROM
-                  |               | "BANK"     |
-                  |               |            |
+                  |               | Ultimo     |               ROM
+                  |               | bloque     |
+                  |               | visible    |
                   |        9FFFFF + ---------- +
                   |                  '''''''''
-                  |                 Otros bancos
-                  |                 no visibles
-                  |                   en ROM
+                  |                Otros bancos
+                  |                no visibles
+                  |                  en ROM
                   |
                   |
                   |
 
-              Bancos de DATA en Cartucho o Disco:
+              Bloques de DATA en Cartucho o Disco:
             + ---------------- + ---------------- +
-            | Default bank     | CD               |
-            | (and all sound)  | Stamps           |
+            | Bloque principal | CD               |
+            | (y el sonido)    | Stamps           |
             + ---------------- + ---------------- +
-            | More VDP stuff   | 32X gfx          |
-            |                  | and 3D           |
+            | Datos de los     | Graficos 32X     |
+            | niveles          | y modelos 3D     |
             + ---------------- + ---------------- +
             | Etc...           |                  |
             + ---------------- + ---------------- +
 
-Los DATA son basicamente todo lo necesario para tu juego:
-Graficos, Paletas, tus layouts de niveles, etc.
+El bloque DATA es el lugar en donde va tu material para tu juego: Graficos, Paletas, tus mapas,
+modelos 3D de 32X, etc. Si se te acaba el espacio puedes agregar otro y cambiarlo dependiendo
+del sistema en que estés corriendo.
 
-Si se te acaba el espacio puedes agregar otro y cambiarlo dependiendo
-del sistema que estés corriendo.
-
-La limitación a $40000 bytes fue para tener compatibilidad con CD/CD32X, SI ES posible saltarse el
-limite en Genesis/Pico (2MB/4MB) y 32X (max. 1MB, 4 bancos) pero roperás compatibilidad con CD/CD32X,
+La limitación a $40000 bytes fué para tener compatibilidad con CD/CD32X, SI ES posible saltarse el
+limite en Genesis/Pico (2MB/4MB) y 32X (max. 1MB, 4 bloques) pero roperás compatibilidad con CD/CD32X,
 no hay vuelta atrás hasta que vuelvas a reorganizar todo con el limite de los $40000 bytes.
 
 ------------------------------------------------
@@ -219,25 +219,39 @@ Archivos a checar:
 /game/incl_data.asm     Todos los includes del codigo
 /game/iso_files.asm     Archivos en el CD
 
-** ESTA PARTE ES NECESARIA PARA CD/CD32X **
-
-Casi parecido a como añades los CODE, en incl_list.asm hay una lista de bancos a usar junto
-con el nombre del archivo en disco:
+- Casi parecido a como añades los CODE, en incl_list.asm hay una lista de bancos a usar junto con el
+nombre del archivo en disco debajo de disc_banklist:
 
 		dc.l DATA_BANK0		; Start Label
 		dc.b "BNK_MAIN.BIN"	; ISO filename
 		dc.l DATA_BANK1		<-- AQUI
 		dc.b "BNK_NEW1.BIN"
 
-Puedes ponerlo en cualquier lugar de la lista, pero NO quitar el -1 porque es lo que indica el fin
-de la lista.
+Puedes ponerlo en cualquier lugar de la lista, pero NO quitar el -1 porque es lo que indica el fin de
+la lista
+Esta parte SOLO aplica para CD/CD32X pero si no lo pones se congelara
+
+- En incl_data.asm incluye tu banco con dos macros y el include:
+
+	data_bank DATA_BANK1			; Entrada
+	include "game/data/bank_01.asm"		; todos los datos para este bloque
+	dend_bank DATA_BANK1_e			; Salida
+
+- Para CD/CD32X: TAMBIÉN hay que agregar el archivo ISO:
+
+        fs_file "BNK_NEW1.BIN",DATA_BANK1,DATA_BANK1_e
 
 ------------------------------------------------
 NOTAS
 ------------------------------------------------
 
-Aunque el Genesis y Pico no usen bancos igual sigue utilizando System_SetDataBank aunque en estos
-no usen bancos, PUEDE que en el futuro se implemente el Sega Mapper "SSF2" (No aplica para Pico)
+* CD/CD32X: Debido a una limitación de la lectura del CD el tamaño maximo es $3F800 bytes,
+aunque los sectores sean de $800 bytes estos se copian en $920 bytes, así que los ultimos $800 bytes
+quedan inutilizables ya los $120 bytes extras se salen del Word-RAM y no se sabe que le pase al
+hardware.
+
+* Aunque el Genesis y Pico no usen bancos igual sigue utilizando System_SetDataBank, PUEDE que en
+el futuro se implemente el Sega Mapper "SSF2" (Solo en Genesis)
 
 ------------------------------------------------
 LISTA DE CARPETAS dentro de /data
@@ -248,9 +262,11 @@ LISTA DE CARPETAS dentro de /data
 /mars           * Contenido para 32X:
   /maps                 Mapas para el modo 2D
   /objects              Modelos 3D para el modo 3D
+    list.asm             Lista de modelos para ambos 32X y CD32X **poca memoria**
+    ROM_list.asm         Lista de modelos para 32X Cartucho SOLAMENTE, se pierde en RV=1
   /screens              Pantallas estaticas
   /sprites              "Super Sprites" para el modo 2D
-  ROM_mars.asm          Datos para el lado SH2 SOLO PARA CARTUCHO, todos los 4MB del ROM disponibles pero solo si RV=0
+  ROM_mars.asm          Datos para el lado SH2 SOLO PARA CARTUCHO, se pierde en RV=1
 
 /mcd            * Contenido para CD/CD32X:
   /stamps               Stamps de rotación y scaling
@@ -271,15 +287,15 @@ PRECAUCIONES
 
 ** CD y CD32X **
 
-- Cambiar bancos de DATA es LENTO, además que al cargar del disco los sectores se escriben en $920 bytes,
+- Cambiar bloques de DATA es LENTO, además que al cargar del disco los sectores se escriben en $920 bytes,
 así que el area $3F800-$3FFFFF no se puede utilizar ya que los $120 bytes extras se salen del area del
 Word-RAM y no sé sabe que podría pasarle al hardware del CD/CD32X.
 
-- Si vas a usar los Stamps: el DATA quedará INUTILIZABLE mientras Sub-CPU genera las Stamps, esto también
-afecta TODO EL SONIDO
-PERO el driver GEMA tiene soporte para leer desde RAM: puedes hacer entre una copia de lista de sequencia o
-solo el unico sequence que vayas a utilizar e incluirlo dentro del CODE (que está en RAM) y cambiar la dirección
-de las lista de sequencias llamando gemaSetMasterList
+- Si vas a usar los Stamps: el "DATA" quedará INUTILIZABLE mientras Sub-CPU genera las Stamps, esto también
+afecta TODO EL SONIDO.
+Pero el driver GEMA tiene soporte para leer desde RAM: puedes hacer entre una copia de lista de sequencia
+o solo el unico sequence que vayas a utilizar e incluirlo dentro del CODE (que está en RAM) y cambiar
+la dirección de las lista de sequencias llamando gemaSetMasterList
 Durante tu codigo tendrás que llamar Sound_Update en todo momento para que el Z80 pueda comunicarse
 con 68K y copiar los datos.
 
@@ -304,8 +320,100 @@ En 32X si es posible de correr el CODE directo del ROM en el area $880000, pero 
 Para hacerla facil mejor utilizo el RAM al mismo estilo que CD/CD32X
 
 ----------------------------------------------------------------
-FUNCIONES DE NIKONA
+RAM
 
+** LAS DIRECCIONES PUEDE QUE CAMBIEN EN PROXIMAS VERSIONES **
+----------------------------------------------------------------
+
+                Genesis y Pico:                 32X Cartucho:                    CD y CD32X
+      FF0000 + ------------------ +  FF0000 + ------------------ +  FF0000 + ------------------ +
+             | LIBRE DE USAR      |         | Librería Nikona    |         | Librería Nikona    |
+             |                    |         |                    |         |                    |
+             | Pero al escribir   |         |                    |         |                    |
+             | aquí perderás      |         |                    |         |                    |
+             | compatibilidad     |  FF3000 + ------------------ +  FF3000 + ------------------ +
+             | con CD, 32X y      |         | Pantalla "CODE"    |         | Pantalla "CODE"    |
+             | CD32X              |         |                    |         |                    |
+             |                    |         |                    |         |                    |
+             |                    |         |                    |         |                    |
+             |                    |         |                    |         |                    |
+             |                    |         |                    |         |                    |
+      FFB000 + ------------------ +  FF???? + ------------------ +  FF???? + ------------------ +
+             | Area usada en      |         | Area usada en      |         | Area usada en      |
+             | Nikona             |         | Nikona             |         | Nikona             |
+             |                    |         |                    |         |                    |
+             |                    |         |                    |         |                    |
+             |                    |         |                    |         |                    |
+             |                    |         |                    |         |                    |
+             |                    |         |                    |         |                    |
+             |                    |         |                    |         |                    |
+      FFFD00 + ------------------ +  FFFD00 + ------------------ +  FFFD00 + ------------------ +
+             | RESERVADO          |         | Codigo de reinicio |         | Lista de vectores  |
+             | Para mantener      |         | al presionar       |         | (Errores, Blanks,  |
+             | compatibilidad     |         | RESET (Hot-Start)  |         |  etc.)             |
+      FFFEF0 + ------------------ +  FFFE00 + ------------------ +  FFFE00 + ------------------ +
+             | Bytes escritos por |         | Bytes escritos por |         | Bytes escritos por |
+             | el Z80 para comm.  |         | el Z80 para comm.  |         | el Z80 para comm.  |
+      FFFE00 + ------------------ +  FFFE00 + ------------------ +  FFFE00 + ------------------ +
+             | Stack a7           |         | Stack a7           |         | Stack a7           |
+             |                    |         |                    |         |                    |
+             |                    |         |                    |         |                    |
+             + ------------------ +         + ------------------ +         + ------------------ +
+
+ETIQUETAS RAM disponibles para usar en CODE:
+
+RAM_SaveData		Copia en RAM del archivo de guardado, ver tamaño en rominfo.asm (SET_SRAMSIZE)
+RAM_HorScroll		Scrolling VDP horizontal, 240 lineas
+RAM_VerScroll		Scrolling VDP vertical, incluyendo modo 2cell 20 2cell's
+RAM_Sprites		Lista de VDP Sprites, 80
+RAM_Palette		Paleta VDP, 64 colores menos 4 de transparencia
+Controller_1		Buffer del control 1
+Controller_2		    ''''   control 2
+RAM_FrameCount		Contador de frames (.l)
+RAM_ScreenMode		Numero de pantalla activo (.w)
+RAM_ScreenOption	Opción rapida para la pantalla antes de cargarla (.w)
+
+* Solo con 32X:
+
+- Si estás usando el modo 2D (256-color scrolling)
+
+RAM_MdMars_ScrlSett	Pointer a los graficos, X pos, Y pos...
+RAM_MdMars_ScrlData	Mapa completo 512x256 en bloques de 16x16
+RAM_MdMars_SuperSpr	Lista de super sprites, Maximo 32
+
+- Si estás usando el Modo 3D (256-color 3D model rendering)
+
+RAM_MdMars_MdlCamera	Posición de la camara 3D: XYZ, rotación...
+RAM_MdMars_MSprites	Lista de Sprites 3D, Maximo 32
+RAM_MdMars_Models	Lista de Modelos 3D, Maximo 32
+
+----------------------------------------------------------------
+CONTROL
+----------------------------------------------------------------
+
+Estructura de Controller_1 y Controller_2:
+  id			Identificador del control: control normal, mouse, etc. (.b)
+  ver			Versión del control: ej. 3 botones ABC y 6 botones XYZABC (.b)
+  hold			Botones mantenidos (.w)
+  press			Botones presionados (.w)
+  release		Botones que se dejaron de presionar (.w)
+  x			Mouse: Velocidad X, Pico: Posición X de la pluma (.w)
+  y			Mouse: Velocidad Y, Pico: Posición Y de la pluma, también indica si está en la tableta o storyware (.w)
+  page			Pico: Numero de pagina (.w)
+  ext			Reservado (.w)
+
+- Control ID: $0D Standard 3 botones o 6 botones:
+  > ver: $00 = 3 botones, $01 = 6 botones
+  > hold, press y release: %0000MXYZSACBRLDU
+
+------------------------------------------------
+
+PICO SOLAMENTE:
+  > hold, press y release: %00000000P00BRLDU
+  > pady: $0000-$00EF tableta, $0100-$01EF storyware
+
+----------------------------------------------------------------
+FUNCIONES DE NIKONA
  nikona/md/system.asm
  nikona/md/video.asm
 ----------------------------------------------------------------
