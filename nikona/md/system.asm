@@ -1851,7 +1851,10 @@ System_SetDataBank:
 .ran_out:
 	; TODO: an on-screen message
 		or	#1,ccr
-		bra.s	.from_err
+		lea	(vdp_data),a0
+		move.l	#$C0000000,4(a0)	; TEMPORAL
+		move.w	#$00E,(a0)		; TEMPORAL
+		bra.s	*			; TEMPORAL
 .found_it:
 		adda	#4,a0
 		bsr	System_MdMcd_RdFile_WRAM

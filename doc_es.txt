@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------------
-Nikona v0.1 documentation ES WIP
+Nikona v0.1 documentation ESP WIP
 ---------------------------------------------------------------------------------------------------------
 
 Este es un SDK en puro ensablador para estos sistemas de la familia Genesis:
@@ -16,14 +16,29 @@ de Z80 para el sonido o SH2 en 32X.
 Dependiendo de que add-on tengas insertado puedes controlar sus caracteristicas especiales desde
 el 68000 principal del Genesis, como las Stamps del SCD o modelos 3D del 32X.
 
+*** ESTO VA A CAMBIAR CUANDO NIKONA LLEGUE A LA VERSION 1.0 ***
+
+Durante el progreso de este SDK me he topado con problemas grandes con los add-ons, como por ejemplo las
+Stamps de SCD
+El lado Genesis (MAIN-CPU) le cuesta MUCHO tiempo recibir la imagen final de las Stamps ya generadas,
+tanto que no tiene tiempo para la logica del juego
+
+La única manera de usar las Stamps de manera rapida sería permitir el programador (USER) tenga acceso
+al Sub-CPU y que ponga su logica ahí y que el MAIN-CPU solo obtenga la imagen y mande inputs al SUB-CPU,
+a parte el 68000 del SUB corre más rapido.
+
+También hacer lo mismo del lado 32X para que el programador tenga más libertad de usar el hardware de
+32X, aunque solo con el MASTER porque SLAVE ya se está usando mucho para otras cosas: El driver PCM y
+comunicación con GEMA de Z80 a SH2.
+
 --------------------------------------------------------
 GUÍA DE CARPETAS
 --------------------------------------------------------
 
 /game
   /code            El codigo de tu juego separados por modos de pantalla ("CODE")
-  /data            Todos los materiales visuales para tu juego
-  globals.asm      Tus variables globales siempre disponibles: $1000 bytes
+  /data            Todos los materiales visuales para tu juego, dependiendo del sistema
+  globals.asm      Tus variables globales siempre disponibles del lado Genesis, $1000 bytes maximo
   incl_code.asm    Todos los includes de las pantallas "CODE"
   incl_data.asm    Todos los includes de los bloques de "DATA"
   incl_list.asm    Las dos listas de pantallas "CODE" y bloques "DATA"
@@ -79,11 +94,11 @@ CODE en /game/code
 
       + ------------------ +
       | Librería Nikona    | \
-      | en CD, 32X y       |  >-- $3000 * Libres en Genesis y Pico
+      | en CD, 32X y       |  >-- $3000 * Sin usar en Genesis y Pico
       | CD32X              | /
       + ------------------ +
       | Tu pantalla        | \
-      | "CODE"             |  >-- $77FF * Libres en Genesis y Pico
+      | "CODE"             |  >-- $77FF * Sin usar en Genesis y Pico
       |                    | /
       + ------------------ +
       | Memoria temporal   | \
@@ -99,14 +114,15 @@ Los "CODE" son los modos de pantalla que pueden ser entre el Titulo, tu motor de
 
 Hay $2000 bytes de memoria temporal (RAM_ScrnBuff) y $1000 bytes de Globales (RAM_Globals):
 
-La memoria temporal es donde pones tu buffer del nivel y la lista de objectos, esta memoria se limpia
-cada vez que cambias de pantalla, y los Globales se mantienen siempre en cada cambio de pantalla, puedes
-poner los puntos, vidas, el numero del nivel, etc.
+La memoria temporal es donde pones tu buffer del nivel y la lista de objectos (los jugadores, enemigos y
+eso), esta memoria se limpia cada vez que cambias de pantalla, y los Globales se mantienen siempre en
+cada cambio de pantalla, puedes poner los puntos, vidas, el numero del nivel, etc.
 
 El CODE está limitado a $77FF bytes debido a que en CD, 32X y CD32X el codigo se carga en RAM.
-En Genesis y Pico el codigo se lee desde ROM pero si te pasas del limite romperás compatibilidad con
-los otros sistemas, si no te interesa compilar a CD, 32X y/o CD32X puedes modificar build.bat o build.sh
-dependiendo de tu OS pero ya no tendrás vuelta atrás hasta que vuelvas a organizar todo el codigo.
+En Genesis y Pico el codigo se lee desde ROM directamente pero si te pasas del limite romperás
+compatibilidad con los otros sistemas, si no te interesa compilar a CD, 32X y/o CD32X puedes modificar
+build.bat o build.sh dependiendo de tu OS pero ya no tendrás vuelta atrás hasta que vuelvas a
+organizar todo el codigo.
 
 ------------------------------------------------
 AÑADIENDO PANTALLAS
@@ -161,8 +177,8 @@ DATA en /game/data
 ----------------------------------------------------------------
 
 Genesis y Pico: Todos los 2MB/4MB: 8/10 bloques "DATA" visibles
-      CD/CD32X: $200000 (Word-RAM 256KB)
-  32X Cartucho: $900000 (1MB) 4 bloques "DATA" visibles
+      CD/CD32X: $200000 (Word-RAM, 256KB)
+  32X Cartucho: $900000 (1MB) 4 bloques disponibles
 
              CD / CD32X            32X Cartucho           Genesis y
              (Word-RAM)             ($900000)             Pico
@@ -183,10 +199,10 @@ Genesis y Pico: Todos los 2MB/4MB: 8/10 bloques "DATA" visibles
                   |               | bloque     |
                   |               | visible    |
                   |        9FFFFF + ---------- +
-                  |                  '''''''''
-                  |                Otros bancos
-                  |                no visibles
-                  |                  en ROM
+                  |
+                  |
+                  |
+                  |
                   |
                   |
                   |
@@ -202,13 +218,18 @@ Genesis y Pico: Todos los 2MB/4MB: 8/10 bloques "DATA" visibles
             | Etc...           |                  |
             + ---------------- + ---------------- +
 
-El bloque DATA es el lugar en donde va tu material para tu juego: Graficos, Paletas, tus mapas,
-modelos 3D de 32X, etc. Si se te acaba el espacio puedes agregar otro y cambiarlo dependiendo
-del sistema en que estés corriendo.
+El bloque DATA es el lugar en donde va tu material para tu juego: Graficos, Paletas, tus mapas, el
+soundtrack, etc. Si se te acaba el espacio puedes agregar otro y cambiarlo dependiendo del sistema en
+que estés corriendo.
 
 La limitación a $40000 bytes fué para tener compatibilidad con CD/CD32X, SI ES posible saltarse el
-limite en Genesis/Pico (2MB/4MB) y 32X (max. 1MB, 4 bloques) pero roperás compatibilidad con CD/CD32X,
-no hay vuelta atrás hasta que vuelvas a reorganizar todo con el limite de los $40000 bytes.
+limite en Genesis/Pico (2MB/4MB) y 32X (max. 1MB pero mesclando los 4 bloques) pero roperás
+compatibilidad con CD/CD32X y no hay vuelta atrás hasta que vuelvas a reorganizar todo.
+
+NOTA:
+
+En Genesis, 32X Cartucho y Pico el primer bloque tiene menos espacio porque también cuentan los primeros
+bytes desde Header hasta el mismo codigo de Nikona.
 
 ------------------------------------------------
 AÑADIENDO BANCOS
@@ -227,11 +248,11 @@ nombre del archivo en disco debajo de disc_banklist:
 		dc.l DATA_BANK1		<-- AQUI
 		dc.b "BNK_NEW1.BIN"
 
-Puedes ponerlo en cualquier lugar de la lista, pero NO quitar el -1 porque es lo que indica el fin de
+Puedes ponerlo en cualquier lugar de la lista, pero NUNCA quitar el -1 porque es lo que indica el fin de
 la lista
-Esta parte SOLO aplica para CD/CD32X pero si no lo pones se congelara
+Esta parte SOLO aplica para CD/CD32X, pero si no lo haces se congelara.
 
-- En incl_data.asm incluye tu banco con dos macros y el include:
+- En incl_data.asm incluye tu banco con dos macros y el include en el medio:
 
 	data_bank DATA_BANK1			; Entrada
 	include "game/data/bank_01.asm"		; todos los datos para este bloque
@@ -288,19 +309,21 @@ PRECAUCIONES
 ** CD y CD32X **
 
 - Cambiar bloques de DATA es LENTO, además que al cargar del disco los sectores se escriben en $920 bytes,
-así que el area $3F800-$3FFFFF no se puede utilizar ya que los $120 bytes extras se salen del area del
-Word-RAM y no sé sabe que podría pasarle al hardware del CD/CD32X.
+así que el area $3F800-$3FFFFF no se puede utilizar.
 
-- Si vas a usar los Stamps: el "DATA" quedará INUTILIZABLE mientras Sub-CPU genera las Stamps, esto también
-afecta TODO EL SONIDO.
-Pero el driver GEMA tiene soporte para leer desde RAM: puedes hacer entre una copia de lista de sequencia
-o solo el unico sequence que vayas a utilizar e incluirlo dentro del CODE (que está en RAM) y cambiar
-la dirección de las lista de sequencias llamando gemaSetMasterList
+- Si vas a usar los Stamps: el Word-RAM quedará INUTILIZABLE mientras Sub-CPU genera las Stamps.
+
+Al usar las Stamps tendrás que cambiar de lugar el soundtrack a RAM dentro del codigo de tu pantalla
+"CODE" ya que el driver GEMA tiene soporte para leer desde RAM, puedes hacer entre una copia de lista de
+sequencias o solo la unica canción y los sfx que vayas a utilizar, después cambiar temporalmente
+la lista de sequencias usando gemaSetMasterList
 Durante tu codigo tendrás que llamar Sound_Update en todo momento para que el Z80 pueda comunicarse
 con 68K y copiar los datos.
+Al cambiar de pantalla tendrás que llamar gemaStopAll primero (Y ESPERAR con un delay), y de ahí despues
+restaurar tu soundtrack principal con gemaSetMasterList nuevamente
 
 - Si NO estás utilizando Stamps y los $2000 bytes temporales se hacen poco puedes utilizar algún
-area libre del Word-RAM, asegurandote que el permiso SIEMPRE lo tenga el MAIN-CPU.
+area libre del Word-RAM, asegurandote de que el permiso SIEMPRE lo tenga el MAIN-CPU.
 
 ** 32X Cartucho **
 
@@ -325,53 +348,68 @@ RAM
 ** LAS DIRECCIONES PUEDE QUE CAMBIEN EN PROXIMAS VERSIONES **
 ----------------------------------------------------------------
 
-                Genesis y Pico:                 32X Cartucho:                    CD y CD32X
-      FF0000 + ------------------ +  FF0000 + ------------------ +  FF0000 + ------------------ +
-             | LIBRE DE USAR      |         | Librería Nikona    |         | Librería Nikona    |
-             |                    |         |                    |         |                    |
-             | Pero al escribir   |         |                    |         |                    |
-             | aquí perderás      |         |                    |         |                    |
-             | compatibilidad     |  FF3000 + ------------------ +  FF3000 + ------------------ +
-             | con CD, 32X y      |         | Pantalla "CODE"    |         | Pantalla "CODE"    |
-             | CD32X              |         |                    |         |                    |
-             |                    |         |                    |         |                    |
-             |                    |         |                    |         |                    |
-             |                    |         |                    |         |                    |
-             |                    |         |                    |         |                    |
-      FFB000 + ------------------ +  FF???? + ------------------ +  FF???? + ------------------ +
-             | Area usada en      |         | Area usada en      |         | Area usada en      |
-             | Nikona             |         | Nikona             |         | Nikona             |
-             |                    |         |                    |         |                    |
-             |                    |         |                    |         |                    |
-             |                    |         |                    |         |                    |
-             |                    |         |                    |         |                    |
-             |                    |         |                    |         |                    |
-             |                    |         |                    |         |                    |
-      FFFD00 + ------------------ +  FFFD00 + ------------------ +  FFFD00 + ------------------ +
-             | RESERVADO          |         | Codigo de reinicio |         | Lista de vectores  |
-             | Para mantener      |         | al presionar       |         | (Errores, Blanks,  |
-             | compatibilidad     |         | RESET (Hot-Start)  |         |  etc.)             |
-      FFFEF0 + ------------------ +  FFFE00 + ------------------ +  FFFE00 + ------------------ +
-             | Bytes escritos por |         | Bytes escritos por |         | Bytes escritos por |
-             | el Z80 para comm.  |         | el Z80 para comm.  |         | el Z80 para comm.  |
-      FFFE00 + ------------------ +  FFFE00 + ------------------ +  FFFE00 + ------------------ +
-             | Stack a7           |         | Stack a7           |         | Stack a7           |
-             |                    |         |                    |         |                    |
-             |                    |         |                    |         |                    |
-             + ------------------ +         + ------------------ +         + ------------------ +
+           Genesis y Pico                32X Cartucho                  CD y CD32X
+ FF0000 + ----------------- + FF0000 + ----------------- + FF0000 + ----------------- +
+        | LIBRE DE USAR     |        | Librería Nikona   |        | Librería Nikona   |
+        |                   |        |                   |        |                   |
+        | Pero al escribir  |        |                   |        |                   |
+        | aquí perderás     |        |                   |        |                   |
+        | compatibilidad    | FF3000 + ----------------- + FF3000 + ----------------- +
+        | con CD, 32X y     |        | Pantalla "CODE"   |        | Pantalla "CODE"   |
+        | CD32X             |        |                   |        |                   |
+        |                   |        |                   |        |                   |
+        |                   |        |                   |        |                   |
+        |                   |        |                   |        |                   |
+        |                   |        |                   |        |                   |
+ FFB000 + ----------------- + FF???? + ----------------- + FF???? + ----------------- +
+        | Area usada en     |        | Area usada en     |        | Area usada en     |
+        | Nikona            |        | Nikona            |        | Nikona            |
+        |                   |        |                   |        |                   |
+        |                   |        |                   |        |                   |
+        |                   |        |                   |        |                   |
+        |                   |        |                   |        |                   |
+        |                   |        |                   |        |                   |
+        |                   |        |                   |        |                   |
+ FFFD00 + ----------------- + FFFD00 + ----------------- + FFFD00 + ----------------- +
+        | Genesis:          |        | Codigo de reinicio|        | Lista de vectores |
+        | SSF2 bankswitch*  |        | al presionar      |        | (Errores, Blanks, |
+        | Pico:             |        | RESET (Hot-Start) |        |  etc.)            |
+        | Buff. del driver  |        |                   |        |                   |
+        | de sonido         |        |                   |        |                   |
+ FFFDF0 + ----------------- + FFFDF0 + ----------------- + FFFDF0 + ----------------- +
+        | Bytes escritos    |        | Bytes escritos    |        | Bytes escritos    |
+        | por el Z80 **     |        | por el Z80        |        | por el Z80        |
+ FFFE00 + ----------------- + FFFE00 + ----------------- + FFFE00 + ----------------- +
+        | Stack a7          |        | Stack a7          |        | Stack a7          |
+        |                   |        |                   |        |                   |
+        |                   |        |                   |        |                   |
+        + ----------------- +        + ----------------- +        + ----------------- +
+
+* Para implementar en el futuro
+** Solo Genesis.
+
+------------------------------------------------
+PRECAUCIONES
+------------------------------------------------
+
+* CD y CD32X:
+
+Las llamadas al BIOS NO SE PUEDEN USAR EN NIKONA
+
+----------------------------------------------------------------
 
 ETIQUETAS RAM disponibles para usar en CODE:
 
 RAM_SaveData		Copia en RAM del archivo de guardado, ver tamaño en rominfo.asm (SET_SRAMSIZE)
 RAM_HorScroll		Scrolling VDP horizontal, 240 lineas
-RAM_VerScroll		Scrolling VDP vertical, incluyendo modo 2cell 20 2cell's
-RAM_Sprites		Lista de VDP Sprites, 80
-RAM_Palette		Paleta VDP, 64 colores menos 4 de transparencia
-Controller_1		Buffer del control 1
-Controller_2		    ''''   control 2
+RAM_VerScroll		Scrolling VDP vertical, incluyendo modo 2cell, 20 2cell's
+RAM_Sprites		Lista de VDP Sprites, 80 sprites
+RAM_Palette		Paleta VDP, todos 64 colores
 RAM_FrameCount		Contador de frames (.l)
 RAM_ScreenMode		Numero de pantalla activo (.w)
 RAM_ScreenOption	Opción rapida para la pantalla antes de cargarla (.w)
+Controller_1		Buffer del control 1
+Controller_2		    ''''   control 2
 
 * Solo con 32X:
 
@@ -388,17 +426,17 @@ RAM_MdMars_MSprites	Lista de Sprites 3D, Maximo 32
 RAM_MdMars_Models	Lista de Modelos 3D, Maximo 32
 
 ----------------------------------------------------------------
-CONTROL
+CONTROL (Controller_1, Controller_2)
 ----------------------------------------------------------------
 
-Estructura de Controller_1 y Controller_2:
+Estructura:
   id			Identificador del control: control normal, mouse, etc. (.b)
   ver			Versión del control: ej. 3 botones ABC y 6 botones XYZABC (.b)
   hold			Botones mantenidos (.w)
   press			Botones presionados (.w)
   release		Botones que se dejaron de presionar (.w)
   x			Mouse: Velocidad X, Pico: Posición X de la pluma (.w)
-  y			Mouse: Velocidad Y, Pico: Posición Y de la pluma, también indica si está en la tableta o storyware (.w)
+  y			Mouse: Velocidad Y, Pico: Posición Y de la pluma + en tableta o storyware (.w)
   page			Pico: Numero de pagina (.w)
   ext			Reservado (.w)
 
@@ -410,6 +448,7 @@ Estructura de Controller_1 y Controller_2:
 
 PICO SOLAMENTE:
   > hold, press y release: %00000000P00BRLDU
+  > padx: $0000-$00FF
   > pady: $0000-$00EF tableta, $0100-$01EF storyware
 
 ----------------------------------------------------------------

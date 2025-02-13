@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 1 - 02/04/2025 11:19:52 PM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 1 - 02/13/2025 02:34:53 AM
 
 
        1/       0 :                     ; ===========================================================================
@@ -7260,496 +7260,496 @@
 (1) 1833/FFFFFFFFFFFF2160 :                     
 (1) 1834/FFFFFFFFFFFF2160 :                     System_SetDataBank:
 (1) 1835/FFFFFFFFFFFF2160 :                     	; CD/CD32X:
-(1) 1866/FFFFFFFFFFFF2160 : 2F07                		move.l	d7,-(sp)
-(1) 1867/FFFFFFFFFFFF2162 :                     	rept 3
-(1) 1868/FFFFFFFFFFFF2162 :                     		bsr	Video_MdMars_WaitSync
-(1) 1869/FFFFFFFFFFFF2162 :                     		bsr	Video_MdMars_SetSync
-(1) 1870/FFFFFFFFFFFF2162 :                     	endm
-(1) 1868/FFFFFFFFFFFF2162 : 6100 F33A           		bsr	Video_MdMars_WaitSync
-(1) 1869/FFFFFFFFFFFF2166 : 6100 F32C           		bsr	Video_MdMars_SetSync
-(1) 1868/FFFFFFFFFFFF216A : 6100 F332           		bsr	Video_MdMars_WaitSync
-(1) 1869/FFFFFFFFFFFF216E : 6100 F324           		bsr	Video_MdMars_SetSync
-(1) 1868/FFFFFFFFFFFF2172 : 6100 F32A           		bsr	Video_MdMars_WaitSync
-(1) 1869/FFFFFFFFFFFF2176 : 6100 F31C           		bsr	Video_MdMars_SetSync
-(1) 1871/FFFFFFFFFFFF217A : 2E00                		move.l	d0,d7
-(1) 1872/FFFFFFFFFFFF217C : 4847                		swap	d7
-(1) 1873/FFFFFFFFFFFF217E : E84F                		lsr.w	#4,d7
-(1) 1874/FFFFFFFFFFFF2180 : 0247 0003           		andi.w	#%11,d7
-(1) 1875/FFFFFFFFFFFF2184 : 33C7 00A1 5104      		move.w	d7,(sysmars_reg+bankset).l
-(1) 1876/FFFFFFFFFFFF218A : 2E1F                		move.l	(sp)+,d7
-(1) 1877/FFFFFFFFFFFF218C : 023C 001E           		and	#%11110,ccr
-(1) 1878/FFFFFFFFFFFF2190 :                     		; rts
-(1) 1880/FFFFFFFFFFFF2190 :                     
-(1) 1881/FFFFFFFFFFFF2190 : 4E75                		rts			; *** KEEP THIS RTS ***
-(1) 1882/FFFFFFFFFFFF2192 :                     
-(1) 1883/FFFFFFFFFFFF2192 :                     ; ====================================================================
-(1) 1884/FFFFFFFFFFFF2192 :                     ; ----------------------------------------------------------------
-(1) 1885/FFFFFFFFFFFF2192 :                     ; Objects system
-(1) 1886/FFFFFFFFFFFF2192 :                     ; ----------------------------------------------------------------
-(1) 1887/FFFFFFFFFFFF2192 :                     
-(1) 1888/FFFFFFFFFFFF2192 :                     ; --------------------------------------------------------
-(1) 1889/FFFFFFFFFFFF2192 :                     ; Objects_Init
-(1) 1890/FFFFFFFFFFFF2192 :                     ;
-(1) 1891/FFFFFFFFFFFF2192 :                     ; Reset Objects system
-(1) 1892/FFFFFFFFFFFF2192 :                     ; --------------------------------------------------------
-(1) 1893/FFFFFFFFFFFF2192 :                     
-(1) 1894/FFFFFFFFFFFF2192 :                     Objects_Init:
-(1) 1895/FFFFFFFFFFFF2192 : 21FC 0000 0000      		move.l	#0,(RAM_CurrObjList).w
+(1) 1869/FFFFFFFFFFFF2160 : 2F07                		move.l	d7,-(sp)
+(1) 1870/FFFFFFFFFFFF2162 :                     	rept 3
+(1) 1871/FFFFFFFFFFFF2162 :                     		bsr	Video_MdMars_WaitSync
+(1) 1872/FFFFFFFFFFFF2162 :                     		bsr	Video_MdMars_SetSync
+(1) 1873/FFFFFFFFFFFF2162 :                     	endm
+(1) 1871/FFFFFFFFFFFF2162 : 6100 F33A           		bsr	Video_MdMars_WaitSync
+(1) 1872/FFFFFFFFFFFF2166 : 6100 F32C           		bsr	Video_MdMars_SetSync
+(1) 1871/FFFFFFFFFFFF216A : 6100 F332           		bsr	Video_MdMars_WaitSync
+(1) 1872/FFFFFFFFFFFF216E : 6100 F324           		bsr	Video_MdMars_SetSync
+(1) 1871/FFFFFFFFFFFF2172 : 6100 F32A           		bsr	Video_MdMars_WaitSync
+(1) 1872/FFFFFFFFFFFF2176 : 6100 F31C           		bsr	Video_MdMars_SetSync
+(1) 1874/FFFFFFFFFFFF217A : 2E00                		move.l	d0,d7
+(1) 1875/FFFFFFFFFFFF217C : 4847                		swap	d7
+(1) 1876/FFFFFFFFFFFF217E : E84F                		lsr.w	#4,d7
+(1) 1877/FFFFFFFFFFFF2180 : 0247 0003           		andi.w	#%11,d7
+(1) 1878/FFFFFFFFFFFF2184 : 33C7 00A1 5104      		move.w	d7,(sysmars_reg+bankset).l
+(1) 1879/FFFFFFFFFFFF218A : 2E1F                		move.l	(sp)+,d7
+(1) 1880/FFFFFFFFFFFF218C : 023C 001E           		and	#%11110,ccr
+(1) 1881/FFFFFFFFFFFF2190 :                     		; rts
+(1) 1883/FFFFFFFFFFFF2190 :                     
+(1) 1884/FFFFFFFFFFFF2190 : 4E75                		rts			; *** KEEP THIS RTS ***
+(1) 1885/FFFFFFFFFFFF2192 :                     
+(1) 1886/FFFFFFFFFFFF2192 :                     ; ====================================================================
+(1) 1887/FFFFFFFFFFFF2192 :                     ; ----------------------------------------------------------------
+(1) 1888/FFFFFFFFFFFF2192 :                     ; Objects system
+(1) 1889/FFFFFFFFFFFF2192 :                     ; ----------------------------------------------------------------
+(1) 1890/FFFFFFFFFFFF2192 :                     
+(1) 1891/FFFFFFFFFFFF2192 :                     ; --------------------------------------------------------
+(1) 1892/FFFFFFFFFFFF2192 :                     ; Objects_Init
+(1) 1893/FFFFFFFFFFFF2192 :                     ;
+(1) 1894/FFFFFFFFFFFF2192 :                     ; Reset Objects system
+(1) 1895/FFFFFFFFFFFF2192 :                     ; --------------------------------------------------------
+(1) 1896/FFFFFFFFFFFF2192 :                     
+(1) 1897/FFFFFFFFFFFF2192 :                     Objects_Init:
+(1) 1898/FFFFFFFFFFFF2192 : 21FC 0000 0000      		move.l	#0,(RAM_CurrObjList).w
          FFFFFFFFFFFF2198 : F5A8             
-(1) 1896/FFFFFFFFFFFF219A : 31FC 0000 F5C4      		move.w	#0,(RAM_CurrObjNum).w
-(1) 1897/FFFFFFFFFFFF21A0 : 4E75                		rts
-(1) 1898/FFFFFFFFFFFF21A2 :                     
-(1) 1899/FFFFFFFFFFFF21A2 :                     ; --------------------------------------------------------
-(1) 1900/FFFFFFFFFFFF21A2 :                     ; Objects_Enable
-(1) 1901/FFFFFFFFFFFF21A2 :                     ;
-(1) 1902/FFFFFFFFFFFF21A2 :                     ; Enable Objects on the current screen
-(1) 1903/FFFFFFFFFFFF21A2 :                     ;
-(1) 1904/FFFFFFFFFFFF21A2 :                     ; Input:
-(1) 1905/FFFFFFFFFFFF21A2 :                     ; a0   | Objects buffer
-(1) 1906/FFFFFFFFFFFF21A2 :                     ; d0.w | Number of Objects to use
-(1) 1907/FFFFFFFFFFFF21A2 :                     ; --------------------------------------------------------
-(1) 1908/FFFFFFFFFFFF21A2 :                     
-(1) 1909/FFFFFFFFFFFF21A2 :                     Objects_Enable:
-(1) 1910/FFFFFFFFFFFF21A2 : 48E7 0102           		movem.l	d7/a6,-(sp)
-(1) 1911/FFFFFFFFFFFF21A6 : 2C48                		move.l	a0,a6
-(1) 1912/FFFFFFFFFFFF21A8 : 3E00                		move.w	d0,d7
-(1) 1913/FFFFFFFFFFFF21AA : CEFC 0068           		mulu.w	#obj_len,d7
-(1) 1914/FFFFFFFFFFFF21AE : 5347                		subq.w	#1,d7
-(1) 1915/FFFFFFFFFFFF21B0 :                     .clr_first:
-(1) 1916/FFFFFFFFFFFF21B0 : 421E                		clr.b	(a6)+
-(1) 1917/FFFFFFFFFFFF21B2 : 51CF FFFC           		dbf	d7,.clr_first
-(1) 1918/FFFFFFFFFFFF21B6 : 21C8 F5A8           		move.l	a0,(RAM_CurrObjList).w
-(1) 1919/FFFFFFFFFFFF21BA : 31C0 F5C4           		move.w	d0,(RAM_CurrObjNum).w
-(1) 1920/FFFFFFFFFFFF21BE : 4CDF 4080           		movem.l	(sp)+,d7/a6
-(1) 1921/FFFFFFFFFFFF21C2 : 4E75                		rts
-(1) 1922/FFFFFFFFFFFF21C4 :                     
-(1) 1923/FFFFFFFFFFFF21C4 :                     ; --------------------------------------------------------
-(1) 1924/FFFFFFFFFFFF21C4 :                     ; Objects_Run
-(1) 1925/FFFFFFFFFFFF21C4 :                     ;
-(1) 1926/FFFFFFFFFFFF21C4 :                     ; Process ALL Objects
-(1) 1927/FFFFFFFFFFFF21C4 :                     ;
-(1) 1928/FFFFFFFFFFFF21C4 :                     ; Uses:
-(1) 1929/FFFFFFFFFFFF21C4 :                     ; ALL
+(1) 1899/FFFFFFFFFFFF219A : 31FC 0000 F5C4      		move.w	#0,(RAM_CurrObjNum).w
+(1) 1900/FFFFFFFFFFFF21A0 : 4E75                		rts
+(1) 1901/FFFFFFFFFFFF21A2 :                     
+(1) 1902/FFFFFFFFFFFF21A2 :                     ; --------------------------------------------------------
+(1) 1903/FFFFFFFFFFFF21A2 :                     ; Objects_Enable
+(1) 1904/FFFFFFFFFFFF21A2 :                     ;
+(1) 1905/FFFFFFFFFFFF21A2 :                     ; Enable Objects on the current screen
+(1) 1906/FFFFFFFFFFFF21A2 :                     ;
+(1) 1907/FFFFFFFFFFFF21A2 :                     ; Input:
+(1) 1908/FFFFFFFFFFFF21A2 :                     ; a0   | Objects buffer
+(1) 1909/FFFFFFFFFFFF21A2 :                     ; d0.w | Number of Objects to use
+(1) 1910/FFFFFFFFFFFF21A2 :                     ; --------------------------------------------------------
+(1) 1911/FFFFFFFFFFFF21A2 :                     
+(1) 1912/FFFFFFFFFFFF21A2 :                     Objects_Enable:
+(1) 1913/FFFFFFFFFFFF21A2 : 48E7 0102           		movem.l	d7/a6,-(sp)
+(1) 1914/FFFFFFFFFFFF21A6 : 2C48                		move.l	a0,a6
+(1) 1915/FFFFFFFFFFFF21A8 : 3E00                		move.w	d0,d7
+(1) 1916/FFFFFFFFFFFF21AA : CEFC 0068           		mulu.w	#obj_len,d7
+(1) 1917/FFFFFFFFFFFF21AE : 5347                		subq.w	#1,d7
+(1) 1918/FFFFFFFFFFFF21B0 :                     .clr_first:
+(1) 1919/FFFFFFFFFFFF21B0 : 421E                		clr.b	(a6)+
+(1) 1920/FFFFFFFFFFFF21B2 : 51CF FFFC           		dbf	d7,.clr_first
+(1) 1921/FFFFFFFFFFFF21B6 : 21C8 F5A8           		move.l	a0,(RAM_CurrObjList).w
+(1) 1922/FFFFFFFFFFFF21BA : 31C0 F5C4           		move.w	d0,(RAM_CurrObjNum).w
+(1) 1923/FFFFFFFFFFFF21BE : 4CDF 4080           		movem.l	(sp)+,d7/a6
+(1) 1924/FFFFFFFFFFFF21C2 : 4E75                		rts
+(1) 1925/FFFFFFFFFFFF21C4 :                     
+(1) 1926/FFFFFFFFFFFF21C4 :                     ; --------------------------------------------------------
+(1) 1927/FFFFFFFFFFFF21C4 :                     ; Objects_Run
+(1) 1928/FFFFFFFFFFFF21C4 :                     ;
+(1) 1929/FFFFFFFFFFFF21C4 :                     ; Process ALL Objects
 (1) 1930/FFFFFFFFFFFF21C4 :                     ;
-(1) 1931/FFFFFFFFFFFF21C4 :                     ; Notes:
-(1) 1932/FFFFFFFFFFFF21C4 :                     ; - ONLY CALL THIS ONCE PER FRAME
-(1) 1933/FFFFFFFFFFFF21C4 :                     ; --------------------------------------------------------
-(1) 1934/FFFFFFFFFFFF21C4 :                     
-(1) 1935/FFFFFFFFFFFF21C4 :                     Objects_Run:
-(1) 1936/FFFFFFFFFFFF21C4 : 2E38 F5A8           		move.l	(RAM_CurrObjList).w,d7
-(1) 1937/FFFFFFFFFFFF21C8 : 671E                		beq.s	.invld_num
-(1) 1938/FFFFFFFFFFFF21CA : 2C47                		move.l	d7,a6
-(1) 1939/FFFFFFFFFFFF21CC : 3E38 F5C4           		move.w	(RAM_CurrObjNum).w,d7
-(1) 1940/FFFFFFFFFFFF21D0 : 6716                		beq.s	.invld_num
-(1) 1941/FFFFFFFFFFFF21D2 : 6B14                		bmi.s	.invld_num
-(1) 1942/FFFFFFFFFFFF21D4 :                     .next_one:
-(1) 1943/FFFFFFFFFFFF21D4 : 2C16                		move.l	obj_code(a6),d6
-(1) 1944/FFFFFFFFFFFF21D6 : 6708                		beq.s	.no_code
-(1) 1945/FFFFFFFFFFFF21D8 : 2F07                		move.l	d7,-(sp)
-(1) 1946/FFFFFFFFFFFF21DA : 2A46                		move.l	d6,a5
-(1) 1947/FFFFFFFFFFFF21DC : 4E95                		jsr	(a5)
-(1) 1948/FFFFFFFFFFFF21DE : 2E1F                		move.l	(sp)+,d7
-(1) 1949/FFFFFFFFFFFF21E0 :                     .no_code:
-(1) 1950/FFFFFFFFFFFF21E0 : DCFC 0068           		adda	#obj_len,a6
-(1) 1951/FFFFFFFFFFFF21E4 : 51CF FFEE           		dbf	d7,.next_one
-(1) 1952/FFFFFFFFFFFF21E8 :                     .invld_num:
-(1) 1953/FFFFFFFFFFFF21E8 : 4E75                		rts
-(1) 1954/FFFFFFFFFFFF21EA :                     
-(1) 1955/FFFFFFFFFFFF21EA :                     ; --------------------------------------------------------
-(1) 1956/FFFFFFFFFFFF21EA :                     ; Objects_Set, Objects_Make
-(1) 1957/FFFFFFFFFFFF21EA :                     ;
-(1) 1958/FFFFFFFFFFFF21EA :                     ; Set a new object into a specific slot.
-(1) 1959/FFFFFFFFFFFF21EA :                     ;
-(1) 1960/FFFFFFFFFFFF21EA :                     ; Input:
-(1) 1961/FFFFFFFFFFFF21EA :                     ; d0.l | Object code pointer
-(1) 1962/FFFFFFFFFFFF21EA :                     ;        If 0: DELETE the object including it's memory
-(1) 1963/FFFFFFFFFFFF21EA :                     ; d1.b | Object sub-type (obj_subid)
-(1) 1964/FFFFFFFFFFFF21EA :                     ; d2.w | Object slot
-(1) 1965/FFFFFFFFFFFF21EA :                     ;        If -1: Auto-search starting from FIRST slot.
-(1) 1966/FFFFFFFFFFFF21EA :                     ;
-(1) 1967/FFFFFFFFFFFF21EA :                     ; Returns:
-(1) 1968/FFFFFFFFFFFF21EA :                     ; bcc | Found free slot
-(1) 1969/FFFFFFFFFFFF21EA :                     ; bcs | Ran-out of object slots
-(1) 1970/FFFFFFFFFFFF21EA :                     ;
-(1) 1971/FFFFFFFFFFFF21EA :                     ; Notes:
-(1) 1972/FFFFFFFFFFFF21EA :                     ; If you are not using obj_subid you can ignore it,
-(1) 1973/FFFFFFFFFFFF21EA :                     ; but it will contain the remains of d2 when you
-(1) 1974/FFFFFFFFFFFF21EA :                     ; called this.
-(1) 1975/FFFFFFFFFFFF21EA :                     ; --------------------------------------------------------
-(1) 1976/FFFFFFFFFFFF21EA :                     
-(1) 1977/FFFFFFFFFFFF21EA :                     Objects_Set:
-(1) 1978/FFFFFFFFFFFF21EA : 48E7 0306           		movem.l	d6-d7/a5-a6,-(sp)
-(1) 1979/FFFFFFFFFFFF21EE : 2C78 F5A8           		movea.l	(RAM_CurrObjList).w,a6
-(1) 1980/FFFFFFFFFFFF21F2 : 7E00                		moveq	#0,d7
-(1) 1981/FFFFFFFFFFFF21F4 : 3E02                		move.w	d2,d7
-(1) 1982/FFFFFFFFFFFF21F6 : CEFC 0068           		mulu.w	#obj_len,d7
-(1) 1983/FFFFFFFFFFFF21FA : DCC7                		adda	d7,a6
-(1) 1984/FFFFFFFFFFFF21FC : 602E                		bra.s	objSet_Go
-(1) 1985/FFFFFFFFFFFF21FE :                     Objects_Make:
-(1) 1986/FFFFFFFFFFFF21FE : 48E7 0306           		movem.l	d6-d7/a5-a6,-(sp)
-(1) 1987/FFFFFFFFFFFF2202 : 2C78 F5A8           		movea.l	(RAM_CurrObjList).w,a6
-(1) 1988/FFFFFFFFFFFF2206 : 3E38 F5C4           		move.w	(RAM_CurrObjNum).w,d7
-(1) 1989/FFFFFFFFFFFF220A : 5347                		subq.w	#1,d7
-(1) 1990/FFFFFFFFFFFF220C : 7C00                		moveq	#0,d6
-(1) 1991/FFFFFFFFFFFF220E :                     .search:
-(1) 1992/FFFFFFFFFFFF220E : BC78 F5C4           		cmp.w	(RAM_CurrObjNum).w,d6
-(1) 1993/FFFFFFFFFFFF2212 : 6C0E                		bge.s	objSet_Error
-(1) 1994/FFFFFFFFFFFF2214 : 4A96                		tst.l	obj_code(a6)
-(1) 1995/FFFFFFFFFFFF2216 : 6714                		beq.s	objSet_Go
-(1) 1996/FFFFFFFFFFFF2218 : DCFC 0068           		adda	#obj_len,a6
-(1) 1997/FFFFFFFFFFFF221C : 5246                		addq.w	#1,d6
-(1) 1998/FFFFFFFFFFFF221E : 51CF FFEE           		dbf	d7,.search
-(1) 1999/FFFFFFFFFFFF2222 :                     objSet_Error:
-(1) 2000/FFFFFFFFFFFF2222 : 4CDF 60C0           		movem.l	(sp)+,d6-d7/a5-a6
-(1) 2001/FFFFFFFFFFFF2226 : 44FC 0001           		move	#1,ccr			; Return carry (No slots)
-(1) 2002/FFFFFFFFFFFF222A : 4E75                		rts
-(1) 2003/FFFFFFFFFFFF222C :                     objSet_Go:
-(1) 2004/FFFFFFFFFFFF222C : 4A80                		tst.l	d0
-(1) 2005/FFFFFFFFFFFF222E : 670A                		beq.s	.from_del
-(1) 2006/FFFFFFFFFFFF2230 : 2E00                		move.l	d0,d7
-(1) 2007/FFFFFFFFFFFF2232 : 2C87                		move.l	d7,obj_code(a6)
-(1) 2008/FFFFFFFFFFFF2234 : 1D41 001D           		move.b	d1,obj_subid(a6)
-(1) 2009/FFFFFFFFFFFF2238 : 600C                		bra.s	.exit_this
-(1) 2010/FFFFFFFFFFFF223A :                     .from_del:
-(1) 2011/FFFFFFFFFFFF223A : 2A4E                		move.l	a6,a5			; Delete entire object
-(1) 2012/FFFFFFFFFFFF223C : 3E3C 0067           		move.w	#obj_len-1,d7
-(1) 2013/FFFFFFFFFFFF2240 : 421D                .clr:		clr.b	(a5)+
-(1) 2014/FFFFFFFFFFFF2242 : 51CF FFFC           		dbf	d7,.clr
-(1) 2015/FFFFFFFFFFFF2246 :                     .exit_this:
-(1) 2016/FFFFFFFFFFFF2246 : 4CDF 60C0           		movem.l	(sp)+,d6-d7/a5-a6
-(1) 2017/FFFFFFFFFFFF224A : 003C 0001           		or	#1,ccr
-(1) 2018/FFFFFFFFFFFF224E : 4E75                		rts
-(1) 2019/FFFFFFFFFFFF2250 :                     
-(1) 2020/FFFFFFFFFFFF2250 :                     ; ====================================================================
-(1) 2021/FFFFFFFFFFFF2250 :                     ; --------------------------------------------------------
-(1) 2022/FFFFFFFFFFFF2250 :                     ; Object functions
-(1) 2023/FFFFFFFFFFFF2250 :                     ; --------------------------------------------------------
-(1) 2024/FFFFFFFFFFFF2250 :                     
-(1) 2025/FFFFFFFFFFFF2250 :                     ; --------------------------------------------------------
-(1) 2026/FFFFFFFFFFFF2250 :                     ; object_Reset
-(1) 2027/FFFFFFFFFFFF2250 :                     ;
-(1) 2028/FFFFFFFFFFFF2250 :                     ; Resets the current object's memory, call this
-(1) 2029/FFFFFFFFFFFF2250 :                     ; at very beginning of your object's init code
+(1) 1931/FFFFFFFFFFFF21C4 :                     ; Uses:
+(1) 1932/FFFFFFFFFFFF21C4 :                     ; ALL
+(1) 1933/FFFFFFFFFFFF21C4 :                     ;
+(1) 1934/FFFFFFFFFFFF21C4 :                     ; Notes:
+(1) 1935/FFFFFFFFFFFF21C4 :                     ; - ONLY CALL THIS ONCE PER FRAME
+(1) 1936/FFFFFFFFFFFF21C4 :                     ; --------------------------------------------------------
+(1) 1937/FFFFFFFFFFFF21C4 :                     
+(1) 1938/FFFFFFFFFFFF21C4 :                     Objects_Run:
+(1) 1939/FFFFFFFFFFFF21C4 : 2E38 F5A8           		move.l	(RAM_CurrObjList).w,d7
+(1) 1940/FFFFFFFFFFFF21C8 : 671E                		beq.s	.invld_num
+(1) 1941/FFFFFFFFFFFF21CA : 2C47                		move.l	d7,a6
+(1) 1942/FFFFFFFFFFFF21CC : 3E38 F5C4           		move.w	(RAM_CurrObjNum).w,d7
+(1) 1943/FFFFFFFFFFFF21D0 : 6716                		beq.s	.invld_num
+(1) 1944/FFFFFFFFFFFF21D2 : 6B14                		bmi.s	.invld_num
+(1) 1945/FFFFFFFFFFFF21D4 :                     .next_one:
+(1) 1946/FFFFFFFFFFFF21D4 : 2C16                		move.l	obj_code(a6),d6
+(1) 1947/FFFFFFFFFFFF21D6 : 6708                		beq.s	.no_code
+(1) 1948/FFFFFFFFFFFF21D8 : 2F07                		move.l	d7,-(sp)
+(1) 1949/FFFFFFFFFFFF21DA : 2A46                		move.l	d6,a5
+(1) 1950/FFFFFFFFFFFF21DC : 4E95                		jsr	(a5)
+(1) 1951/FFFFFFFFFFFF21DE : 2E1F                		move.l	(sp)+,d7
+(1) 1952/FFFFFFFFFFFF21E0 :                     .no_code:
+(1) 1953/FFFFFFFFFFFF21E0 : DCFC 0068           		adda	#obj_len,a6
+(1) 1954/FFFFFFFFFFFF21E4 : 51CF FFEE           		dbf	d7,.next_one
+(1) 1955/FFFFFFFFFFFF21E8 :                     .invld_num:
+(1) 1956/FFFFFFFFFFFF21E8 : 4E75                		rts
+(1) 1957/FFFFFFFFFFFF21EA :                     
+(1) 1958/FFFFFFFFFFFF21EA :                     ; --------------------------------------------------------
+(1) 1959/FFFFFFFFFFFF21EA :                     ; Objects_Set, Objects_Make
+(1) 1960/FFFFFFFFFFFF21EA :                     ;
+(1) 1961/FFFFFFFFFFFF21EA :                     ; Set a new object into a specific slot.
+(1) 1962/FFFFFFFFFFFF21EA :                     ;
+(1) 1963/FFFFFFFFFFFF21EA :                     ; Input:
+(1) 1964/FFFFFFFFFFFF21EA :                     ; d0.l | Object code pointer
+(1) 1965/FFFFFFFFFFFF21EA :                     ;        If 0: DELETE the object including it's memory
+(1) 1966/FFFFFFFFFFFF21EA :                     ; d1.b | Object sub-type (obj_subid)
+(1) 1967/FFFFFFFFFFFF21EA :                     ; d2.w | Object slot
+(1) 1968/FFFFFFFFFFFF21EA :                     ;        If -1: Auto-search starting from FIRST slot.
+(1) 1969/FFFFFFFFFFFF21EA :                     ;
+(1) 1970/FFFFFFFFFFFF21EA :                     ; Returns:
+(1) 1971/FFFFFFFFFFFF21EA :                     ; bcc | Found free slot
+(1) 1972/FFFFFFFFFFFF21EA :                     ; bcs | Ran-out of object slots
+(1) 1973/FFFFFFFFFFFF21EA :                     ;
+(1) 1974/FFFFFFFFFFFF21EA :                     ; Notes:
+(1) 1975/FFFFFFFFFFFF21EA :                     ; If you are not using obj_subid you can ignore it,
+(1) 1976/FFFFFFFFFFFF21EA :                     ; but it will contain the remains of d2 when you
+(1) 1977/FFFFFFFFFFFF21EA :                     ; called this.
+(1) 1978/FFFFFFFFFFFF21EA :                     ; --------------------------------------------------------
+(1) 1979/FFFFFFFFFFFF21EA :                     
+(1) 1980/FFFFFFFFFFFF21EA :                     Objects_Set:
+(1) 1981/FFFFFFFFFFFF21EA : 48E7 0306           		movem.l	d6-d7/a5-a6,-(sp)
+(1) 1982/FFFFFFFFFFFF21EE : 2C78 F5A8           		movea.l	(RAM_CurrObjList).w,a6
+(1) 1983/FFFFFFFFFFFF21F2 : 7E00                		moveq	#0,d7
+(1) 1984/FFFFFFFFFFFF21F4 : 3E02                		move.w	d2,d7
+(1) 1985/FFFFFFFFFFFF21F6 : CEFC 0068           		mulu.w	#obj_len,d7
+(1) 1986/FFFFFFFFFFFF21FA : DCC7                		adda	d7,a6
+(1) 1987/FFFFFFFFFFFF21FC : 602E                		bra.s	objSet_Go
+(1) 1988/FFFFFFFFFFFF21FE :                     Objects_Make:
+(1) 1989/FFFFFFFFFFFF21FE : 48E7 0306           		movem.l	d6-d7/a5-a6,-(sp)
+(1) 1990/FFFFFFFFFFFF2202 : 2C78 F5A8           		movea.l	(RAM_CurrObjList).w,a6
+(1) 1991/FFFFFFFFFFFF2206 : 3E38 F5C4           		move.w	(RAM_CurrObjNum).w,d7
+(1) 1992/FFFFFFFFFFFF220A : 5347                		subq.w	#1,d7
+(1) 1993/FFFFFFFFFFFF220C : 7C00                		moveq	#0,d6
+(1) 1994/FFFFFFFFFFFF220E :                     .search:
+(1) 1995/FFFFFFFFFFFF220E : BC78 F5C4           		cmp.w	(RAM_CurrObjNum).w,d6
+(1) 1996/FFFFFFFFFFFF2212 : 6C0E                		bge.s	objSet_Error
+(1) 1997/FFFFFFFFFFFF2214 : 4A96                		tst.l	obj_code(a6)
+(1) 1998/FFFFFFFFFFFF2216 : 6714                		beq.s	objSet_Go
+(1) 1999/FFFFFFFFFFFF2218 : DCFC 0068           		adda	#obj_len,a6
+(1) 2000/FFFFFFFFFFFF221C : 5246                		addq.w	#1,d6
+(1) 2001/FFFFFFFFFFFF221E : 51CF FFEE           		dbf	d7,.search
+(1) 2002/FFFFFFFFFFFF2222 :                     objSet_Error:
+(1) 2003/FFFFFFFFFFFF2222 : 4CDF 60C0           		movem.l	(sp)+,d6-d7/a5-a6
+(1) 2004/FFFFFFFFFFFF2226 : 44FC 0001           		move	#1,ccr			; Return carry (No slots)
+(1) 2005/FFFFFFFFFFFF222A : 4E75                		rts
+(1) 2006/FFFFFFFFFFFF222C :                     objSet_Go:
+(1) 2007/FFFFFFFFFFFF222C : 4A80                		tst.l	d0
+(1) 2008/FFFFFFFFFFFF222E : 670A                		beq.s	.from_del
+(1) 2009/FFFFFFFFFFFF2230 : 2E00                		move.l	d0,d7
+(1) 2010/FFFFFFFFFFFF2232 : 2C87                		move.l	d7,obj_code(a6)
+(1) 2011/FFFFFFFFFFFF2234 : 1D41 001D           		move.b	d1,obj_subid(a6)
+(1) 2012/FFFFFFFFFFFF2238 : 600C                		bra.s	.exit_this
+(1) 2013/FFFFFFFFFFFF223A :                     .from_del:
+(1) 2014/FFFFFFFFFFFF223A : 2A4E                		move.l	a6,a5			; Delete entire object
+(1) 2015/FFFFFFFFFFFF223C : 3E3C 0067           		move.w	#obj_len-1,d7
+(1) 2016/FFFFFFFFFFFF2240 : 421D                .clr:		clr.b	(a5)+
+(1) 2017/FFFFFFFFFFFF2242 : 51CF FFFC           		dbf	d7,.clr
+(1) 2018/FFFFFFFFFFFF2246 :                     .exit_this:
+(1) 2019/FFFFFFFFFFFF2246 : 4CDF 60C0           		movem.l	(sp)+,d6-d7/a5-a6
+(1) 2020/FFFFFFFFFFFF224A : 003C 0001           		or	#1,ccr
+(1) 2021/FFFFFFFFFFFF224E : 4E75                		rts
+(1) 2022/FFFFFFFFFFFF2250 :                     
+(1) 2023/FFFFFFFFFFFF2250 :                     ; ====================================================================
+(1) 2024/FFFFFFFFFFFF2250 :                     ; --------------------------------------------------------
+(1) 2025/FFFFFFFFFFFF2250 :                     ; Object functions
+(1) 2026/FFFFFFFFFFFF2250 :                     ; --------------------------------------------------------
+(1) 2027/FFFFFFFFFFFF2250 :                     
+(1) 2028/FFFFFFFFFFFF2250 :                     ; --------------------------------------------------------
+(1) 2029/FFFFFFFFFFFF2250 :                     ; object_Reset
 (1) 2030/FFFFFFFFFFFF2250 :                     ;
-(1) 2031/FFFFFFFFFFFF2250 :                     ; Input:
-(1) 2032/FFFFFFFFFFFF2250 :                     ; a6 | This object
-(1) 2033/FFFFFFFFFFFF2250 :                     ; --------------------------------------------------------
-(1) 2034/FFFFFFFFFFFF2250 :                     
-(1) 2035/FFFFFFFFFFFF2250 :                     object_Reset:
-(1) 2036/FFFFFFFFFFFF2250 : 48E7 0304           		movem.l	d6-d7/a5,-(sp)
-(1) 2037/FFFFFFFFFFFF2254 : 4BEE 0028           		lea	obj_ram(a6),a5
-(1) 2038/FFFFFFFFFFFF2258 : 3C3C 003F           		move.w	#(obj_len-obj_ram)-1,d6
-(1) 2039/FFFFFFFFFFFF225C : 7E00                		moveq	#0,d7
-(1) 2040/FFFFFFFFFFFF225E : 1AC7                .clr_ram:	move.b	d7,(a5)+
-(1) 2041/FFFFFFFFFFFF2260 : 51CE FFFC           		dbf	d6,.clr_ram
-(1) 2042/FFFFFFFFFFFF2264 : 4CDF 20C0           		movem.l	(sp)+,d6-d7/a5
-(1) 2043/FFFFFFFFFFFF2268 : 4E75                		rts
-(1) 2044/FFFFFFFFFFFF226A :                     
-(1) 2045/FFFFFFFFFFFF226A :                     ; --------------------------------------------------------
-(1) 2046/FFFFFFFFFFFF226A :                     ; object_ResetAnim
-(1) 2047/FFFFFFFFFFFF226A :                     ;
-(1) 2048/FFFFFFFFFFFF226A :                     ; Reset animation variables
-(1) 2049/FFFFFFFFFFFF226A :                     ; call this BEFORE using object_Animate
+(1) 2031/FFFFFFFFFFFF2250 :                     ; Resets the current object's memory, call this
+(1) 2032/FFFFFFFFFFFF2250 :                     ; at very beginning of your object's init code
+(1) 2033/FFFFFFFFFFFF2250 :                     ;
+(1) 2034/FFFFFFFFFFFF2250 :                     ; Input:
+(1) 2035/FFFFFFFFFFFF2250 :                     ; a6 | This object
+(1) 2036/FFFFFFFFFFFF2250 :                     ; --------------------------------------------------------
+(1) 2037/FFFFFFFFFFFF2250 :                     
+(1) 2038/FFFFFFFFFFFF2250 :                     object_Reset:
+(1) 2039/FFFFFFFFFFFF2250 : 48E7 0304           		movem.l	d6-d7/a5,-(sp)
+(1) 2040/FFFFFFFFFFFF2254 : 4BEE 0028           		lea	obj_ram(a6),a5
+(1) 2041/FFFFFFFFFFFF2258 : 3C3C 003F           		move.w	#(obj_len-obj_ram)-1,d6
+(1) 2042/FFFFFFFFFFFF225C : 7E00                		moveq	#0,d7
+(1) 2043/FFFFFFFFFFFF225E : 1AC7                .clr_ram:	move.b	d7,(a5)+
+(1) 2044/FFFFFFFFFFFF2260 : 51CE FFFC           		dbf	d6,.clr_ram
+(1) 2045/FFFFFFFFFFFF2264 : 4CDF 20C0           		movem.l	(sp)+,d6-d7/a5
+(1) 2046/FFFFFFFFFFFF2268 : 4E75                		rts
+(1) 2047/FFFFFFFFFFFF226A :                     
+(1) 2048/FFFFFFFFFFFF226A :                     ; --------------------------------------------------------
+(1) 2049/FFFFFFFFFFFF226A :                     ; object_ResetAnim
 (1) 2050/FFFFFFFFFFFF226A :                     ;
-(1) 2051/FFFFFFFFFFFF226A :                     ; Input:
-(1) 2052/FFFFFFFFFFFF226A :                     ; a6 | This object
-(1) 2053/FFFFFFFFFFFF226A :                     ; --------------------------------------------------------
-(1) 2054/FFFFFFFFFFFF226A :                     
-(1) 2055/FFFFFFFFFFFF226A :                     object_ResetAnim:
-(1) 2056/FFFFFFFFFFFF226A :                     ;  		clr.w	obj_anim_indx(a6)
-(1) 2057/FFFFFFFFFFFF226A :                     ;  		clr.b	obj_anim_spd(a6)
-(1) 2058/FFFFFFFFFFFF226A : 1D7C 00FF 0026      		move.b	#-1,obj_anim_icur(a6)
-(1) 2059/FFFFFFFFFFFF2270 : 4E75                		rts
-(1) 2060/FFFFFFFFFFFF2272 :                     
-(1) 2061/FFFFFFFFFFFF2272 :                     ; --------------------------------------------------------
-(1) 2062/FFFFFFFFFFFF2272 :                     ; object_Speed
-(1) 2063/FFFFFFFFFFFF2272 :                     ;
-(1) 2064/FFFFFFFFFFFF2272 :                     ; Moves the object using speed values set on
-(1) 2065/FFFFFFFFFFFF2272 :                     ; obj_x_spd and obj_y_spd, updates obj_x and obj_y
+(1) 2051/FFFFFFFFFFFF226A :                     ; Reset animation variables
+(1) 2052/FFFFFFFFFFFF226A :                     ; call this BEFORE using object_Animate
+(1) 2053/FFFFFFFFFFFF226A :                     ;
+(1) 2054/FFFFFFFFFFFF226A :                     ; Input:
+(1) 2055/FFFFFFFFFFFF226A :                     ; a6 | This object
+(1) 2056/FFFFFFFFFFFF226A :                     ; --------------------------------------------------------
+(1) 2057/FFFFFFFFFFFF226A :                     
+(1) 2058/FFFFFFFFFFFF226A :                     object_ResetAnim:
+(1) 2059/FFFFFFFFFFFF226A :                     ;  		clr.w	obj_anim_indx(a6)
+(1) 2060/FFFFFFFFFFFF226A :                     ;  		clr.b	obj_anim_spd(a6)
+(1) 2061/FFFFFFFFFFFF226A : 1D7C 00FF 0026      		move.b	#-1,obj_anim_icur(a6)
+(1) 2062/FFFFFFFFFFFF2270 : 4E75                		rts
+(1) 2063/FFFFFFFFFFFF2272 :                     
+(1) 2064/FFFFFFFFFFFF2272 :                     ; --------------------------------------------------------
+(1) 2065/FFFFFFFFFFFF2272 :                     ; object_Speed
 (1) 2066/FFFFFFFFFFFF2272 :                     ;
-(1) 2067/FFFFFFFFFFFF2272 :                     ; Input:
-(1) 2068/FFFFFFFFFFFF2272 :                     ; a6 | This object
-(1) 2069/FFFFFFFFFFFF2272 :                     ; --------------------------------------------------------
-(1) 2070/FFFFFFFFFFFF2272 :                     
-(1) 2071/FFFFFFFFFFFF2272 :                     object_Speed:
-(1) 2072/FFFFFFFFFFFF2272 : 2F07                		move.l	d7,-(sp)
-(1) 2073/FFFFFFFFFFFF2274 : 7E00                		moveq	#0,d7
-(1) 2074/FFFFFFFFFFFF2276 : 3E2E 0016           		move.w	obj_x_spd(a6),d7
-(1) 2075/FFFFFFFFFFFF227A : 48C7                		ext.l	d7
-(1) 2076/FFFFFFFFFFFF227C : E187                		asl.l	#8,d7
-(1) 2077/FFFFFFFFFFFF227E : DFAE 0004           		add.l	d7,obj_x(a6)
-(1) 2078/FFFFFFFFFFFF2282 : 7E00                		moveq	#0,d7
-(1) 2079/FFFFFFFFFFFF2284 : 3E2E 0018           		move.w	obj_y_spd(a6),d7
-(1) 2080/FFFFFFFFFFFF2288 : 48C7                		ext.l	d7
-(1) 2081/FFFFFFFFFFFF228A : E187                		asl.l	#8,d7
-(1) 2082/FFFFFFFFFFFF228C : DFAE 0008           		add.l	d7,obj_y(a6)
-(1) 2083/FFFFFFFFFFFF2290 : 7E00                		moveq	#0,d7
-(1) 2084/FFFFFFFFFFFF2292 : 3E2E 001A           		move.w	obj_z_spd(a6),d7
-(1) 2085/FFFFFFFFFFFF2296 : 48C7                		ext.l	d7
-(1) 2086/FFFFFFFFFFFF2298 : E187                		asl.l	#8,d7
-(1) 2087/FFFFFFFFFFFF229A : DFAE 000C           		add.l	d7,obj_z(a6)
-(1) 2088/FFFFFFFFFFFF229E : 2E1F                		move.l	(sp)+,d7
-(1) 2089/FFFFFFFFFFFF22A0 : 4E75                		rts
-(1) 2090/FFFFFFFFFFFF22A2 :                     
-(1) 2091/FFFFFFFFFFFF22A2 :                     ; --------------------------------------------------------
-(1) 2092/FFFFFFFFFFFF22A2 :                     ; object_Animate
-(1) 2093/FFFFFFFFFFFF22A2 :                     ;
-(1) 2094/FFFFFFFFFFFF22A2 :                     ; Animates the sprite with a animation script,
-(1) 2095/FFFFFFFFFFFF22A2 :                     ; modifies obj_frame with the frame to use
+(1) 2067/FFFFFFFFFFFF2272 :                     ; Moves the object using speed values set on
+(1) 2068/FFFFFFFFFFFF2272 :                     ; obj_x_spd and obj_y_spd, updates obj_x and obj_y
+(1) 2069/FFFFFFFFFFFF2272 :                     ;
+(1) 2070/FFFFFFFFFFFF2272 :                     ; Input:
+(1) 2071/FFFFFFFFFFFF2272 :                     ; a6 | This object
+(1) 2072/FFFFFFFFFFFF2272 :                     ; --------------------------------------------------------
+(1) 2073/FFFFFFFFFFFF2272 :                     
+(1) 2074/FFFFFFFFFFFF2272 :                     object_Speed:
+(1) 2075/FFFFFFFFFFFF2272 : 2F07                		move.l	d7,-(sp)
+(1) 2076/FFFFFFFFFFFF2274 : 7E00                		moveq	#0,d7
+(1) 2077/FFFFFFFFFFFF2276 : 3E2E 0016           		move.w	obj_x_spd(a6),d7
+(1) 2078/FFFFFFFFFFFF227A : 48C7                		ext.l	d7
+(1) 2079/FFFFFFFFFFFF227C : E187                		asl.l	#8,d7
+(1) 2080/FFFFFFFFFFFF227E : DFAE 0004           		add.l	d7,obj_x(a6)
+(1) 2081/FFFFFFFFFFFF2282 : 7E00                		moveq	#0,d7
+(1) 2082/FFFFFFFFFFFF2284 : 3E2E 0018           		move.w	obj_y_spd(a6),d7
+(1) 2083/FFFFFFFFFFFF2288 : 48C7                		ext.l	d7
+(1) 2084/FFFFFFFFFFFF228A : E187                		asl.l	#8,d7
+(1) 2085/FFFFFFFFFFFF228C : DFAE 0008           		add.l	d7,obj_y(a6)
+(1) 2086/FFFFFFFFFFFF2290 : 7E00                		moveq	#0,d7
+(1) 2087/FFFFFFFFFFFF2292 : 3E2E 001A           		move.w	obj_z_spd(a6),d7
+(1) 2088/FFFFFFFFFFFF2296 : 48C7                		ext.l	d7
+(1) 2089/FFFFFFFFFFFF2298 : E187                		asl.l	#8,d7
+(1) 2090/FFFFFFFFFFFF229A : DFAE 000C           		add.l	d7,obj_z(a6)
+(1) 2091/FFFFFFFFFFFF229E : 2E1F                		move.l	(sp)+,d7
+(1) 2092/FFFFFFFFFFFF22A0 : 4E75                		rts
+(1) 2093/FFFFFFFFFFFF22A2 :                     
+(1) 2094/FFFFFFFFFFFF22A2 :                     ; --------------------------------------------------------
+(1) 2095/FFFFFFFFFFFF22A2 :                     ; object_Animate
 (1) 2096/FFFFFFFFFFFF22A2 :                     ;
-(1) 2097/FFFFFFFFFFFF22A2 :                     ; Input:
-(1) 2098/FFFFFFFFFFFF22A2 :                     ; a6 | This object
-(1) 2099/FFFFFFFFFFFF22A2 :                     ; a0 | Animation data
-(1) 2100/FFFFFFFFFFFF22A2 :                     ; --------------------------------------------------------
-(1) 2101/FFFFFFFFFFFF22A2 :                     
-(1) 2102/FFFFFFFFFFFF22A2 :                     ; anim_data:
-(1) 2103/FFFFFFFFFFFF22A2 :                     ; 	dc.w .frame_1-anim_data
-(1) 2104/FFFFFFFFFFFF22A2 :                     ; 	dc.w .frame_2-anim_data
-(1) 2105/FFFFFFFFFFFF22A2 :                     ; 	;...
-(1) 2106/FFFFFFFFFFFF22A2 :                     ;
-(1) 2107/FFFFFFFFFFFF22A2 :                     ; .frame_num:
-(1) 2108/FFFFFFFFFFFF22A2 :                     ; 	dc.w speed			; Animation speed/delay
-(1) 2109/FFFFFFFFFFFF22A2 :                     ; 	dc.w frame_0,frame_1,...	; Frames list
-(1) 2110/FFFFFFFFFFFF22A2 :                     ; 	dc.w command			; End-of-data command
-(1) 2111/FFFFFFFFFFFF22A2 :                     ;
-(1) 2112/FFFFFFFFFFFF22A2 :                     ; commands:
-(1) 2113/FFFFFFFFFFFF22A2 :                     ; dc.w -1 		; Finish animation, stops at last frame.
-(1) 2114/FFFFFFFFFFFF22A2 :                     ; dc.w -2 		; Loop animation, goes back to index 0
-(1) 2115/FFFFFFFFFFFF22A2 :                     ; dc.w -3,to_indx	; Jump to index
-(1) 2116/FFFFFFFFFFFF22A2 :                     
-(1) 2117/FFFFFFFFFFFF22A2 :                     object_Animate:
-(1) 2118/FFFFFFFFFFFF22A2 : 48E7 0780           		movem.l	a0/d5-d7,-(sp)
-(1) 2119/FFFFFFFFFFFF22A6 : 7E00                		moveq	#0,d7
-(1) 2120/FFFFFFFFFFFF22A8 : 1E2E 0026            		move.b	obj_anim_icur(a6),d7
-(1) 2121/FFFFFFFFFFFF22AC : BE6E 0022            		cmp.w	obj_anim_num(a6),d7
-(1) 2122/FFFFFFFFFFFF22B0 : 670E                 		beq.s	.sameThing
-(1) 2123/FFFFFFFFFFFF22B2 : 1D6E 0023 0026       		move.b	obj_anim_num+1(a6),obj_anim_icur(a6)
-(1) 2124/FFFFFFFFFFFF22B8 : 426E 0024            		clr.w	obj_anim_indx(a6)
-(1) 2125/FFFFFFFFFFFF22BC : 422E 0027            		clr.b	obj_anim_spd(a6)
-(1) 2126/FFFFFFFFFFFF22C0 :                     .sameThing:
-(1) 2127/FFFFFFFFFFFF22C0 : 3E2E 0022            		move.w	obj_anim_num(a6),d7
-(1) 2128/FFFFFFFFFFFF22C4 : 0C07 00FF            		cmpi.b	#-1,d7
-(1) 2129/FFFFFFFFFFFF22C8 : 6748                 		beq.s	.return
-(1) 2130/FFFFFFFFFFFF22CA : DE47                 		add.w	d7,d7
-(1) 2131/FFFFFFFFFFFF22CC : 3E30 7000            		move.w	(a0,d7.w),d7
-(1) 2132/FFFFFFFFFFFF22D0 : 41F0 7000            		lea	(a0,d7.w),a0
-(1) 2133/FFFFFFFFFFFF22D4 : 3E18                 		move.w	(a0)+,d7
-(1) 2134/FFFFFFFFFFFF22D6 : 0C47 FFFF            		cmpi.w	#-1,d7
-(1) 2135/FFFFFFFFFFFF22DA : 670C                 		beq.s	.keepspd
-(1) 2136/FFFFFFFFFFFF22DC : 042E 0001 0027       		subi.b	#1,obj_anim_spd(a6)
-(1) 2137/FFFFFFFFFFFF22E2 : 6A2E                 		bpl.s	.return
-(1) 2138/FFFFFFFFFFFF22E4 : 1D47 0027           		move.b	d7,obj_anim_spd(a6)
-(1) 2139/FFFFFFFFFFFF22E8 :                     .keepspd:
-(1) 2140/FFFFFFFFFFFF22E8 : 7C00                 		moveq	#0,d6
-(1) 2141/FFFFFFFFFFFF22EA : 3E2E 0024            		move.w	obj_anim_indx(a6),d7
-(1) 2142/FFFFFFFFFFFF22EE : DE47                 		add.w	d7,d7
-(1) 2143/FFFFFFFFFFFF22F0 : 3C10                 		move.w	(a0),d6
-(1) 2144/FFFFFFFFFFFF22F2 : D0C7                 		adda	d7,a0
-(1) 2145/FFFFFFFFFFFF22F4 : 3A10                 		move.w	(a0),d5
-(1) 2146/FFFFFFFFFFFF22F6 : 0C45 FFFF            		cmpi.w	#-1,d5
-(1) 2147/FFFFFFFFFFFF22FA : 6730                 		beq.s	.lastFrame	; finish
-(1) 2148/FFFFFFFFFFFF22FC : 0C45 FFFE            		cmpi.w	#-2,d5
-(1) 2149/FFFFFFFFFFFF2300 : 6712                 		beq.s	.noAnim		; loop animation
-(1) 2150/FFFFFFFFFFFF2302 : 0C45 FFFD            		cmpi.w	#-3,d5
-(1) 2151/FFFFFFFFFFFF2306 : 671A                 		beq.s	.goToFrame
-(1) 2152/FFFFFFFFFFFF2308 : 3D45 0020            		move.w	d5,obj_frame(a6)
-(1) 2153/FFFFFFFFFFFF230C : 066E 0001 0024       		add.w	#1,obj_anim_indx(a6)
-(1) 2154/FFFFFFFFFFFF2312 :                     .return:
-(1) 2155/FFFFFFFFFFFF2312 : 601C                 		bra.s	.exit_anim
-(1) 2156/FFFFFFFFFFFF2314 :                     .noAnim:
-(1) 2157/FFFFFFFFFFFF2314 : 3D7C 0001 0024       		move.w	#1,obj_anim_indx(a6)
-(1) 2158/FFFFFFFFFFFF231A : 3A06                 		move.w	d6,d5
-(1) 2159/FFFFFFFFFFFF231C : 3D45 0020            		move.w	d5,obj_frame(a6)
-(1) 2160/FFFFFFFFFFFF2320 : 600E                		bra.s	.exit_anim
-(1) 2161/FFFFFFFFFFFF2322 :                     .goToFrame:
-(1) 2162/FFFFFFFFFFFF2322 : 426E 0024           		clr.w	obj_anim_indx(a6)
-(1) 2163/FFFFFFFFFFFF2326 : 3D68 0002 0024      		move.w	2(a0),obj_anim_indx(a6)
-(1) 2164/FFFFFFFFFFFF232C :                     .lastFrame:
-(1) 2165/FFFFFFFFFFFF232C : 422E 0027            		clr.b	obj_anim_spd(a6)
-(1) 2166/FFFFFFFFFFFF2330 :                     .exit_anim:
-(1) 2167/FFFFFFFFFFFF2330 : 4CDF 01E0           		movem.l	(sp)+,a0/d5-d7
-(1) 2168/FFFFFFFFFFFF2334 : 4E75                		rts
-(1) 2169/FFFFFFFFFFFF2336 :                     
-(1) 2170/FFFFFFFFFFFF2336 :                     ; --------------------------------------------------------
-(1) 2171/FFFFFFFFFFFF2336 :                     ; object_Touch
-(1) 2172/FFFFFFFFFFFF2336 :                     ;
-(1) 2173/FFFFFFFFFFFF2336 :                     ; Detects collision with another Object
-(1) 2174/FFFFFFFFFFFF2336 :                     ; from the Object's list, reads TOP to BOTTOM
+(1) 2097/FFFFFFFFFFFF22A2 :                     ; Animates the sprite with a animation script,
+(1) 2098/FFFFFFFFFFFF22A2 :                     ; modifies obj_frame with the frame to use
+(1) 2099/FFFFFFFFFFFF22A2 :                     ;
+(1) 2100/FFFFFFFFFFFF22A2 :                     ; Input:
+(1) 2101/FFFFFFFFFFFF22A2 :                     ; a6 | This object
+(1) 2102/FFFFFFFFFFFF22A2 :                     ; a0 | Animation data
+(1) 2103/FFFFFFFFFFFF22A2 :                     ; --------------------------------------------------------
+(1) 2104/FFFFFFFFFFFF22A2 :                     
+(1) 2105/FFFFFFFFFFFF22A2 :                     ; anim_data:
+(1) 2106/FFFFFFFFFFFF22A2 :                     ; 	dc.w .frame_1-anim_data
+(1) 2107/FFFFFFFFFFFF22A2 :                     ; 	dc.w .frame_2-anim_data
+(1) 2108/FFFFFFFFFFFF22A2 :                     ; 	;...
+(1) 2109/FFFFFFFFFFFF22A2 :                     ;
+(1) 2110/FFFFFFFFFFFF22A2 :                     ; .frame_num:
+(1) 2111/FFFFFFFFFFFF22A2 :                     ; 	dc.w speed			; Animation speed/delay
+(1) 2112/FFFFFFFFFFFF22A2 :                     ; 	dc.w frame_0,frame_1,...	; Frames list
+(1) 2113/FFFFFFFFFFFF22A2 :                     ; 	dc.w command			; End-of-data command
+(1) 2114/FFFFFFFFFFFF22A2 :                     ;
+(1) 2115/FFFFFFFFFFFF22A2 :                     ; commands:
+(1) 2116/FFFFFFFFFFFF22A2 :                     ; dc.w -1 		; Finish animation, stops at last frame.
+(1) 2117/FFFFFFFFFFFF22A2 :                     ; dc.w -2 		; Loop animation, goes back to index 0
+(1) 2118/FFFFFFFFFFFF22A2 :                     ; dc.w -3,to_indx	; Jump to index
+(1) 2119/FFFFFFFFFFFF22A2 :                     
+(1) 2120/FFFFFFFFFFFF22A2 :                     object_Animate:
+(1) 2121/FFFFFFFFFFFF22A2 : 48E7 0780           		movem.l	a0/d5-d7,-(sp)
+(1) 2122/FFFFFFFFFFFF22A6 : 7E00                		moveq	#0,d7
+(1) 2123/FFFFFFFFFFFF22A8 : 1E2E 0026            		move.b	obj_anim_icur(a6),d7
+(1) 2124/FFFFFFFFFFFF22AC : BE6E 0022            		cmp.w	obj_anim_num(a6),d7
+(1) 2125/FFFFFFFFFFFF22B0 : 670E                 		beq.s	.sameThing
+(1) 2126/FFFFFFFFFFFF22B2 : 1D6E 0023 0026       		move.b	obj_anim_num+1(a6),obj_anim_icur(a6)
+(1) 2127/FFFFFFFFFFFF22B8 : 426E 0024            		clr.w	obj_anim_indx(a6)
+(1) 2128/FFFFFFFFFFFF22BC : 422E 0027            		clr.b	obj_anim_spd(a6)
+(1) 2129/FFFFFFFFFFFF22C0 :                     .sameThing:
+(1) 2130/FFFFFFFFFFFF22C0 : 3E2E 0022            		move.w	obj_anim_num(a6),d7
+(1) 2131/FFFFFFFFFFFF22C4 : 0C07 00FF            		cmpi.b	#-1,d7
+(1) 2132/FFFFFFFFFFFF22C8 : 6748                 		beq.s	.return
+(1) 2133/FFFFFFFFFFFF22CA : DE47                 		add.w	d7,d7
+(1) 2134/FFFFFFFFFFFF22CC : 3E30 7000            		move.w	(a0,d7.w),d7
+(1) 2135/FFFFFFFFFFFF22D0 : 41F0 7000            		lea	(a0,d7.w),a0
+(1) 2136/FFFFFFFFFFFF22D4 : 3E18                 		move.w	(a0)+,d7
+(1) 2137/FFFFFFFFFFFF22D6 : 0C47 FFFF            		cmpi.w	#-1,d7
+(1) 2138/FFFFFFFFFFFF22DA : 670C                 		beq.s	.keepspd
+(1) 2139/FFFFFFFFFFFF22DC : 042E 0001 0027       		subi.b	#1,obj_anim_spd(a6)
+(1) 2140/FFFFFFFFFFFF22E2 : 6A2E                 		bpl.s	.return
+(1) 2141/FFFFFFFFFFFF22E4 : 1D47 0027           		move.b	d7,obj_anim_spd(a6)
+(1) 2142/FFFFFFFFFFFF22E8 :                     .keepspd:
+(1) 2143/FFFFFFFFFFFF22E8 : 7C00                 		moveq	#0,d6
+(1) 2144/FFFFFFFFFFFF22EA : 3E2E 0024            		move.w	obj_anim_indx(a6),d7
+(1) 2145/FFFFFFFFFFFF22EE : DE47                 		add.w	d7,d7
+(1) 2146/FFFFFFFFFFFF22F0 : 3C10                 		move.w	(a0),d6
+(1) 2147/FFFFFFFFFFFF22F2 : D0C7                 		adda	d7,a0
+(1) 2148/FFFFFFFFFFFF22F4 : 3A10                 		move.w	(a0),d5
+(1) 2149/FFFFFFFFFFFF22F6 : 0C45 FFFF            		cmpi.w	#-1,d5
+(1) 2150/FFFFFFFFFFFF22FA : 6730                 		beq.s	.lastFrame	; finish
+(1) 2151/FFFFFFFFFFFF22FC : 0C45 FFFE            		cmpi.w	#-2,d5
+(1) 2152/FFFFFFFFFFFF2300 : 6712                 		beq.s	.noAnim		; loop animation
+(1) 2153/FFFFFFFFFFFF2302 : 0C45 FFFD            		cmpi.w	#-3,d5
+(1) 2154/FFFFFFFFFFFF2306 : 671A                 		beq.s	.goToFrame
+(1) 2155/FFFFFFFFFFFF2308 : 3D45 0020            		move.w	d5,obj_frame(a6)
+(1) 2156/FFFFFFFFFFFF230C : 066E 0001 0024       		add.w	#1,obj_anim_indx(a6)
+(1) 2157/FFFFFFFFFFFF2312 :                     .return:
+(1) 2158/FFFFFFFFFFFF2312 : 601C                 		bra.s	.exit_anim
+(1) 2159/FFFFFFFFFFFF2314 :                     .noAnim:
+(1) 2160/FFFFFFFFFFFF2314 : 3D7C 0001 0024       		move.w	#1,obj_anim_indx(a6)
+(1) 2161/FFFFFFFFFFFF231A : 3A06                 		move.w	d6,d5
+(1) 2162/FFFFFFFFFFFF231C : 3D45 0020            		move.w	d5,obj_frame(a6)
+(1) 2163/FFFFFFFFFFFF2320 : 600E                		bra.s	.exit_anim
+(1) 2164/FFFFFFFFFFFF2322 :                     .goToFrame:
+(1) 2165/FFFFFFFFFFFF2322 : 426E 0024           		clr.w	obj_anim_indx(a6)
+(1) 2166/FFFFFFFFFFFF2326 : 3D68 0002 0024      		move.w	2(a0),obj_anim_indx(a6)
+(1) 2167/FFFFFFFFFFFF232C :                     .lastFrame:
+(1) 2168/FFFFFFFFFFFF232C : 422E 0027            		clr.b	obj_anim_spd(a6)
+(1) 2169/FFFFFFFFFFFF2330 :                     .exit_anim:
+(1) 2170/FFFFFFFFFFFF2330 : 4CDF 01E0           		movem.l	(sp)+,a0/d5-d7
+(1) 2171/FFFFFFFFFFFF2334 : 4E75                		rts
+(1) 2172/FFFFFFFFFFFF2336 :                     
+(1) 2173/FFFFFFFFFFFF2336 :                     ; --------------------------------------------------------
+(1) 2174/FFFFFFFFFFFF2336 :                     ; object_Touch
 (1) 2175/FFFFFFFFFFFF2336 :                     ;
-(1) 2176/FFFFFFFFFFFF2336 :                     ; Input:
-(1) 2177/FFFFFFFFFFFF2336 :                     ; a6   | This object
-(1) 2178/FFFFFFFFFFFF2336 :                     ; d0.w | Start from slot
-(1) 2179/FFFFFFFFFFFF2336 :                     ;
-(1) 2180/FFFFFFFFFFFF2336 :                     ; Returns:
-(1) 2181/FFFFFFFFFFFF2336 :                     ; d0.l | If Nothing: 0
-(1) 2182/FFFFFFFFFFFF2336 :                     ;        If Found:   The target's RAM location
-(1) 2183/FFFFFFFFFFFF2336 :                     ; --------------------------------------------------------
-(1) 2184/FFFFFFFFFFFF2336 :                     
-(1) 2185/FFFFFFFFFFFF2336 :                     object_Touch:
-(1) 2186/FFFFFFFFFFFF2336 : 48E7 7F04           		movem.l	d1-d7/a5,-(sp)
-(1) 2187/FFFFFFFFFFFF233A : 7000                		moveq	#0,d0
-(1) 2188/FFFFFFFFFFFF233C : 3C2E 0010           		move.w	obj_size_x(a6),d6	; Check if we have a valid size
-(1) 2189/FFFFFFFFFFFF2340 : 3A2E 0012           		move.w	obj_size_y(a6),d5
-(1) 2190/FFFFFFFFFFFF2344 : 8C45                		or.w	d5,d6
-(1) 2191/FFFFFFFFFFFF2346 : 672C                		beq	.exit_this
-(1) 2192/FFFFFFFFFFFF2348 : 2A78 F5A8           		movea.l	(RAM_CurrObjList).w,a5
-(1) 2193/FFFFFFFFFFFF234C : 3C00                		move.w	d0,d6
-(1) 2194/FFFFFFFFFFFF234E : CCFC 0068           		mulu.w	#obj_len,d6
-(1) 2195/FFFFFFFFFFFF2352 : DAC6                		adda	d6,a5
-(1) 2196/FFFFFFFFFFFF2354 : 3E00                		move.w	d0,d7
-(1) 2197/FFFFFFFFFFFF2356 :                     .next:
-(1) 2198/FFFFFFFFFFFF2356 : BE78 F5C4           		cmp.w	(RAM_CurrObjNum).w,d7
-(1) 2199/FFFFFFFFFFFF235A : 6C16                		bge.s	.ran_out
-(1) 2200/FFFFFFFFFFFF235C : BBCE                		cmp.l	a6,a5			; If reading THIS object, skip
-(1) 2201/FFFFFFFFFFFF235E : 670A                		beq.s	.skip
-(1) 2202/FFFFFFFFFFFF2360 : 4A95                		tst.l	obj_code(a5)		; This object has code?
-(1) 2203/FFFFFFFFFFFF2362 : 6706                		beq.s	.skip
-(1) 2204/FFFFFFFFFFFF2364 : 6114                		bsr.s	.check_this
-(1) 2205/FFFFFFFFFFFF2366 : 4A40                		tst.w	d0			; Exit if Found.
-(1) 2206/FFFFFFFFFFFF2368 : 660A                		bne.s	.exit_this
-(1) 2207/FFFFFFFFFFFF236A : DAFC 0068           .skip:		adda	#obj_len,a5
-(1) 2208/FFFFFFFFFFFF236E : 51CF FFE6           		dbf	d7,.next
-(1) 2209/FFFFFFFFFFFF2372 :                     .ran_out:
-(1) 2210/FFFFFFFFFFFF2372 : 7000                		moveq	#0,d0
-(1) 2211/FFFFFFFFFFFF2374 :                     .exit_this:
-(1) 2212/FFFFFFFFFFFF2374 : 4CDF 20FE           		movem.l	(sp)+,d1-d7/a5
-(1) 2213/FFFFFFFFFFFF2378 : 4E75                		rts
-(1) 2214/FFFFFFFFFFFF237A :                     
-(1) 2215/FFFFFFFFFFFF237A :                     ; main check
-(1) 2216/FFFFFFFFFFFF237A :                     .check_this:
-(1) 2217/FFFFFFFFFFFF237A : 7000                		moveq	#0,d0			; Reset Return
-(1) 2218/FFFFFFFFFFFF237C :                     	; d6 - Y current top
-(1) 2219/FFFFFFFFFFFF237C :                     	; d5 - Y current bottom
-(1) 2220/FFFFFFFFFFFF237C :                     	; d4 - Y target top
-(1) 2221/FFFFFFFFFFFF237C :                     	; d3 - Y target bottom
-(1) 2222/FFFFFFFFFFFF237C :                     	; Check X
-(1) 2223/FFFFFFFFFFFF237C : 322E 0010           		move.w	obj_size_x(a6),d1	; $LLRR
-(1) 2224/FFFFFFFFFFFF2380 : 6700 00B4           		beq	.not_ytop
-(1) 2225/FFFFFFFFFFFF2384 : 3C2E 0004           		move.w	obj_x(a6),d6		; d6 - Left point
-(1) 2226/FFFFFFFFFFFF2388 : 3A06                		move.w	d6,d5			; d5 - Right point
-(1) 2227/FFFFFFFFFFFF238A : 3401                		move.w	d1,d2
-(1) 2228/FFFFFFFFFFFF238C : E049                		lsr.w	#8,d1			; d1 - Left size
-(1) 2229/FFFFFFFFFFFF238E : 0242 00FF           		andi.w	#$FF,d2			; d2 - Right size
-(1) 2230/FFFFFFFFFFFF2392 :                     ; 		lsl.w	#3,d1
-(1) 2231/FFFFFFFFFFFF2392 :                     ; 		lsl.w	#3,d2
-(1) 2232/FFFFFFFFFFFF2392 : 5342                		subq.w	#1,d2			; X right adjust
-(1) 2233/FFFFFFFFFFFF2394 : 9C41                		sub.w	d1,d6
-(1) 2234/FFFFFFFFFFFF2396 : DA42                		add.w	d2,d5
-(1) 2235/FFFFFFFFFFFF2398 : 322D 0010           		move.w	obj_size_x(a5),d1	; $LLRR
-(1) 2236/FFFFFFFFFFFF239C : 6700 0098           		beq	.not_ytop
-(1) 2237/FFFFFFFFFFFF23A0 : 382D 0004           		move.w	obj_x(a5),d4		; d4 - Left point
-(1) 2238/FFFFFFFFFFFF23A4 : 3604                		move.w	d4,d3			; d3 - Right point
-(1) 2239/FFFFFFFFFFFF23A6 : 3401                		move.w	d1,d2
-(1) 2240/FFFFFFFFFFFF23A8 : E049                		lsr.w	#8,d1			; d1 - Left size
-(1) 2241/FFFFFFFFFFFF23AA : 0242 00FF           		andi.w	#$FF,d2			; d2 - Right size
-(1) 2242/FFFFFFFFFFFF23AE :                     ; 		lsl.w	#3,d1
-(1) 2243/FFFFFFFFFFFF23AE :                     ; 		lsl.w	#3,d2
-(1) 2244/FFFFFFFFFFFF23AE : 5342                		subq.w	#1,d2
-(1) 2245/FFFFFFFFFFFF23B0 : 9841                		sub.w	d1,d4
-(1) 2246/FFFFFFFFFFFF23B2 : D642                		add.w	d2,d3
-(1) 2247/FFFFFFFFFFFF23B4 : B646                		cmp.w	d6,d3
-(1) 2248/FFFFFFFFFFFF23B6 : 6D7E                		blt	.not_ytop
-(1) 2249/FFFFFFFFFFFF23B8 : B845                		cmp.w	d5,d4
-(1) 2250/FFFFFFFFFFFF23BA : 6C7A                		bge	.not_ytop
-(1) 2251/FFFFFFFFFFFF23BC :                     
-(1) 2252/FFFFFFFFFFFF23BC :                     	; Check Y
-(1) 2253/FFFFFFFFFFFF23BC : 322E 0012           		move.w	obj_size_y(a6),d1	; $LLRR
-(1) 2254/FFFFFFFFFFFF23C0 : 6774                		beq	.not_ytop
-(1) 2255/FFFFFFFFFFFF23C2 : 3C2E 0008           		move.w	obj_y(a6),d6		; d6 - Left point
-(1) 2256/FFFFFFFFFFFF23C6 : 3A06                		move.w	d6,d5			; d5 - Right point
-(1) 2257/FFFFFFFFFFFF23C8 : 3401                		move.w	d1,d2
-(1) 2258/FFFFFFFFFFFF23CA : E049                		lsr.w	#8,d1			; d1 - Left size
-(1) 2259/FFFFFFFFFFFF23CC : 0242 00FF           		andi.w	#$FF,d2			; d2 - Right size
-(1) 2260/FFFFFFFFFFFF23D0 :                     ; 		lsl.w	#3,d1
-(1) 2261/FFFFFFFFFFFF23D0 :                     ; 		lsl.w	#3,d2
-(1) 2262/FFFFFFFFFFFF23D0 : 5342                		subq.w	#1,d2
-(1) 2263/FFFFFFFFFFFF23D2 : 9C41                		sub.w	d1,d6
-(1) 2264/FFFFFFFFFFFF23D4 : DA42                		add.w	d2,d5
-(1) 2265/FFFFFFFFFFFF23D6 : 322D 0012           		move.w	obj_size_y(a5),d1	; $LLRR
-(1) 2266/FFFFFFFFFFFF23DA : 675A                		beq	.not_ytop
-(1) 2267/FFFFFFFFFFFF23DC : 382D 0008           		move.w	obj_y(a5),d4		; d4 - Left point
-(1) 2268/FFFFFFFFFFFF23E0 : 3604                		move.w	d4,d3			; d3 - Right point
-(1) 2269/FFFFFFFFFFFF23E2 : 3401                		move.w	d1,d2
-(1) 2270/FFFFFFFFFFFF23E4 : E049                		lsr.w	#8,d1			; d1 - Left size
-(1) 2271/FFFFFFFFFFFF23E6 : 0242 00FF           		andi.w	#$FF,d2			; d2 - Right size
-(1) 2272/FFFFFFFFFFFF23EA :                     ; 		lsl.w	#3,d1
-(1) 2273/FFFFFFFFFFFF23EA :                     ; 		lsl.w	#3,d2
-(1) 2274/FFFFFFFFFFFF23EA : 5342                		subq.w	#1,d2
-(1) 2275/FFFFFFFFFFFF23EC : 9841                		sub.w	d1,d4
-(1) 2276/FFFFFFFFFFFF23EE : D642                		add.w	d2,d3
-(1) 2277/FFFFFFFFFFFF23F0 : B646                		cmp.w	d6,d3
-(1) 2278/FFFFFFFFFFFF23F2 : 6D42                		blt.s	.not_ytop
-(1) 2279/FFFFFFFFFFFF23F4 : B845                		cmp.w	d5,d4
-(1) 2280/FFFFFFFFFFFF23F6 : 6C3E                		bge.s	.not_ytop
-(1) 2281/FFFFFFFFFFFF23F8 :                     
-(1) 2282/FFFFFFFFFFFF23F8 :                     	; Special Z check
-(1) 2283/FFFFFFFFFFFF23F8 : 322E 0014           		move.w	obj_size_z(a6),d1	; $LLRR
-(1) 2284/FFFFFFFFFFFF23FC : 6736                		beq.s	.set_ok
-(1) 2285/FFFFFFFFFFFF23FE : 3C2E 000C           		move.w	obj_z(a6),d6		; d6 - Left point
-(1) 2286/FFFFFFFFFFFF2402 : 3A06                		move.w	d6,d5			; d5 - Right point
-(1) 2287/FFFFFFFFFFFF2404 : 3401                		move.w	d1,d2
-(1) 2288/FFFFFFFFFFFF2406 : E049                		lsr.w	#8,d1			; d1 - Left size
-(1) 2289/FFFFFFFFFFFF2408 : 0242 00FF           		andi.w	#$FF,d2			; d2 - Right size
-(1) 2290/FFFFFFFFFFFF240C :                     ; 		lsl.w	#3,d1
-(1) 2291/FFFFFFFFFFFF240C :                     ; 		lsl.w	#3,d2
-(1) 2292/FFFFFFFFFFFF240C : 5342                		subq.w	#1,d2
-(1) 2293/FFFFFFFFFFFF240E : 9C41                		sub.w	d1,d6
-(1) 2294/FFFFFFFFFFFF2410 : DA42                		add.w	d2,d5
-(1) 2295/FFFFFFFFFFFF2412 : 322D 0014           		move.w	obj_size_z(a5),d1	; $LLRR
-(1) 2296/FFFFFFFFFFFF2416 : 671C                		beq.s	.set_ok
-(1) 2297/FFFFFFFFFFFF2418 : 382D 000C           		move.w	obj_z(a5),d4		; d4 - Left point
-(1) 2298/FFFFFFFFFFFF241C : 3604                		move.w	d4,d3			; d3 - Right point
-(1) 2299/FFFFFFFFFFFF241E : 3401                		move.w	d1,d2
-(1) 2300/FFFFFFFFFFFF2420 : E049                		lsr.w	#8,d1			; d1 - Left size
-(1) 2301/FFFFFFFFFFFF2422 : 0242 00FF           		andi.w	#$FF,d2			; d2 - Right size
-(1) 2302/FFFFFFFFFFFF2426 :                     ; 		lsl.w	#3,d1
-(1) 2303/FFFFFFFFFFFF2426 :                     ; 		lsl.w	#3,d2
-(1) 2304/FFFFFFFFFFFF2426 : 5342                		subq.w	#1,d2
-(1) 2305/FFFFFFFFFFFF2428 : 9841                		sub.w	d1,d4
-(1) 2306/FFFFFFFFFFFF242A : D642                		add.w	d2,d3
-(1) 2307/FFFFFFFFFFFF242C : B646                		cmp.w	d6,d3
-(1) 2308/FFFFFFFFFFFF242E : 6D06                		blt	.not_ytop
-(1) 2309/FFFFFFFFFFFF2430 : B845                		cmp.w	d5,d4
-(1) 2310/FFFFFFFFFFFF2432 : 6C02                		bge	.not_ytop
-(1) 2311/FFFFFFFFFFFF2434 :                     .set_ok:
-(1) 2312/FFFFFFFFFFFF2434 : 200D                		move.l	a5,d0			; FOUND OBJECT
-(1) 2313/FFFFFFFFFFFF2436 :                     .not_ytop:
-(1) 2314/FFFFFFFFFFFF2436 : 4E75                		rts
-(1) 2315/FFFFFFFFFFFF2438 :                     
-(1) 2316/FFFFFFFFFFFF2438 :                     ; ============================================================
-(1) 2317/FFFFFFFFFFFF2438 :                     ; --------------------------------------------------------
-(1) 2318/FFFFFFFFFFFF2438 :                     ; object_MdMars_GetSprInfo
-(1) 2319/FFFFFFFFFFFF2438 :                     ;
-(1) 2320/FFFFFFFFFFFF2438 :                     ; Grabs info from the current object
-(1) 2321/FFFFFFFFFFFF2438 :                     ; for Video_MdMars_MakeSpr2D and Video_MdMars_MakeSpr3D
+(1) 2176/FFFFFFFFFFFF2336 :                     ; Detects collision with another Object
+(1) 2177/FFFFFFFFFFFF2336 :                     ; from the Object's list, reads TOP to BOTTOM
+(1) 2178/FFFFFFFFFFFF2336 :                     ;
+(1) 2179/FFFFFFFFFFFF2336 :                     ; Input:
+(1) 2180/FFFFFFFFFFFF2336 :                     ; a6   | This object
+(1) 2181/FFFFFFFFFFFF2336 :                     ; d0.w | Start from slot
+(1) 2182/FFFFFFFFFFFF2336 :                     ;
+(1) 2183/FFFFFFFFFFFF2336 :                     ; Returns:
+(1) 2184/FFFFFFFFFFFF2336 :                     ; d0.l | If Nothing: 0
+(1) 2185/FFFFFFFFFFFF2336 :                     ;        If Found:   The target's RAM location
+(1) 2186/FFFFFFFFFFFF2336 :                     ; --------------------------------------------------------
+(1) 2187/FFFFFFFFFFFF2336 :                     
+(1) 2188/FFFFFFFFFFFF2336 :                     object_Touch:
+(1) 2189/FFFFFFFFFFFF2336 : 48E7 7F04           		movem.l	d1-d7/a5,-(sp)
+(1) 2190/FFFFFFFFFFFF233A : 7000                		moveq	#0,d0
+(1) 2191/FFFFFFFFFFFF233C : 3C2E 0010           		move.w	obj_size_x(a6),d6	; Check if we have a valid size
+(1) 2192/FFFFFFFFFFFF2340 : 3A2E 0012           		move.w	obj_size_y(a6),d5
+(1) 2193/FFFFFFFFFFFF2344 : 8C45                		or.w	d5,d6
+(1) 2194/FFFFFFFFFFFF2346 : 672C                		beq	.exit_this
+(1) 2195/FFFFFFFFFFFF2348 : 2A78 F5A8           		movea.l	(RAM_CurrObjList).w,a5
+(1) 2196/FFFFFFFFFFFF234C : 3C00                		move.w	d0,d6
+(1) 2197/FFFFFFFFFFFF234E : CCFC 0068           		mulu.w	#obj_len,d6
+(1) 2198/FFFFFFFFFFFF2352 : DAC6                		adda	d6,a5
+(1) 2199/FFFFFFFFFFFF2354 : 3E00                		move.w	d0,d7
+(1) 2200/FFFFFFFFFFFF2356 :                     .next:
+(1) 2201/FFFFFFFFFFFF2356 : BE78 F5C4           		cmp.w	(RAM_CurrObjNum).w,d7
+(1) 2202/FFFFFFFFFFFF235A : 6C16                		bge.s	.ran_out
+(1) 2203/FFFFFFFFFFFF235C : BBCE                		cmp.l	a6,a5			; If reading THIS object, skip
+(1) 2204/FFFFFFFFFFFF235E : 670A                		beq.s	.skip
+(1) 2205/FFFFFFFFFFFF2360 : 4A95                		tst.l	obj_code(a5)		; This object has code?
+(1) 2206/FFFFFFFFFFFF2362 : 6706                		beq.s	.skip
+(1) 2207/FFFFFFFFFFFF2364 : 6114                		bsr.s	.check_this
+(1) 2208/FFFFFFFFFFFF2366 : 4A40                		tst.w	d0			; Exit if Found.
+(1) 2209/FFFFFFFFFFFF2368 : 660A                		bne.s	.exit_this
+(1) 2210/FFFFFFFFFFFF236A : DAFC 0068           .skip:		adda	#obj_len,a5
+(1) 2211/FFFFFFFFFFFF236E : 51CF FFE6           		dbf	d7,.next
+(1) 2212/FFFFFFFFFFFF2372 :                     .ran_out:
+(1) 2213/FFFFFFFFFFFF2372 : 7000                		moveq	#0,d0
+(1) 2214/FFFFFFFFFFFF2374 :                     .exit_this:
+(1) 2215/FFFFFFFFFFFF2374 : 4CDF 20FE           		movem.l	(sp)+,d1-d7/a5
+(1) 2216/FFFFFFFFFFFF2378 : 4E75                		rts
+(1) 2217/FFFFFFFFFFFF237A :                     
+(1) 2218/FFFFFFFFFFFF237A :                     ; main check
+(1) 2219/FFFFFFFFFFFF237A :                     .check_this:
+(1) 2220/FFFFFFFFFFFF237A : 7000                		moveq	#0,d0			; Reset Return
+(1) 2221/FFFFFFFFFFFF237C :                     	; d6 - Y current top
+(1) 2222/FFFFFFFFFFFF237C :                     	; d5 - Y current bottom
+(1) 2223/FFFFFFFFFFFF237C :                     	; d4 - Y target top
+(1) 2224/FFFFFFFFFFFF237C :                     	; d3 - Y target bottom
+(1) 2225/FFFFFFFFFFFF237C :                     	; Check X
+(1) 2226/FFFFFFFFFFFF237C : 322E 0010           		move.w	obj_size_x(a6),d1	; $LLRR
+(1) 2227/FFFFFFFFFFFF2380 : 6700 00B4           		beq	.not_ytop
+(1) 2228/FFFFFFFFFFFF2384 : 3C2E 0004           		move.w	obj_x(a6),d6		; d6 - Left point
+(1) 2229/FFFFFFFFFFFF2388 : 3A06                		move.w	d6,d5			; d5 - Right point
+(1) 2230/FFFFFFFFFFFF238A : 3401                		move.w	d1,d2
+(1) 2231/FFFFFFFFFFFF238C : E049                		lsr.w	#8,d1			; d1 - Left size
+(1) 2232/FFFFFFFFFFFF238E : 0242 00FF           		andi.w	#$FF,d2			; d2 - Right size
+(1) 2233/FFFFFFFFFFFF2392 :                     ; 		lsl.w	#3,d1
+(1) 2234/FFFFFFFFFFFF2392 :                     ; 		lsl.w	#3,d2
+(1) 2235/FFFFFFFFFFFF2392 : 5342                		subq.w	#1,d2			; X right adjust
+(1) 2236/FFFFFFFFFFFF2394 : 9C41                		sub.w	d1,d6
+(1) 2237/FFFFFFFFFFFF2396 : DA42                		add.w	d2,d5
+(1) 2238/FFFFFFFFFFFF2398 : 322D 0010           		move.w	obj_size_x(a5),d1	; $LLRR
+(1) 2239/FFFFFFFFFFFF239C : 6700 0098           		beq	.not_ytop
+(1) 2240/FFFFFFFFFFFF23A0 : 382D 0004           		move.w	obj_x(a5),d4		; d4 - Left point
+(1) 2241/FFFFFFFFFFFF23A4 : 3604                		move.w	d4,d3			; d3 - Right point
+(1) 2242/FFFFFFFFFFFF23A6 : 3401                		move.w	d1,d2
+(1) 2243/FFFFFFFFFFFF23A8 : E049                		lsr.w	#8,d1			; d1 - Left size
+(1) 2244/FFFFFFFFFFFF23AA : 0242 00FF           		andi.w	#$FF,d2			; d2 - Right size
+(1) 2245/FFFFFFFFFFFF23AE :                     ; 		lsl.w	#3,d1
+(1) 2246/FFFFFFFFFFFF23AE :                     ; 		lsl.w	#3,d2
+(1) 2247/FFFFFFFFFFFF23AE : 5342                		subq.w	#1,d2
+(1) 2248/FFFFFFFFFFFF23B0 : 9841                		sub.w	d1,d4
+(1) 2249/FFFFFFFFFFFF23B2 : D642                		add.w	d2,d3
+(1) 2250/FFFFFFFFFFFF23B4 : B646                		cmp.w	d6,d3
+(1) 2251/FFFFFFFFFFFF23B6 : 6D7E                		blt	.not_ytop
+(1) 2252/FFFFFFFFFFFF23B8 : B845                		cmp.w	d5,d4
+(1) 2253/FFFFFFFFFFFF23BA : 6C7A                		bge	.not_ytop
+(1) 2254/FFFFFFFFFFFF23BC :                     
+(1) 2255/FFFFFFFFFFFF23BC :                     	; Check Y
+(1) 2256/FFFFFFFFFFFF23BC : 322E 0012           		move.w	obj_size_y(a6),d1	; $LLRR
+(1) 2257/FFFFFFFFFFFF23C0 : 6774                		beq	.not_ytop
+(1) 2258/FFFFFFFFFFFF23C2 : 3C2E 0008           		move.w	obj_y(a6),d6		; d6 - Left point
+(1) 2259/FFFFFFFFFFFF23C6 : 3A06                		move.w	d6,d5			; d5 - Right point
+(1) 2260/FFFFFFFFFFFF23C8 : 3401                		move.w	d1,d2
+(1) 2261/FFFFFFFFFFFF23CA : E049                		lsr.w	#8,d1			; d1 - Left size
+(1) 2262/FFFFFFFFFFFF23CC : 0242 00FF           		andi.w	#$FF,d2			; d2 - Right size
+(1) 2263/FFFFFFFFFFFF23D0 :                     ; 		lsl.w	#3,d1
+(1) 2264/FFFFFFFFFFFF23D0 :                     ; 		lsl.w	#3,d2
+(1) 2265/FFFFFFFFFFFF23D0 : 5342                		subq.w	#1,d2
+(1) 2266/FFFFFFFFFFFF23D2 : 9C41                		sub.w	d1,d6
+(1) 2267/FFFFFFFFFFFF23D4 : DA42                		add.w	d2,d5
+(1) 2268/FFFFFFFFFFFF23D6 : 322D 0012           		move.w	obj_size_y(a5),d1	; $LLRR
+(1) 2269/FFFFFFFFFFFF23DA : 675A                		beq	.not_ytop
+(1) 2270/FFFFFFFFFFFF23DC : 382D 0008           		move.w	obj_y(a5),d4		; d4 - Left point
+(1) 2271/FFFFFFFFFFFF23E0 : 3604                		move.w	d4,d3			; d3 - Right point
+(1) 2272/FFFFFFFFFFFF23E2 : 3401                		move.w	d1,d2
+(1) 2273/FFFFFFFFFFFF23E4 : E049                		lsr.w	#8,d1			; d1 - Left size
+(1) 2274/FFFFFFFFFFFF23E6 : 0242 00FF           		andi.w	#$FF,d2			; d2 - Right size
+(1) 2275/FFFFFFFFFFFF23EA :                     ; 		lsl.w	#3,d1
+(1) 2276/FFFFFFFFFFFF23EA :                     ; 		lsl.w	#3,d2
+(1) 2277/FFFFFFFFFFFF23EA : 5342                		subq.w	#1,d2
+(1) 2278/FFFFFFFFFFFF23EC : 9841                		sub.w	d1,d4
+(1) 2279/FFFFFFFFFFFF23EE : D642                		add.w	d2,d3
+(1) 2280/FFFFFFFFFFFF23F0 : B646                		cmp.w	d6,d3
+(1) 2281/FFFFFFFFFFFF23F2 : 6D42                		blt.s	.not_ytop
+(1) 2282/FFFFFFFFFFFF23F4 : B845                		cmp.w	d5,d4
+(1) 2283/FFFFFFFFFFFF23F6 : 6C3E                		bge.s	.not_ytop
+(1) 2284/FFFFFFFFFFFF23F8 :                     
+(1) 2285/FFFFFFFFFFFF23F8 :                     	; Special Z check
+(1) 2286/FFFFFFFFFFFF23F8 : 322E 0014           		move.w	obj_size_z(a6),d1	; $LLRR
+(1) 2287/FFFFFFFFFFFF23FC : 6736                		beq.s	.set_ok
+(1) 2288/FFFFFFFFFFFF23FE : 3C2E 000C           		move.w	obj_z(a6),d6		; d6 - Left point
+(1) 2289/FFFFFFFFFFFF2402 : 3A06                		move.w	d6,d5			; d5 - Right point
+(1) 2290/FFFFFFFFFFFF2404 : 3401                		move.w	d1,d2
+(1) 2291/FFFFFFFFFFFF2406 : E049                		lsr.w	#8,d1			; d1 - Left size
+(1) 2292/FFFFFFFFFFFF2408 : 0242 00FF           		andi.w	#$FF,d2			; d2 - Right size
+(1) 2293/FFFFFFFFFFFF240C :                     ; 		lsl.w	#3,d1
+(1) 2294/FFFFFFFFFFFF240C :                     ; 		lsl.w	#3,d2
+(1) 2295/FFFFFFFFFFFF240C : 5342                		subq.w	#1,d2
+(1) 2296/FFFFFFFFFFFF240E : 9C41                		sub.w	d1,d6
+(1) 2297/FFFFFFFFFFFF2410 : DA42                		add.w	d2,d5
+(1) 2298/FFFFFFFFFFFF2412 : 322D 0014           		move.w	obj_size_z(a5),d1	; $LLRR
+(1) 2299/FFFFFFFFFFFF2416 : 671C                		beq.s	.set_ok
+(1) 2300/FFFFFFFFFFFF2418 : 382D 000C           		move.w	obj_z(a5),d4		; d4 - Left point
+(1) 2301/FFFFFFFFFFFF241C : 3604                		move.w	d4,d3			; d3 - Right point
+(1) 2302/FFFFFFFFFFFF241E : 3401                		move.w	d1,d2
+(1) 2303/FFFFFFFFFFFF2420 : E049                		lsr.w	#8,d1			; d1 - Left size
+(1) 2304/FFFFFFFFFFFF2422 : 0242 00FF           		andi.w	#$FF,d2			; d2 - Right size
+(1) 2305/FFFFFFFFFFFF2426 :                     ; 		lsl.w	#3,d1
+(1) 2306/FFFFFFFFFFFF2426 :                     ; 		lsl.w	#3,d2
+(1) 2307/FFFFFFFFFFFF2426 : 5342                		subq.w	#1,d2
+(1) 2308/FFFFFFFFFFFF2428 : 9841                		sub.w	d1,d4
+(1) 2309/FFFFFFFFFFFF242A : D642                		add.w	d2,d3
+(1) 2310/FFFFFFFFFFFF242C : B646                		cmp.w	d6,d3
+(1) 2311/FFFFFFFFFFFF242E : 6D06                		blt	.not_ytop
+(1) 2312/FFFFFFFFFFFF2430 : B845                		cmp.w	d5,d4
+(1) 2313/FFFFFFFFFFFF2432 : 6C02                		bge	.not_ytop
+(1) 2314/FFFFFFFFFFFF2434 :                     .set_ok:
+(1) 2315/FFFFFFFFFFFF2434 : 200D                		move.l	a5,d0			; FOUND OBJECT
+(1) 2316/FFFFFFFFFFFF2436 :                     .not_ytop:
+(1) 2317/FFFFFFFFFFFF2436 : 4E75                		rts
+(1) 2318/FFFFFFFFFFFF2438 :                     
+(1) 2319/FFFFFFFFFFFF2438 :                     ; ============================================================
+(1) 2320/FFFFFFFFFFFF2438 :                     ; --------------------------------------------------------
+(1) 2321/FFFFFFFFFFFF2438 :                     ; object_MdMars_GetSprInfo
 (1) 2322/FFFFFFFFFFFF2438 :                     ;
-(1) 2323/FFFFFFFFFFFF2438 :                     ; Input:
-(1) 2324/FFFFFFFFFFFF2438 :                     ; a6   | This object
-(1) 2325/FFFFFFFFFFFF2438 :                     ; d0.l | X/Y center: splitw(center_x,center_y)
-(1) 2326/FFFFFFFFFFFF2438 :                     ;        Set to 0 for 3D Sprites
-(1) 2327/FFFFFFFFFFFF2438 :                     ; d1.w | Flags
-(1) 2328/FFFFFFFFFFFF2438 :                     ;
-(1) 2329/FFFFFFFFFFFF2438 :                     ; Output:
-(1) 2330/FFFFFFFFFFFF2438 :                     ; d0.l | X and Y position
-(1) 2331/FFFFFFFFFFFF2438 :                     ; d1.l | Flags and Z Position
-(1) 2332/FFFFFFFFFFFF2438 :                     ; d2.w | Current frame when using object_Animate
-(1) 2333/FFFFFFFFFFFF2438 :                     ; --------------------------------------------------------
-(1) 2334/FFFFFFFFFFFF2438 :                     
-(1) 2335/FFFFFFFFFFFF2438 :                     object_MdMars_GetSprInfo:
-(1) 2337/FFFFFFFFFFFF2438 : 4841                		swap	d1
-(1) 2338/FFFFFFFFFFFF243A : 322E 000C           		move.w	obj_z(a6),d1
-(1) 2339/FFFFFFFFFFFF243E : 4840                		swap	d0
-(1) 2340/FFFFFFFFFFFF2440 : 382E 0004           		move.w	obj_x(a6),d4
-(1) 2341/FFFFFFFFFFFF2444 : 9840                		sub.w	d0,d4
-(1) 2342/FFFFFFFFFFFF2446 : 4844                		swap	d4
-(1) 2343/FFFFFFFFFFFF2448 : 4840                		swap	d0
-(1) 2344/FFFFFFFFFFFF244A : 382E 0008           		move.w	obj_y(a6),d4		; d0 - Xpos | Ypos
-(1) 2345/FFFFFFFFFFFF244E : 9840                		sub.w	d0,d4
-(1) 2346/FFFFFFFFFFFF2450 : C940                		exg.l	d4,d0
-(1) 2347/FFFFFFFFFFFF2452 : 7400                		moveq	#0,d2
-(1) 2348/FFFFFFFFFFFF2454 : 342E 0020           		move.w	obj_frame(a6),d2
-(1) 2350/FFFFFFFFFFFF2458 : 4E75                		rts
-(1) 2351/FFFFFFFFFFFF245A :                     
+(1) 2323/FFFFFFFFFFFF2438 :                     ; Grabs info from the current object
+(1) 2324/FFFFFFFFFFFF2438 :                     ; for Video_MdMars_MakeSpr2D and Video_MdMars_MakeSpr3D
+(1) 2325/FFFFFFFFFFFF2438 :                     ;
+(1) 2326/FFFFFFFFFFFF2438 :                     ; Input:
+(1) 2327/FFFFFFFFFFFF2438 :                     ; a6   | This object
+(1) 2328/FFFFFFFFFFFF2438 :                     ; d0.l | X/Y center: splitw(center_x,center_y)
+(1) 2329/FFFFFFFFFFFF2438 :                     ;        Set to 0 for 3D Sprites
+(1) 2330/FFFFFFFFFFFF2438 :                     ; d1.w | Flags
+(1) 2331/FFFFFFFFFFFF2438 :                     ;
+(1) 2332/FFFFFFFFFFFF2438 :                     ; Output:
+(1) 2333/FFFFFFFFFFFF2438 :                     ; d0.l | X and Y position
+(1) 2334/FFFFFFFFFFFF2438 :                     ; d1.l | Flags and Z Position
+(1) 2335/FFFFFFFFFFFF2438 :                     ; d2.w | Current frame when using object_Animate
+(1) 2336/FFFFFFFFFFFF2438 :                     ; --------------------------------------------------------
+(1) 2337/FFFFFFFFFFFF2438 :                     
+(1) 2338/FFFFFFFFFFFF2438 :                     object_MdMars_GetSprInfo:
+(1) 2340/FFFFFFFFFFFF2438 : 4841                		swap	d1
+(1) 2341/FFFFFFFFFFFF243A : 322E 000C           		move.w	obj_z(a6),d1
+(1) 2342/FFFFFFFFFFFF243E : 4840                		swap	d0
+(1) 2343/FFFFFFFFFFFF2440 : 382E 0004           		move.w	obj_x(a6),d4
+(1) 2344/FFFFFFFFFFFF2444 : 9840                		sub.w	d0,d4
+(1) 2345/FFFFFFFFFFFF2446 : 4844                		swap	d4
+(1) 2346/FFFFFFFFFFFF2448 : 4840                		swap	d0
+(1) 2347/FFFFFFFFFFFF244A : 382E 0008           		move.w	obj_y(a6),d4		; d0 - Xpos | Ypos
+(1) 2348/FFFFFFFFFFFF244E : 9840                		sub.w	d0,d4
+(1) 2349/FFFFFFFFFFFF2450 : C940                		exg.l	d4,d0
+(1) 2350/FFFFFFFFFFFF2452 : 7400                		moveq	#0,d2
+(1) 2351/FFFFFFFFFFFF2454 : 342E 0020           		move.w	obj_frame(a6),d2
+(1) 2353/FFFFFFFFFFFF2458 : 4E75                		rts
+(1) 2354/FFFFFFFFFFFF245A :                     
      183/FFFFFFFFFFFF245A :                     
      184/FFFFFFFFFFFF245A :                     ; --------------------------------------------------------
      185/FFFFFFFFFFFF245A :                     ; SCREEN MODE MAIN LOOP
@@ -20484,7 +20484,7 @@
      415/   6C604 : 00                  		dc.b 0
      416/   6C605 :                     		align $8000
      417/   70000 :                     
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 2 - 02/04/2025 11:19:52 PM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 2 - 02/13/2025 02:34:53 AM
 
 
   Symbol Table (* = unused):
@@ -20573,7 +20573,7 @@
  DAC_REFILL :                  1360 C |  DAC_REFILL.DACFILL_END :      141F C |
  DAC_REFILL.DACFILL_LOOP :     13D8 C |  DAC_REFILL.DACFILL_RET :      1422 C |
  DAC_REFILL.DAC_OVER :         13AE C |  DATA_BANK0 :                 2DEFC C |
-*DATE :                "02/04/2025" - |  DDACCNTR :                    18D0 C |
+*DATE :                "02/13/2025" - |  DDACCNTR :                    18D0 C |
  DDACFIFOMID :                   37 C |  DDACPNTR :                    18CD C |
 *DEF_HSIZE_128 :                100 - | *DEF_HSIZE_32 :                  40 - |
  DEF_HSIZE_64 :                  80 - | *DEF_MAXSTAMPCOUT :              60 - |
@@ -21506,7 +21506,7 @@
  TBLZ_CLEAR.CLR_ALL :           F9F C |  TEXTR_TEST :                     0 C |
  TH :                      20000000 - |  TICKCNT :                     1CF8 C |
  TICKFLAG :                    1CF7 C |  TICKSPSET :                   1CF6 C |
-*TIME :               "11:19:52 PM" - |  TIMERCTL :                      30 - |
+*TIME :               "02:34:53 AM" - |  TIMERCTL :                      30 - |
  TRACK_OUT :                    5B0 C |  TRACK_OUT.INDX_DEL :           5C5 C |
  TRACK_OUT.NOTHIN :             5F2 C |  TRACK_OUT.VALID :              5C4 C |
  TRKBLKS_0 :                   17EA C |  TRKBLKS_1 :                   17F2 C |
@@ -21843,7 +21843,7 @@
    2222 symbols
     408 unused symbols
 
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 3 - 02/04/2025 11:19:52 PM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 3 - 02/13/2025 02:34:53 AM
 
 
   Defined Macros:
@@ -21868,7 +21868,7 @@ VDP_SHOWME                            |
 
      31 macros
 
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 4 - 02/04/2025 11:19:52 PM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 4 - 02/13/2025 02:34:53 AM
 
 
   Defined Structures/Unions:
@@ -22047,7 +22047,7 @@ SSPR
   A      (I16) Y_POS
   C      (I32) VRAM
 14 structures
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 5 - 02/04/2025 11:19:52 PM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 5 - 02/13/2025 02:34:53 AM
 
 
   Defined Functions:
@@ -22056,7 +22056,7 @@ SSPR
 VDP_WRTL                              | FULL_LOC                             
 CELL_NUM                              | SPLITW                               
 
- AS V1.42 Beta [Bld 212] - Source File main.asm - Page 6 - 02/04/2025 11:19:52 PM
+ AS V1.42 Beta [Bld 212] - Source File main.asm - Page 6 - 02/13/2025 02:34:53 AM
 
 
   Code Pages:
@@ -22066,10 +22066,10 @@ STANDARD (0 changed characters)
 
 1 code page
 
-0.33 seconds assembly time
+0.35 seconds assembly time
 
-  20943 lines source file
-  21837 lines incl. macro expansions
+  20946 lines source file
+  21840 lines incl. macro expansions
       6 passes
       0 errors
       0 warnings
